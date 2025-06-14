@@ -1,0 +1,33 @@
+{
+  "sizes": [
+    {
+      "sizeValue": 40,
+      "stock": 12
+    },
+    {
+      "sizeValue": 41,
+      "stock": 9
+    }
+  ],
+  "details": [
+    {
+      "title": "Material",
+      "content": "Charol"
+    },
+    {
+      "title": "Altura del tacón",
+      "content": "12 cm"
+    }
+  ],
+  "tags": [
+    "brillante",
+    "glamour",
+    "evento"
+  ],
+  "hexColor": "#FF0000",
+  "imagesAlt": [
+    "zapato rojo",
+    "tacón alto brillante"
+  ],
+  "visibility": "VISIBLE"
+}

@@ -1,0 +1,121 @@
+{
+  "productName": "Zapato de tacón elegante",
+  "productDescription": "Zapato de tacón alto ideal para eventos formales.",
+  "productCategories": [
+    "Calzado",
+    "Mujer",
+    "Tacones"
+  ],
+  "price": {
+    "baseValue": 120,
+    "discountType": "PERCENT",
+    "discountValue": 15,
+    "discountStartAt": "2025-02-18T00:00:00.000Z",
+    "discountEndAt": "2025-03-18T00:00:00.000Z"
+  },
+  "visibility": "VISIBLE",
+  "variants": [
+    {
+      "sizes": [
+        {
+          "sizeValue": 36,
+          "stock": 8
+        },
+        {
+          "sizeValue": 37,
+          "stock": 5
+        }
+      ],
+      "details": [
+        {
+          "title": "Material",
+          "content": "Cuero sintético"
+        },
+        {
+          "title": "Altura del tacón",
+          "content": "10 cm"
+        }
+      ],
+      "tags": [
+        "elegante",
+        "fiesta",
+        "noche"
+      ],
+      "hexColor": "#000000",
+      "imagesField": "imagesOfVariant1",
+      "imagesAlt": [
+        "zapato negro",
+        "tacón alto"
+      ],
+      "visibility": "VISIBLE"
+    },
+    {
+      "sizes": [
+        {
+          "sizeValue": 38,
+          "stock": 10
+        },
+        {
+          "sizeValue": 39,
+          "stock": 7
+        }
+      ],
+      "details": [
+        {
+          "title": "Material",
+          "content": "Gamuza"
+        },
+        {
+          "title": "Altura del tacón",
+          "content": "8 cm"
+        }
+      ],
+      "tags": [
+        "cómodo",
+        "casual",
+        "diario"
+      ],
+      "hexColor": "#A0522D",
+      "imagesField": "imagesOfVariant2",
+      "imagesAlt": [
+        "zapato marrón",
+        "tacón medio"
+      ],
+      "visibility": "VISIBLE"
+    },
+    {
+      "sizes": [
+        {
+          "sizeValue": 40,
+          "stock": 12
+        },
+        {
+          "sizeValue": 41,
+          "stock": 9
+        }
+      ],
+      "details": [
+        {
+          "title": "Material",
+          "content": "Charol"
+        },
+        {
+          "title": "Altura del tacón",
+          "content": "12 cm"
+        }
+      ],
+      "tags": [
+        "brillante",
+        "glamour",
+        "evento"
+      ],
+      "hexColor": "#FF0000",
+      "imagesField": "imagesOfVariant3",
+      "imagesAlt": [
+        "zapato rojo",
+        "tacón alto brillante"
+      ],
+      "visibility": "VISIBLE"
+    }
+  ]
+}

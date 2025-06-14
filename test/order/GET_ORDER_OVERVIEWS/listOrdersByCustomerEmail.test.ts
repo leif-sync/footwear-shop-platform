@@ -1,0 +1,56 @@
+import { api } from "../../api.ts";
+import { expect, test } from "vitest";
+import { createTestOrder, loginTest } from "../../helper.ts";
+import { ordersPathUrl } from "../shared.ts";
+import { HTTP_STATUS } from "../../../src/modules/shared/infrastructure/httpStatus.ts";
+import { orderStatusOptions } from "../../../src/modules/order/domain/orderStatus.ts";
+import { orderPaymentStatusOptions } from "../../../src/modules/order/domain/orderPaymentStatus.ts";
+
+test("list orders by customer email", async () => {
+  const customerEmail = "test.customer.email@example.com";
+  await createTestOrder({
+    customer: {
+      email: customerEmail,
+    },
+  });
+
+  const token = await loginTest();
+  const limit = 10;
+  const offset = 0;
+  const response = await api
+    .get(ordersPathUrl)
+    .query({
+      limit,
+      offset,
+    })
+    .set("Cookie", token);
+
+  expect(response.status).toBe(HTTP_STATUS.OK);
+  expect(response.body.orders).toBeDefined();
+  expect(response.body.orders).toBeInstanceOf(Array);
+  expect(response.body.orders.length).toBeGreaterThanOrEqual(1);
+  expect(response.body.orders.length).toBeLessThanOrEqual(limit);
+
+  response.body.orders.forEach((order) => {
+    expect(order).toMatchObject({
+      orderId: expect.any(String),
+      orderStatus: expect.toBeOneOf(Object.values(orderStatusOptions)),
+      customerEmail: customerEmail,
+      totalAmount: expect.any(Number),
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
+      paymentStatus: expect.toBeOneOf(Object.values(orderPaymentStatusOptions)),
+    });
+
+    expect(order.paymentStatus).not.toBe(
+      orderPaymentStatusOptions.IN_PAYMENT_GATEWAY
+    );
+  });
+
+  expect(response.body.meta).toMatchObject({
+    limit,
+    offset,
+    currentOrdersCount: response.body.orders.length,
+    storedOrdersCount: expect.any(Number),
+  });
+});

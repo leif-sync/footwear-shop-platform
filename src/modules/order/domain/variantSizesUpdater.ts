@@ -1,0 +1,72 @@
+import { Integer } from "../../shared/domain/integer.js";
+import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
+import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
+
+export class VariantSizesUpdater {
+  private readonly sizeValue: PositiveInteger;
+  private initialStock: NonNegativeInteger;
+  private stockAdjustment: Integer;
+
+  constructor(params: {
+    sizeValue: PositiveInteger;
+    initialStock: NonNegativeInteger;
+    stockAdjustment?: Integer;
+  }) {
+    const { sizeValue, initialStock, stockAdjustment } = params;
+    this.sizeValue = PositiveInteger.clone(sizeValue);
+    this.initialStock = NonNegativeInteger.clone(initialStock);
+    this.stockAdjustment = stockAdjustment
+      ? Integer.clone(stockAdjustment)
+      : new Integer(0);
+  }
+
+  static clone(size: VariantSizesUpdater) {
+    return new VariantSizesUpdater({
+      sizeValue: size.sizeValue,
+      initialStock: size.initialStock,
+      stockAdjustment: size.stockAdjustment,
+    });
+  }
+
+  toPrimitives() {
+    return {
+      sizeValue: this.sizeValue.getValue(),
+      initialStock: this.initialStock.getValue(),
+      currentStock: this.getCurrentStock(),
+      stockAdjustment: this.stockAdjustment.getValue(), 
+    };
+  }
+
+  hasEnoughStock(params: { stockToCheck: PositiveInteger }) {
+    const { stockToCheck } = params;
+    const currentStock = this.getCurrentStock();
+    return currentStock >= stockToCheck.getValue();
+  }
+
+  subtractStock(params: { stockToSubtract: PositiveInteger }) {
+    const { stockToSubtract } = params;
+    const currentStock = this.getCurrentStock();
+    const newStock = currentStock - stockToSubtract.getValue();
+    if (newStock < 0) throw new Error("Stock cannot be negative");
+    const currentStockAdjustment = this.stockAdjustment.getValue();
+    this.stockAdjustment = new Integer(
+      currentStockAdjustment - stockToSubtract.getValue()
+    );
+  }
+
+  addStock(params: { stockToAdd: PositiveInteger }) {
+    const { stockToAdd } = params;
+    const currentStockAdjustment = this.stockAdjustment.getValue();
+    this.stockAdjustment = new Integer(
+      currentStockAdjustment + stockToAdd.getValue()
+    );
+  }
+
+  getSizeValue() {
+    return this.sizeValue.getValue();
+  }
+
+  getCurrentStock() {
+    return this.initialStock.getValue() + this.stockAdjustment.getValue();
+  }
+}
