@@ -40,7 +40,6 @@ export async function createWebpayPlusPaymentGatewayLink(
         orderId,
       });
 
-
     const webpayResult = await WebpaySdkHelper.createLinkPaymentGateway({
       sessionId: orderId.getValue(),
       amount: invoiceAmount.getValue(),
@@ -64,7 +63,7 @@ export async function createWebpayPlusPaymentGatewayLink(
     }
 
     if (error instanceof InvalidOrderError) {
-      res.status(HTTP_STATUS.NOT_FOUND).json({
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
         message: "Order not found",
       });
       return;
@@ -78,7 +77,7 @@ export async function createWebpayPlusPaymentGatewayLink(
     }
 
     if (error instanceof PaymentDeadlineExceededError) {
-      res.status(HTTP_STATUS.BAD_REQUEST).json({
+      res.status(HTTP_STATUS.CONFLICT).json({
         message: "Payment deadline exceeded",
       });
       return;

@@ -105,6 +105,6 @@
     "test",
     "dist",
     "vitest.config.ts",
-    "eslint.config.ts",
+    "eslint.config.mjs",
   ],
 }
