@@ -1,4 +1,4 @@
-import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
+import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
 import { UUID } from "../../shared/domain/UUID.js";
 import { Currency, CurrencyOptions } from "../domain/currency.js";
 import { InvalidOrderError } from "../domain/errors/invalidOrderError.js";
@@ -47,7 +47,7 @@ export class CreatePaymentTransaction {
     const transactionStatus = new PaymentTransactionStatus(
       params.transactionStatus
     );
-    const amount = new PositiveInteger(params.amount);
+    const amount = new NonNegativeInteger(params.amount);
     const paymentProcessor = new PaymentProcessor(params.paymentProcessor);
     const rawResponse = params.rawResponse;
     const currency = new Currency(params.currency);

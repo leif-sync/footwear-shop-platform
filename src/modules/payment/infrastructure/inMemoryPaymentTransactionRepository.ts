@@ -48,17 +48,47 @@ export class InMemoryPaymentTransactionRepository
   async create(params: {
     paymentTransaction: PaymentTransaction;
   }): Promise<void> {
-
     const transaction = PaymentTransaction.clone(params.paymentTransaction);
     this.transactions.push(transaction);
   }
 
   async find(params: {
     transactionId: UUID;
-  }): Promise<PaymentTransaction | null> {
-    const transaction = this.transactions.find((transaction) =>
-      params.transactionId.equals(transaction.getId())
+  }): Promise<PaymentTransaction | null>;
+  async find(params: {
+    gatewaySessionId: string;
+  }): Promise<PaymentTransaction | null>;
+  async find(
+    params: { transactionId: UUID } | { gatewaySessionId: string }
+  ): Promise<PaymentTransaction | null> {
+    if ("transactionId" in params) {
+      const transaction = this.transactions.find((transaction) =>
+        params.transactionId.equals(transaction.getId())
+      );
+      return transaction ? PaymentTransaction.clone(transaction) : null;
+    }
+
+    const transaction = this.transactions.find(
+      (transaction) =>
+        transaction.getGatewaySessionId() === params.gatewaySessionId
     );
     return transaction ? PaymentTransaction.clone(transaction) : null;
+  }
+
+  async exists(params: { transactionId: UUID }): Promise<boolean>;
+  async exists(params: { gatewaySessionId: string }): Promise<boolean>;
+  async exists(
+    params: { transactionId: UUID } | { gatewaySessionId: string }
+  ): Promise<boolean> {
+    if ("transactionId" in params) {
+      return this.transactions.some((transaction) =>
+        params.transactionId.equals(transaction.getId())
+      );
+    }
+
+    return this.transactions.some(
+      (transaction) =>
+        transaction.getGatewaySessionId() === params.gatewaySessionId
+    );
   }
 }

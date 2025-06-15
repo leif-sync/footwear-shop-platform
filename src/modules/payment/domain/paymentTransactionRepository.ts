@@ -24,4 +24,11 @@ export abstract class PaymentTransactionRepository {
   abstract find(params: {
     transactionId: UUID;
   }): Promise<PaymentTransaction | null>;
+
+  abstract find(params: {
+    gatewaySessionId: string;
+  }): Promise<PaymentTransaction | null>;
+
+  abstract exists(params: { transactionId: UUID }): Promise<boolean>;
+  abstract exists(params: { gatewaySessionId: string }): Promise<boolean>;
 }

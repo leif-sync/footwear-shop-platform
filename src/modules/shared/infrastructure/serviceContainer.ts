@@ -45,7 +45,7 @@ import { FakeEmailSender } from "../../notification/infrastructure.ts/fakeEmailS
 import { ListOrderOverviews } from "../../order/application/listOrderOverviews.js";
 import { GetOrder } from "../../order/application/getOrder.js";
 import { OrderRepository } from "../../order/domain/orderRepository.js";
-import { PaymentSuccessHandler } from "../../payment/application/paymentSuccessHandler.js";
+import { PaymentGatewaySuccessHandler } from "../../payment/application/paymentGatewaySuccessHandler.js";
 import { PaymentOrderNotifier } from "../../payment/infrastructure/paymentOrderNotifier.js";
 import { InMemoryPaymentTransactionRepository } from "../../payment/infrastructure/inMemoryPaymentTransactionRepository.js";
 import { PaymentTransactionRepository } from "../../payment/domain/paymentTransactionRepository.js";
@@ -250,9 +250,10 @@ export const ServiceContainer = {
     }),
   },
   payment: {
-    paymentGatewaySuccessHandler: new PaymentSuccessHandler({
+    paymentGatewaySuccessHandler: new PaymentGatewaySuccessHandler({
       paymentAssociatedDataProvider,
       paymentOrderNotifier,
+      paymentTransactionRepository,
     }),
     // paymentDataRetriever: new CreatePaymentDataRetriever({ orderRepository }),
     listPaymentTransactions: new ListPayments({

@@ -283,6 +283,15 @@ export class OrderWrite {
     this.ensureIsValid();
   }
 
+  setOrderStatusAndPaymentInfo(params: {
+    orderStatus: OrderStatus;
+    paymentInfo: OrderPaymentInfo;
+  }) {
+    this.orderStatus = OrderStatus.clone(params.orderStatus);
+    this.paymentInfo = OrderPaymentInfo.clone(params.paymentInfo);
+    this.ensureIsValid();
+  }
+
   toPrimitives() {
     return {
       orderId: this.orderId.getValue(),

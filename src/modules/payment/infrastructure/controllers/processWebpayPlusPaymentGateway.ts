@@ -2,8 +2,6 @@ import { Request, Response } from "express";
 import { processWebpayPlusPaymentGatewaySchema } from "../schemas/webpayPlus.js";
 import { HTTP_STATUS } from "../../../shared/infrastructure/httpStatus.js";
 import {
-  commit,
-  webpayPlusRefundTypeOptions,
   webpayPlusResponseCodeOptions,
   webpayPlusStatusOptions,
   WebpaySdkHelper,
@@ -11,102 +9,126 @@ import {
 import { InvalidOrderError } from "../../domain/errors/invalidOrderError.js";
 import { PaymentDeadlineExceededError } from "../../domain/errors/paymentDeadlineExceededError.js";
 import { ServiceContainer } from "../../../shared/infrastructure/serviceContainer.js";
-import { paymentTransactionRepository } from "../../../shared/infrastructure/serviceContainer.js";
 import { PaymentTransaction } from "../../domain/paymentTransaction.js";
-import { PositiveInteger } from "../../../shared/domain/positiveInteger.js";
-import { Currency, CurrencyOptions } from "../../domain/currency.js";
+import { Currency } from "../../domain/currency.js";
 import {
   PaymentProcessor,
-  PaymentProcessorOptions,
 } from "../../domain/paymentProcessor.js";
 import { UUID } from "../../../shared/domain/UUID.js";
 import { TransactionType } from "../../domain/transactionType.js";
 import { PaymentTransactionStatus } from "../../domain/paymentTransactionStatus.js";
 import { PaymentAlreadyMadeError } from "../../domain/errors/paymentAlreadyMadeError.js";
 import { COMMERCE_NAME } from "../../../../environmentVariables.js";
+import { NonNegativeInteger } from "../../../shared/domain/nonNegativeInteger.js";
+import { PaymentNotFromGatewayError } from "../../domain/errors/paymentNotFromGatewayError.js";
+import { PaymentNotApprovedError } from "../../domain/errors/paymentNotApproved.js";
 
 // * Todos los flujos de webpay-plus se encuentran en el siguiente enlace:
 // * https://www.transbankdevelopers.cl/documentacion/webpay-plus#resumen-de-flujos
 
 const commerceName = COMMERCE_NAME;
 
-async function handlePaymentSuccessErrors(params: {
-  webpayResponse: commit;
+function handlePaymentSuccessErrors(params: {
   error: unknown;
   response: Response;
-  token: string;
 }) {
-  const { error, response, webpayResponse, token } = params;
-  try {
-    // * como el usuario podría volver a recargar la página de el resultado de la orden
-    // * es posible que el caso de uso lance el error de "payment already made" pero esto
-    // * no necesariamente significaría que el usuario pago 2 veces, sino que esta consultando
-    // * el estado de la orden que ya fue pagada con el mismo token de webpay entonces si
-    // * hacemos una reversa de la transacción, el usuario podría ver que su orden fue
-    // * reembolsada pero la orden tendría un estado de pagado lo cual es inconsistente
-    if (error instanceof PaymentAlreadyMadeError) {
-      response.status(HTTP_STATUS.BAD_REQUEST).json({
-        message: "Payment already made",
-      });
-      return;
-    }
+  const { error, response } = params;
 
-    const isRefundApplicable =
-      error instanceof InvalidOrderError ||
-      error instanceof PaymentDeadlineExceededError;
-
-    if (!isRefundApplicable) throw error;
-
-    const webpayRefundResult = await WebpaySdkHelper.refundTransaction({
-      token,
-      amount: webpayResponse.amount,
-    });
-
-    const refundStatus =
-      webpayRefundResult.type === webpayPlusRefundTypeOptions.REVERSED
-        ? PaymentTransactionStatus.create.approved()
-        : webpayRefundResult.response_code ===
-            webpayPlusResponseCodeOptions.APPROVED
-          ? PaymentTransactionStatus.create.approved()
-          : PaymentTransactionStatus.create.declined();
-
-    const webpayRefundTransaction = new PaymentTransaction({
-      amount: new PositiveInteger(webpayResponse.amount),
-      currency: new Currency(CurrencyOptions.CLP),
-      createdAt: new Date(),
-      orderId: new UUID(webpayResponse.session_id),
-      paymentProcessor: new PaymentProcessor(PaymentProcessorOptions.WEBPAY),
-      transactionId: UUID.generateRandomUUID(),
-      transactionType: TransactionType.create.refund(),
-      transactionStatus: refundStatus,
-      updatedAt: new Date(),
-      rawResponse: JSON.stringify(webpayRefundResult),
-    });
-
-    await paymentTransactionRepository.create({
-      paymentTransaction: webpayRefundTransaction,
-    });
-
+  if (error instanceof PaymentNotFromGatewayError) {
     response.status(HTTP_STATUS.BAD_REQUEST).json({
-      message:
-        error instanceof InvalidOrderError
-          ? "Invalid order, payment has been refunded"
-          : "Payment deadline exceeded, payment has been refunded",
+      error: {
+        message: "Payment not from gateway",
+        code: "PAYMENT_NOT_FROM_GATEWAY",
+      },
+    });
+    return;
+  }
+
+  if (error instanceof PaymentNotApprovedError) {
+    response.status(HTTP_STATUS.CONFLICT).json({
+      error: {
+        message: "Payment not approved",
+        code: "PAYMENT_NOT_APPROVED",
+      },
+    });
+    return;
+  }
+
+  if (error instanceof InvalidOrderError) {
+    response.status(HTTP_STATUS.CONFLICT).json({
+      error: {
+        message: "Invalid order, payment has been refunded",
+        code: "INVALID_ORDER",
+        isPaymentRefunded: true,
+      },
+    });
+  }
+
+  if (error instanceof PaymentAlreadyMadeError) {
+    response.status(HTTP_STATUS.CONFLICT).json({
+      error: {
+        message: "Payment already made",
+        code: "PAYMENT_ALREADY_MADE",
+        isPaymentRefunded: true,
+      },
+    });
+    return;
+  }
+
+  if (error instanceof PaymentDeadlineExceededError) {
+    response.status(HTTP_STATUS.CONFLICT).json({
+      error: {
+        message: "Payment deadline exceeded, payment has been refunded",
+        code: "PAYMENT_DEADLINE_EXCEEDED",
+        isPaymentRefunded: true,
+      },
+    });
+  }
+}
+
+async function processCashBackWebpayPlus(params: {
+  gatewaySessionId: string;
+  amount: NonNegativeInteger;
+  orderId: UUID;
+}) {
+  const { orderId, gatewaySessionId, amount } = params;
+
+  try {
+    const response = await WebpaySdkHelper.refundTransaction({
+      amount: amount.getValue(),
+      token: gatewaySessionId,
+    });
+
+    return new PaymentTransaction({
+      transactionId: UUID.generateRandomUUID(),
+      orderId,
+      amount,
+      transactionType: TransactionType.create.refund(),
+      transactionStatus: PaymentTransactionStatus.create.approved(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      paymentProcessor: PaymentProcessor.create.WEBPAY(),
+      rawResponse: JSON.stringify(response),
+      currency: Currency.create.CLP(),
+      gatewaySessionId,
     });
   } catch (error) {
-    const isTransactionAlreadyBeenReversed =
-      error instanceof Error &&
-      error.name === "TransbankError" &&
-      error.message.includes("Transaction already REVERSED");
-
-    if (isTransactionAlreadyBeenReversed) {
-      response.status(HTTP_STATUS.BAD_REQUEST).json({
-        message: "Transaction already reversed",
-      });
-      return;
-    }
-
-    throw error;
+    return new PaymentTransaction({
+      transactionId: UUID.generateRandomUUID(),
+      orderId,
+      amount,
+      transactionType: TransactionType.create.refund(),
+      transactionStatus: PaymentTransactionStatus.create.declined(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      paymentProcessor: PaymentProcessor.create.WEBPAY(),
+      rawResponse: JSON.stringify({
+        error: error instanceof Error ? error.message : "Unknown error",
+        code: "REFUND_FAILED",
+      }),
+      currency: Currency.create.CLP(),
+      gatewaySessionId,
+    });
   }
 }
 
@@ -124,53 +146,30 @@ async function handleFlow1(params: { response: Response; token: string }) {
   const isPaymentAuthorized =
     webpayTransactionResult.status === webpayPlusStatusOptions.AUTHORIZED;
 
-  const isRefund =
-    webpayTransactionResult.status === webpayPlusStatusOptions.REVERSED ||
-    webpayTransactionResult.status === webpayPlusStatusOptions.NULLIFIED ||
-    webpayTransactionResult.status ===
-      webpayPlusStatusOptions.PARTIALLY_NULLIFIED;
-
   const isPaymentSuccessFull = isPaymentAPProved && isPaymentAuthorized;
 
-  const currency = new Currency(CurrencyOptions.CLP);
+  const currency = Currency.create.CLP();
 
-  const transactionDetail = new PaymentTransaction({
+  const paymentTransaction = new PaymentTransaction({
     transactionId: UUID.generateRandomUUID(),
     orderId: new UUID(webpayTransactionResult.session_id),
     currency,
-    amount: new PositiveInteger(webpayTransactionResult.amount),
+    amount: new NonNegativeInteger(webpayTransactionResult.amount),
     transactionType: TransactionType.create.payment(),
     transactionStatus: isPaymentSuccessFull
       ? PaymentTransactionStatus.create.approved()
       : PaymentTransactionStatus.create.declined(),
     createdAt: new Date(),
     updatedAt: new Date(),
-    paymentProcessor: new PaymentProcessor(PaymentProcessorOptions.WEBPAY),
+    paymentProcessor: PaymentProcessor.create.WEBPAY(),
     rawResponse: JSON.stringify(webpayTransactionResult),
+    gatewaySessionId: token, // ocupamos el token como sessionId
   });
-
-  if (isRefund) {
-    response.status(HTTP_STATUS.BAD_REQUEST).json({
-      message: "Payment has been refunded or reversed",
-    });
-
-    return;
-  }
-
-  await paymentTransactionRepository.create({
-    paymentTransaction: transactionDetail,
-  });
-
-  if (!isPaymentSuccessFull) {
-    response.status(HTTP_STATUS.BAD_REQUEST).json({
-      message: "Payment rejected",
-    });
-    return;
-  }
 
   try {
     await ServiceContainer.payment.paymentGatewaySuccessHandler.run({
-      orderId: new UUID(webpayTransactionResult.session_id),
+      paymentTransaction,
+      processCashBack: processCashBackWebpayPlus,
     });
 
     const isCreditCard = webpayTransactionResult.installments_amount;
@@ -178,7 +177,7 @@ async function handleFlow1(params: { response: Response; token: string }) {
     // * la respuesta es según los requerimientos de la pasarela de pago
     // * https://www.transbankdevelopers.cl/documentacion/como_empezar#requerimientos-de-pagina-de-resultado
 
-    const apiResponse: {
+    type WebpayPlusPaymentResponse = {
       commerceName: string;
       currency: string;
       totalAmount: number;
@@ -188,13 +187,16 @@ async function handleFlow1(params: { response: Response; token: string }) {
       paymentType: "CREDIT" | "DEBIT";
       installmentsNumber?: number;
       installmentsAmount?: number;
-    } = {
+    };
+
+    const apiResponse: WebpayPlusPaymentResponse = {
       commerceName,
       currency: currency.getValue(),
       totalAmount: webpayTransactionResult.amount,
       authorizationCode: webpayTransactionResult.authorization_code,
       transactionDate: webpayTransactionResult.transaction_date,
       last4CardDigits: webpayTransactionResult.card_detail.card_number,
+      installmentsNumber: webpayTransactionResult.installments_number,
       paymentType: isCreditCard ? "CREDIT" : "DEBIT",
     };
 
@@ -206,15 +208,12 @@ async function handleFlow1(params: { response: Response; token: string }) {
         webpayTransactionResult.installments_amount;
     }
 
-    response.status(HTTP_STATUS.OK).json(apiResponse);
+    response.status(HTTP_STATUS.OK).json({
+      invoice: apiResponse,
+    });
     return;
   } catch (error) {
-    await handlePaymentSuccessErrors({
-      webpayResponse: webpayTransactionResult,
-      error,
-      response,
-      token,
-    });
+    handlePaymentSuccessErrors({ error, response });
     return;
   }
 }
@@ -229,8 +228,10 @@ export async function processWebpayPlusPaymentGateway(
 
   if (!resultParse.success) {
     res.status(HTTP_STATUS.BAD_REQUEST).json({
-      message: "Invalid request",
-      errors: resultParse.error.issues,
+      error: {
+        message: "Invalid request",
+        details: resultParse.error.issues,
+      },
     });
     return;
   }
@@ -244,7 +245,10 @@ export async function processWebpayPlusPaymentGateway(
 
   if (isPaymentFormError) {
     res.status(HTTP_STATUS.BAD_REQUEST).json({
-      message: "An error occurred in the payment form",
+      error: {
+        message: "Error in payment form",
+        code: "PAYMENT_GATEWAY_ERROR",
+      },
     });
     return;
   }
@@ -254,7 +258,10 @@ export async function processWebpayPlusPaymentGateway(
 
   if (isPaymentAborted) {
     res.status(HTTP_STATUS.BAD_REQUEST).json({
-      message: "Payment aborted",
+      error: {
+        message: "Payment aborted",
+        code: "PAYMENT_ABORTED",
+      },
     });
     return;
   }
@@ -264,7 +271,10 @@ export async function processWebpayPlusPaymentGateway(
 
   if (isPaymentRequestTimedOut) {
     res.status(HTTP_STATUS.BAD_REQUEST).json({
-      message: "Payment timeout",
+      error: {
+        message: "Payment timeout",
+        code: "PAYMENT_TIMEOUT",
+      },
     });
     return;
   }
@@ -276,7 +286,10 @@ export async function processWebpayPlusPaymentGateway(
   }
 
   res.status(HTTP_STATUS.BAD_REQUEST).json({
-    message: "Invalid request",
+    error: {
+      message: "Invalid request",
+      code: "INVALID_REQUEST",
+    },
   });
   return;
 }

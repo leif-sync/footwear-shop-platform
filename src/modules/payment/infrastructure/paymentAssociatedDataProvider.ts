@@ -59,17 +59,20 @@ export class PaymentAssociatedDataProvider
 
     const orderWrite = OrderWrite.from(order);
 
-    orderWrite.setOrderStatus(
-      new OrderStatus(orderStatusOptions.WAITING_FOR_SHIPMENT)
+    const newOrderStatus = new OrderStatus(
+      orderStatusOptions.WAITING_FOR_SHIPMENT
     );
 
-    orderWrite.setPaymentInfo(
-      new OrderPaymentInfo({
-        paymentAt: new Date(),
-        paymentStatus: new OrderPaymentStatus(orderPaymentStatusOptions.PAID),
-        paymentDeadline: order.getPaymentDeadline(),
-      })
-    );
+    const newPaymentInfo = new OrderPaymentInfo({
+      paymentAt: new Date(),
+      paymentStatus: new OrderPaymentStatus(orderPaymentStatusOptions.PAID),
+      paymentDeadline: order.getPaymentDeadline(),
+    });
+    
+    orderWrite.setOrderStatusAndPaymentInfo({
+      orderStatus: newOrderStatus,
+      paymentInfo: newPaymentInfo,
+    });
 
     await this.orderRepository.update({ order: orderWrite });
   }
