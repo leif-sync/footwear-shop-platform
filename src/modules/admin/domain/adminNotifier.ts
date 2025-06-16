@@ -3,8 +3,10 @@ import { Email } from "../../shared/domain/email.js";
 import { Admin } from "./admin.js";
 import { COMMERCE_NAME } from "../../../environmentVariables.js";
 
-//TODO: improve the email template
-
+/**
+ * This class is responsible for notifying admins about updates to their details.
+ * It sends an email to the admin with their updated information.
+ */
 export class AdminNotifier {
   private readonly emailSender: EmailSender;
 

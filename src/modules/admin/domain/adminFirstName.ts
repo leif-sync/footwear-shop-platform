@@ -1,5 +1,10 @@
 import { adminConstraints } from "./adminConstraints.js";
 
+/**
+ * Represents the first name of an admin.
+ * This class encapsulates the logic for validating the first name according to predefined constraints.
+ * It ensures that the first name meets the minimum and maximum length requirements.
+ */
 export class AdminFirstName {
   private readonly firstName: string;
 

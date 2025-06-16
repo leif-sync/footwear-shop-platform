@@ -10,6 +10,13 @@ import { AdminRepository } from "../domain/adminRepository.js";
 import { AdminNotFoundError } from "../domain/errors/adminNotFoundError.js";
 import { validPermissionOptions } from "../domain/validPermissions.js";
 
+/**
+ * Use case for updating an admin's details partially.
+ * This class encapsulates the logic for updating an admin's information
+ * while allowing for optional fields to be updated.
+ * It ensures that the admin's existing information is preserved unless explicitly changed.
+ * It also notifies the admin of the update.
+ */
 export class UpdatePartialAdmin {
   private readonly adminRepository: AdminRepository;
   private readonly adminNotifier: AdminNotifier;
@@ -22,6 +29,19 @@ export class UpdatePartialAdmin {
     this.adminNotifier = params.adminNotifier;
   }
 
+  /**
+   * Updates an admin's details partially.
+   * @param params - The parameters for updating the admin.
+   * @param params.adminId - The ID of the admin to update.
+   * @param params.firstName - Optional new first name for the admin.
+   * @param params.lastName - Optional new last name for the admin.
+   * @param params.phoneNumber - Optional new phone number for the admin.
+   * @param params.permissions - Optional new permissions for the admin.
+   *
+   * @returns A promise that resolves when the admin is successfully updated.
+   *
+   * @throws {AdminNotFoundError} If no admin with the given ID is found.
+   */
   async run(params: {
     adminId: string;
     firstName?: string;

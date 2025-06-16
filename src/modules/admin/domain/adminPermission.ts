@@ -4,6 +4,9 @@ import {
   validPermissionOptions,
 } from "./validPermissions.js";
 
+/**
+ * Represents a permission assigned to an admin.
+ */
 export class AdminPermission {
   private readonly permissionName: validPermissionOptions;
 

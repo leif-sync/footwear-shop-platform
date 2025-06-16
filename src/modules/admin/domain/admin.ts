@@ -5,6 +5,10 @@ import { AdminFirstName } from "./adminFirstName.js";
 import { AdminLastName } from "./adminLastName.js";
 import { AdminPermission } from "./adminPermission.js";
 
+/**
+ * Entity representing an admin in the system.
+ * This class encapsulates the properties and behaviors of an admin,
+ */
 export class Admin {
   private readonly adminId: UUID;
   private readonly firstName: AdminFirstName;
@@ -15,6 +19,18 @@ export class Admin {
   private readonly updatedAt: Date;
   private readonly createdAt: Date;
 
+  /**
+   * Constructs an Admin entity with the provided parameters.
+   * @param params - The parameters for creating the admin.
+   * @param params.adminId - The unique identifier for the admin.
+   * @param params.firstName - The first name of the admin.
+   * @param params.lastName - The last name of the admin.
+   * @param params.email - The email address of the admin.
+   * @param params.phoneNumber - The phone number of the admin.
+   * @param params.permissions - The permissions assigned to the admin.
+   * @param params.updatedAt - The date when the admin was last updated.
+   * @param params.createdAt - The date when the admin was created.
+   */
   constructor(params: {
     adminId: UUID;
     firstName: AdminFirstName;

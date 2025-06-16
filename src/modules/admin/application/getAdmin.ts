@@ -4,6 +4,10 @@ import { Admin } from "../domain/admin.js";
 import { AdminRepository } from "../domain/adminRepository.js";
 import { AdminNotFoundError } from "../domain/errors/adminNotFoundError.js";
 
+/**
+ * Use case for retrieving an admin by either their ID or email.
+ * This class encapsulates the logic for fetching an admin from the repository.
+ */
 export class GetAdmin {
   private readonly adminRepository: AdminRepository;
 
@@ -25,7 +29,20 @@ export class GetAdmin {
     return admin;
   }
 
+  /**
+   * Finds an admin by their ID.
+   * @param params.adminId - The ID of the admin to find.
+   * @returns - A promise that resolves to the found admin.
+   * @throws {AdminNotFoundError} If no admin with the given ID is found.
+   */
   async run(params: { adminId: string }): Promise<Admin>;
+
+  /**
+   * Finds an admin by their email.
+   * @param params.adminEmail - The email of the admin to find.
+   * @returns - A promise that resolves to the found admin.
+   * @throws {AdminNotFoundError} If no admin with the given email is found.
+   */
   async run(params: { adminEmail: string }): Promise<Admin>;
   async run(params: { adminId?: string; adminEmail?: string }): Promise<Admin> {
     const { adminId, adminEmail } = params;

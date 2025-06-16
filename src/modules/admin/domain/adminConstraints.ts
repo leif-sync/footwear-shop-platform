@@ -1,3 +1,8 @@
+
+/**
+ * Admin constraints for validation.
+ * These constraints define the minimum and maximum lengths for various admin fields.
+ */
 export const adminConstraints = {
   firstName: {
     minLength: 2,

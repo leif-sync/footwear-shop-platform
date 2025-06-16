@@ -1,6 +1,10 @@
 import { Email } from "../../../shared/domain/email.js";
 import { UUID } from "../../../shared/domain/UUID.js";
 
+/**
+ * This error is used to indicate that an admin with the specified ID or email was not found in the system.
+ * It can be instantiated with either an adminId or an adminEmail.
+ */
 export class AdminNotFoundError extends Error {
   constructor(params: { adminId: string | UUID });
   constructor(params: { adminEmail: string | Email });
