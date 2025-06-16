@@ -9,6 +9,15 @@ export class ListCategories {
     this.categoryRepository = params.categoryRepository;
   }
 
+  /**
+   * Lists categories with pagination.
+   * @param params.limit - The maximum number of categories to return. positive integer.
+   * @param params.offset - The number of categories to skip before starting to collect the result set. non-negative integer.
+   * @returns - A promise that resolves to an array of category details.
+   *
+   * @throws {PositiveIntegerError} If the limit is not a positive integer.
+   * @throws {NonNegativeIntegerError} If the offset is not a non-negative integer.
+   */
   async run(params: { limit: number; offset: number }) {
     const limit = new PositiveInteger(params.limit);
     const offset = new NonNegativeInteger(params.offset);
