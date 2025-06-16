@@ -31,10 +31,10 @@ export class GetDetail {
     detailName: string;
   }>;
 
-  async run(params: { detailId?: string; detailName?: string }) {
-    const { detailId, detailName } = params;
-    if (detailId) return this.getDetailById(detailId);
-    if (detailName) return this.getDetailByName(detailName);
-    throw new Error("Invalid params");
+  async run(params: { detailId: string } | { detailName: string }) {
+    const isDetailId = "detailId" in params;
+
+    if (isDetailId) return this.getDetailById(params.detailId);
+    return this.getDetailByName(params.detailName);
   }
 }

@@ -9,6 +9,16 @@ export class ListDetails {
     this.detailRepository = params.detailRepository;
   }
 
+  /**
+   * Lists details with pagination.
+   * @param params - The parameters for listing details.
+   * @param params.limit - The maximum number of details to return, must be a positive integer.
+   * @param params.offset - The number of details to skip before starting to collect the result set, must be a non-negative integer.
+   * @returns An array of details, each represented as a primitive object.
+   *
+   * @throws {PositiveIntegerError} If the limit is not a positive integer.
+   * @throws {NonNegativeError} If the offset is not a non-negative integer.
+   */
   async run(params: { limit: number; offset: number }) {
     const limit = new PositiveInteger(params.limit);
     const offset = new NonNegativeInteger(params.offset);

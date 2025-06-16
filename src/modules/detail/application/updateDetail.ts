@@ -10,6 +10,14 @@ export class UpdateDetail {
     this.detailRepository = params.detailRepository;
   }
 
+
+  /**
+   * Updates a detail's name.
+   * @param params - The parameters for updating the detail.
+   * @param params.detailId - The ID of the detail to be updated.
+   * @param params.detailName - The new name for the detail.
+   * @throws {DetailNotFoundError} If the detail with the given ID does not exist.
+   */
   async run(params: { detailId: string; detailName: string }) {
     const { detailName } = params;
 
@@ -17,7 +25,7 @@ export class UpdateDetail {
     const detail = new Detail({ detailId, detailName });
 
     const detailFound = await this.detailRepository.find({ detailId });
-    if (!detailFound) throw new DetailNotFoundError({ detailName });
+    if (!detailFound) throw new DetailNotFoundError({ detailId });
 
     await this.detailRepository.update({ detail });
   }
