@@ -14,6 +14,14 @@ export class CountStoredOrders {
   }
 
 
+  /**
+   * Counts the number of stored orders based on the provided filters.
+   * @param params - The parameters for counting stored orders.
+   * @param params.orderStatus - The status of the orders to count. Can be a single status or an array of statuses.
+   * @param params.paymentStatus - The payment status of the orders to count. Can be a single status or an array of statuses.
+   * @param params.customerEmail - The email of the customer whose orders to count. Can be a single email or an array of emails.
+   * @returns The count of stored orders that match the provided filters.
+   */
   async run(params: {
     orderStatus?: orderStatusOptions | orderStatusOptions[];
     paymentStatus?: orderPaymentStatusOptions | orderPaymentStatusOptions[];

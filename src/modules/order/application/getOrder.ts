@@ -9,6 +9,13 @@ export class GetOrder {
     this.orderRepository = params.orderRepository;
   }
 
+  /**
+   * Retrieves an order by its ID.
+   * @param params - The parameters for retrieving the order.
+   * @param params.orderId - The ID of the order to retrieve.
+   * @returns The order represented as a primitive object.
+   * @throws {OrderNotFoundError} If the order with the given ID does not exist.
+   */
   async run(params: { orderId: string }) {
     const orderId = new UUID(params.orderId);
 
