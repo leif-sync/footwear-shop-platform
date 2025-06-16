@@ -31,7 +31,6 @@ import { InMemoryTagRepository } from "../../tag/infrastructure/inMemoryTagRepos
 import { ProductAssociatedDataProvider } from "../../product/infrastructure/productAssociatedDataProvider.js";
 import { TagValidationService } from "../../tag/infrastructure/validationService.js";
 import { SizeValidationService } from "../../size/infrastructure.ts/sizeValidationService.js";
-import { CategoryValidationService } from "../../category/infrastructure/categoryValidationService.js";
 import { UpdatePartialProduct } from "../../product/application/updatePartialProduct.js";
 import { UpdatePartialVariant } from "../../product/application/updatePartialVariant.js";
 import { AddVariantToProduct } from "../../product/application/addVariantToProduct.js";
@@ -74,6 +73,7 @@ import { CountTransactions } from "../../payment/application/countTransactions.j
 import { CreatePaymentTransaction } from "../../payment/application/createPaymentTransaction.js";
 import { PaymentAssociatedDataProvider } from "../../payment/infrastructure/paymentAssociatedDataProvider.js";
 import { PrepareOrderForPayment } from "../../payment/application/prepareOrderForPayment.js";
+import { AssociatedDataProvider as CategoryAssociatedDataProvider } from "../../category/infrastructure/associatedDataProvider.js";
 
 // repositories
 // ! change to valid repositories
@@ -112,7 +112,7 @@ const sizeValidationService = new SizeValidationService({
   productRepository,
 });
 
-const categoryValidationService = new CategoryValidationService({
+const categoryAssociatedDataProvider = new CategoryAssociatedDataProvider({
   productRepository,
 });
 
@@ -214,7 +214,7 @@ export const ServiceContainer = {
     createCategory: new CreateCategory({ categoryRepository }),
     deleteCategory: new DeleteCategory({
       categoryRepository,
-      categoryValidationService,
+      associatedDataProvider: categoryAssociatedDataProvider,
     }),
     getCategory: new GetCategory({ categoryRepository }),
     litCategories: new ListCategories({ categoryRepository }),
