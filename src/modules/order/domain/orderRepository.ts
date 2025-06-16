@@ -1,4 +1,5 @@
 import { Email } from "../../shared/domain/email.js";
+import { SmartOmit } from "../../shared/domain/helperTypes.js";
 import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
 import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
 import { UUID } from "../../shared/domain/UUID.js";
@@ -38,7 +39,7 @@ export abstract class OrderRepository {
   abstract delete(params: { orderId: UUID }): Promise<void>;
   abstract delete(params: { orderIds: UUID[] }): Promise<void>;
 
-  abstract countStoredOrders(params: orderFilterCriteria): Promise<NonNegativeInteger>; // !
+  abstract countStoredOrders(params: SmartOmit<orderFilterCriteria, "limit" | "offset">): Promise<NonNegativeInteger>; // !
 
   abstract checkIfProductIsBought(params: {
     productId: UUID;

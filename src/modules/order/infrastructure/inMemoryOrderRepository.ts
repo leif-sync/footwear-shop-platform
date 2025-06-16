@@ -28,6 +28,7 @@ import { OrderCreator } from "../domain/orderCreator.js";
 import { Phone } from "../../shared/domain/phone.js";
 import { InvalidProductError } from "../domain/errors/invalidProductError.js";
 import { InvalidVariantError } from "../domain/errors/invalidVariantError.js";
+import { SmartOmit } from "../../shared/domain/helperTypes.js";
 
 function orderStatusCriteria(orderStatus: OrderStatus) {
   const filter = (order: OrderWrite) =>
@@ -164,10 +165,41 @@ export class InMemoryOrderRepository implements OrderRepository {
   }
 
   async countStoredOrders(
-    params: orderFilterCriteria
+    params: SmartOmit<orderFilterCriteria, "limit" | "offset">
   ): Promise<NonNegativeInteger> {
-    const ordersCount = await this.listOrderOverviews(params);
-    return new NonNegativeInteger(ordersCount.length);
+    const { orderStatus, paymentStatus, customerEmail } = params;
+
+    let filters = new Specification<OrderWrite>(() => true);
+
+    if (orderStatus) {
+      filters = this.aggregateCriteria({
+        data: orderStatus,
+        criteriaToAdd: orderStatusCriteria,
+        criteria: filters,
+      });
+    }
+
+    if (paymentStatus) {
+      filters = this.aggregateCriteria({
+        data: paymentStatus,
+        criteriaToAdd: orderPaymentStatusCriteria,
+        criteria: filters,
+      });
+    }
+
+    if (customerEmail) {
+      filters = this.aggregateCriteria({
+        data: customerEmail,
+        criteriaToAdd: customerEmailCriteria,
+        criteria: filters,
+      });
+    }
+
+    const filteredOrdersCount = this.orders.filter(
+      filters.isSatisfiedBy
+    ).length;
+
+    return new NonNegativeInteger(filteredOrdersCount);
   }
 
   async update(params: { order: OrderWrite }): Promise<void>;

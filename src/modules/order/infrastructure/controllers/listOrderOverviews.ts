@@ -53,8 +53,6 @@ export async function listOrderOverviews(
 
     const storedOrdersCount =
       await ServiceContainer.order.countStoredOrders.run({
-        limit: validLimit,
-        offset,
         orderStatus,
         paymentStatus,
         customerEmail,

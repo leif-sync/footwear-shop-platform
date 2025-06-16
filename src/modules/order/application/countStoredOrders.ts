@@ -1,6 +1,4 @@
 import { Email } from "../../shared/domain/email.js";
-import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
-import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
 import {
   OrderPaymentStatus,
   orderPaymentStatusOptions,
@@ -15,16 +13,12 @@ export class CountStoredOrders {
     this.orderRepository = params.orderRepository;
   }
 
+
   async run(params: {
-    limit: number;
-    offset: number;
     orderStatus?: orderStatusOptions | orderStatusOptions[];
     paymentStatus?: orderPaymentStatusOptions | orderPaymentStatusOptions[];
     customerEmail?: string | string[];
   }) {
-    const limit = new PositiveInteger(params.limit);
-    const offset = new NonNegativeInteger(params.offset);
-
     const orderStatus = params.orderStatus
       ? Array.isArray(params.orderStatus)
         ? params.orderStatus.map((status) => new OrderStatus(status))
@@ -44,8 +38,6 @@ export class CountStoredOrders {
       : undefined;
 
     const storedOrdersCount = await this.orderRepository.countStoredOrders({
-      limit,
-      offset,
       orderStatus,
       paymentStatus,
       customerEmail,
