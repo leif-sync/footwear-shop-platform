@@ -1,6 +1,7 @@
 import {
   IMAGE_STORAGE_ENGINE,
   imageStorageOptions,
+  PAYMENT_TIMEOUT_SECONDS,
 } from "../../../environmentVariables.js";
 import { CreateCategory } from "../../category/application/createCategory.js";
 import { DeleteCategory } from "../../category/application/deleteCategory.js";
@@ -36,7 +37,7 @@ import { UpdatePartialVariant } from "../../product/application/updatePartialVar
 import { AddVariantToProduct } from "../../product/application/addVariantToProduct.js";
 import { AddImageToVariant } from "../../product/application/addImageToVariant.js";
 import { DeleteImageFromVariant } from "../../product/application/deleteImageFromVariant.js";
-import { CreateOrder } from "../../order/application/createOrder.js";
+import { CreateCustomerOrder } from "../../order/application/createCustomerOrder.js";
 import { OrderAssociatedDataProvider } from "../../order/infrastructure/orderAssociatedDataProvider.js";
 import { FakeOrderTransactionManager } from "../../order/infrastructure/fakeOrderTransactionManager.js";
 import { InMemoryOrderRepository } from "../../order/infrastructure/inMemoryOrderRepository.js";
@@ -74,6 +75,7 @@ import { CreatePaymentTransaction } from "../../payment/application/createPaymen
 import { PaymentAssociatedDataProvider } from "../../payment/infrastructure/paymentAssociatedDataProvider.js";
 import { PrepareOrderForPayment } from "../../payment/application/prepareOrderForPayment.js";
 import { AssociatedDataProvider as CategoryAssociatedDataProvider } from "../../category/infrastructure/associatedDataProvider.js";
+import { CreateAdminOrder } from "../../order/application/createAdminOrder.js";
 
 // repositories
 // ! change to valid repositories
@@ -233,7 +235,12 @@ export const ServiceContainer = {
   },
   order: {
     countStoredOrders: new CountStoredOrders({ orderRepository }),
-    createOrder: new CreateOrder({
+    createCustomerOrder: new CreateCustomerOrder({
+      orderAssociatedDataProvider,
+      orderTransactionManager,
+      paymentTimeoutDuration: PAYMENT_TIMEOUT_SECONDS,
+    }),
+    createAdminOrder: new CreateAdminOrder({
       orderAssociatedDataProvider,
       orderTransactionManager,
     }),

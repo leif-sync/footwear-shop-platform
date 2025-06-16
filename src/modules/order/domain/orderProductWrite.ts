@@ -22,7 +22,7 @@ export class OrderProductWrite {
   static from(product: OrderProduct) {
     const productId = new UUID(product.getProductId());
     const unitPrice = new PositiveInteger(product.getUnitPrice());
-    
+
     const productVariants = product
       .toPrimitives()
       .productVariants.map((variant) => {

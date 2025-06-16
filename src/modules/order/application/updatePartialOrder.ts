@@ -22,34 +22,34 @@ import { OrderWrite } from "../domain/orderWrite.js";
 import { ProductUpdater } from "../domain/productUpdater.js";
 import { ShippingAddress } from "../domain/shippingAddress.js";
 
-type customer = {
+interface customer {
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
-};
+}
 
-type shippingAddress = {
+interface shippingAddress {
   region: string;
   commune: string;
   streetName: string;
   streetNumber: string;
   additionalInfo?: string;
-};
+}
 
-type paymentInfo = {
+interface paymentInfo {
   paymentStatus: orderPaymentStatusOptions;
   paymentAt: Date | null;
   paymentDeadline: Date;
-};
+}
 
-type updateOrderParams = {
+interface updateOrderParams {
   orderId: string;
   customer?: customer;
   shippingAddress?: shippingAddress;
   orderStatus?: orderStatusOptions;
   paymentInfo?: paymentInfo;
-};
+}
 
 // TODO: mover a la definición de OrderWrite y validar allí
 
@@ -253,9 +253,9 @@ export class UpdatePartialOrder {
     );
 
     const productUpdaters =
-      await this.orderAssociatedDataProvider.retrieveProductUpdaters(
-        productIds
-      );
+      await this.orderAssociatedDataProvider.retrieveProductUpdaters({
+        productIds,
+      });
 
     const productUpdatersMap = new Map(
       productUpdaters.map((product) => [product.getProductId(), product])
@@ -328,9 +328,9 @@ export class UpdatePartialOrder {
           transactionalOrderRepository,
         } = dataAccessor;
 
-        await transactionalAssociatedDataProvider.applyProductUpdaters(
-          productUpdaters
-        );
+        await transactionalAssociatedDataProvider.applyProductUpdaters({
+          productUpdaters,
+        });
         await transactionalOrderRepository.update({ order: orderWrite });
       }
     );

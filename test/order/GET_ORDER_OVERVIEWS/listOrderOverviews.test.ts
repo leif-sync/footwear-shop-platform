@@ -8,6 +8,7 @@ import { orderPaymentStatusOptions } from "../../../src/modules/order/domain/ord
 
 test("list orders that are not in the payment gateway", async () => {
   for (let i = 0; i < 20; i++) await createTestOrder();
+
   await createTestOrder({
     orderStatus: orderStatusOptions.WAITING_FOR_PAYMENT,
     paymentInfo: {
@@ -45,7 +46,9 @@ test("list orders that are not in the payment gateway", async () => {
       paymentStatus: expect.toBeOneOf(Object.values(orderPaymentStatusOptions)),
     });
 
-    expect(order.paymentStatus).not.toBe(orderPaymentStatusOptions.IN_PAYMENT_GATEWAY);
+    expect(order.paymentStatus).not.toBe(
+      orderPaymentStatusOptions.IN_PAYMENT_GATEWAY
+    );
   });
 
   expect(response.body.meta).toMatchObject({

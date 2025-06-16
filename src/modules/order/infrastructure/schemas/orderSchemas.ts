@@ -112,15 +112,11 @@ const orderProductSchema = z.object({
 
 const paymentInfoSchema = z.object({
   paymentDeadline: z.coerce.date(),
-  paymentStatus: z.enum(
-    Object.keys(orderPaymentStatusOptions) as [orderPaymentStatusOptions]
-  ),
+  paymentStatus: z.nativeEnum(orderPaymentStatusOptions),
   paymentAt: z.coerce.date().nullable(),
 });
 
-const orderStatusSchema = z.enum(
-  Object.keys(orderStatusOptions) as [orderStatusOptions]
-);
+const orderStatusSchema = z.nativeEnum(orderStatusOptions);
 
 export const createOrderSchema = z.object({
   customer: customerSchema,

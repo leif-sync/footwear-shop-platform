@@ -1,16 +1,15 @@
-export const orderPaymentStatusOptions = {
-  IN_PAYMENT_GATEWAY: "IN_PAYMENT_GATEWAY",
-  PENDING: "PENDING",
-  PAID: "PAID",
-  EXPIRED: "EXPIRED",
-  REFUNDED: "REFUNDED",
-} as const;
+export enum orderPaymentStatusOptions {
+  IN_PAYMENT_GATEWAY = "IN_PAYMENT_GATEWAY",
+  PENDING = "PENDING",
+  PAID = "PAID",
+  EXPIRED = "EXPIRED",
+  REFUNDED = "REFUNDED",
+}
 
 const paymentStatusOptionsSet = new Set(
   Object.values(orderPaymentStatusOptions)
 );
 
-export type orderPaymentStatusOptions = keyof typeof orderPaymentStatusOptions;
 
 export class OrderPaymentStatus {
   private readonly value: orderPaymentStatusOptions;

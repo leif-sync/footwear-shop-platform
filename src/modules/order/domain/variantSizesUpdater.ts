@@ -1,6 +1,7 @@
 import { Integer } from "../../shared/domain/integer.js";
 import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
 import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
+import { NotEnoughStockError } from "./errors/notEnoughStockError.js";
 
 export class VariantSizesUpdater {
   private readonly sizeValue: PositiveInteger;
@@ -33,7 +34,7 @@ export class VariantSizesUpdater {
       sizeValue: this.sizeValue.getValue(),
       initialStock: this.initialStock.getValue(),
       currentStock: this.getCurrentStock(),
-      stockAdjustment: this.stockAdjustment.getValue(), 
+      stockAdjustment: this.stockAdjustment.getValue(),
     };
   }
 
@@ -47,7 +48,11 @@ export class VariantSizesUpdater {
     const { stockToSubtract } = params;
     const currentStock = this.getCurrentStock();
     const newStock = currentStock - stockToSubtract.getValue();
-    if (newStock < 0) throw new Error("Stock cannot be negative");
+    if (newStock < 0) {
+      throw new NotEnoughStockError({
+        sizeValue: this.sizeValue.getValue(),
+      });
+    }
     const currentStockAdjustment = this.stockAdjustment.getValue();
     this.stockAdjustment = new Integer(
       currentStockAdjustment - stockToSubtract.getValue()

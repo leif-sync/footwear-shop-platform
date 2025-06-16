@@ -9,7 +9,8 @@ export class Specification<T> {
   }
 
   isSatisfiedBy = (item: T): boolean => {
-    return this.evaluate(item);
+    const result = this.evaluate(item);
+    return result;
   };
 
   and(other: Specification<T>): Specification<T> {
@@ -28,7 +29,6 @@ export class Specification<T> {
     return new Specification((item: T) => !this.isSatisfiedBy(item));
   }
 
-  // Método helper para filtrar colecciones
   filter(items: T[]): T[] {
     return items.filter(this.isSatisfiedBy);
   }

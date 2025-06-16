@@ -1,13 +1,11 @@
-export const orderStatusOptions = {
-  WAITING_FOR_PAYMENT: "WAITING_FOR_PAYMENT",
-  WAITING_FOR_SHIPMENT: "WAITING_FOR_SHIPMENT",
-  SHIPPED: "SHIPPED",
-  CANCELED: "CANCELED",
-  DELIVERED: "DELIVERED",
-  RETURNED: "RETURNED",
-} as const;
-
-export type orderStatusOptions = keyof typeof orderStatusOptions;
+export enum orderStatusOptions {
+  WAITING_FOR_PAYMENT = "WAITING_FOR_PAYMENT",
+  WAITING_FOR_SHIPMENT = "WAITING_FOR_SHIPMENT",
+  SHIPPED = "SHIPPED",
+  CANCELED = "CANCELED",
+  DELIVERED = "DELIVERED",
+  RETURNED = "RETURNED",
+}
 
 const validOrderStatus = new Set(Object.values(orderStatusOptions));
 
@@ -27,6 +25,7 @@ export class OrderStatus {
     shipped: () => new OrderStatus(orderStatusOptions.SHIPPED),
     canceled: () => new OrderStatus(orderStatusOptions.CANCELED),
     delivered: () => new OrderStatus(orderStatusOptions.DELIVERED),
+    returned: () => new OrderStatus(orderStatusOptions.RETURNED),
   };
 
   static clone(orderStatus: OrderStatus): OrderStatus {

@@ -15,8 +15,8 @@ export class Customer {
   }) {
     this.firstName = params.firstName;
     this.lastName = params.lastName;
-    this.email = Email.clone(params.email);
-    this.phone = Phone.clone(params.phone);
+    this.email = params.email;
+    this.phone = params.phone;
     this.ensureIsValid();
   }
 
@@ -29,7 +29,7 @@ export class Customer {
     return new Customer({
       firstName: customer.firstName,
       lastName: customer.lastName,
-      email: new Email(customer.email.getValue()),
+      email: customer.email,
       phone: customer.phone,
     });
   }
@@ -39,11 +39,11 @@ export class Customer {
   }
 
   getLastName() {
-    return this.lastName
+    return this.lastName;
   }
 
   getEmail() {
-    return this.email.getValue()
+    return this.email.getValue();
   }
 
   getPhone() {

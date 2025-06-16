@@ -292,6 +292,14 @@ export class OrderWrite {
     this.ensureIsValid();
   }
 
+  getCreatorId() {
+    return this.creatorDetails.getCreatorId();
+  }
+
+  getProductIds(): string[] {
+    return this.orderProducts.map((product) => product.getProductId());
+  }
+
   toPrimitives() {
     return {
       orderId: this.orderId.getValue(),

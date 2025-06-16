@@ -1,5 +1,6 @@
 import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
 import { UUID } from "../../shared/domain/UUID.js";
+import { SizeNotAvailableForVariantError } from "./errors/sizeNotAvailableForVariantError.js";
 import { VariantSizesUpdater } from "./variantSizesUpdater.js";
 
 type sizeValue = number;
@@ -50,7 +51,12 @@ export class VariantUpdater {
   }) {
     const { sizeValue, stockToAdd } = params;
     const size = this.sizes.get(sizeValue.getValue());
-    if (!size) throw new Error("Size not present");
+    if (!size) {
+      throw new SizeNotAvailableForVariantError({
+        sizeValue: sizeValue.getValue(),
+        variantId: this.variantId.getValue(),
+      });
+    }
     size.addStock({ stockToAdd });
   }
 
@@ -60,7 +66,12 @@ export class VariantUpdater {
   }) {
     const { sizeValue, stockToSubtract } = params;
     const size = this.sizes.get(sizeValue.getValue());
-    if (!size) throw new Error("Size not present");
+    if (!size) {
+      throw new SizeNotAvailableForVariantError({
+        sizeValue: sizeValue.getValue(),
+        variantId: this.variantId.getValue(),
+      });
+    }
     size.subtractStock({ stockToSubtract });
   }
 

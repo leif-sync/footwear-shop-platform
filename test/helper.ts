@@ -42,9 +42,25 @@ import {
   adminAccessTokenName,
   adminAccessTokenPayload,
 } from "../src/modules/auth/infrastructure/controllers/loginAdmin";
-import { orderStatusOptions } from "../src/modules/order/domain/orderStatus";
+import {
+  OrderStatus,
+  orderStatusOptions,
+} from "../src/modules/order/domain/orderStatus";
 import { CountryData } from "../src/modules/order/domain/countryData";
-import { orderPaymentStatusOptions } from "../src/modules/order/domain/orderPaymentStatus";
+import {
+  OrderPaymentStatus,
+  orderPaymentStatusOptions,
+} from "../src/modules/order/domain/orderPaymentStatus";
+import { Email } from "../src/modules/shared/domain/email";
+import { Phone } from "../src/modules/shared/domain/phone";
+import { Customer } from "../src/modules/order/domain/customer";
+import { ShippingAddress } from "../src/modules/order/domain/shippingAddress";
+import { OrderVariantWrite } from "../src/modules/order/domain/orderVariantWrite";
+import { OrderVariantSize } from "../src/modules/order/domain/orderVariantSize";
+import { OrderCreatorDetails } from "../src/modules/order/domain/orderCreatorDetails";
+import { OrderCreator } from "../src/modules/order/domain/orderCreator";
+import { OrderPaymentInfo } from "../src/modules/order/domain/orderPaymentInfo";
+import { OrderItem } from "../src/modules/order/domain/setupOrderInformation";
 
 export async function loginTest() {
   const adminEmail = initialSuperAdminUser.email;
@@ -70,7 +86,7 @@ export async function createTestProduct(params?: {
   categories?: string[];
   variants?: [
     {
-      visibility?: typeof visibilityOptions.VISIBLE;
+      visibility?: visibilityOptions.VISIBLE;
       tags?: string[];
       sizes?: {
         sizeValue?: number;
@@ -309,33 +325,31 @@ type testOrderProduct = {
   }[];
 };
 
-export async function createTestOrder(
-  params: {
-    orderStatus?: orderStatusOptions;
-    creatorDetails?: {
-      creatorId?: string;
-    };
-    customer?: {
-      email?: string;
-      firstName?: string;
-      lastName?: string;
-      phone?: string;
-    };
-    shippingAddress?: {
-      commune?: string;
-      region?: string;
-      streetName?: string;
-      streetNumber?: string;
-      additionalInfo?: string;
-    };
-    orderProducts?: [testOrderProduct, ...testOrderProduct[]];
-    paymentInfo?: {
-      paymentAt: Date | null;
-      paymentStatus: orderPaymentStatusOptions;
-      paymentDeadline: Date;
-    };
-  } = {}
-) {
+export async function createTestOrder(params?: {
+  orderStatus?: orderStatusOptions;
+  creatorDetails?: {
+    creatorId: string;
+  };
+  customer?: {
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+  };
+  shippingAddress?: {
+    commune?: string;
+    region?: string;
+    streetName?: string;
+    streetNumber?: string;
+    additionalInfo?: string;
+  };
+  orderProducts?: [testOrderProduct, ...testOrderProduct[]];
+  paymentInfo?: {
+    paymentAt: Date | null;
+    paymentStatus: orderPaymentStatusOptions;
+    paymentDeadline: Date;
+  };
+}) {
   const defaultProduct = await createTestProduct();
   const defaultOrderProducts = [
     {
@@ -358,8 +372,8 @@ export async function createTestOrder(
     adminEmail: initialSuperAdminUser.email,
   });
 
-  const orderProducts =
-    params.orderProducts?.map((product) => ({
+  const primitiveOrderProducts =
+    params?.orderProducts?.map((product) => ({
       productId: product.productId ?? defaultOrderProducts[0].productId,
       productVariants:
         product.productVariants?.map((variant) => ({
@@ -380,38 +394,95 @@ export async function createTestOrder(
         })) ?? defaultOrderProducts[0].productVariants,
     })) ?? defaultOrderProducts;
 
-  const order = await ServiceContainer.order.createOrder.run({
-    orderStatus: params.orderStatus ?? orderStatusOptions.WAITING_FOR_SHIPMENT,
-    customer: {
-      email: params.customer?.email ?? "example@example.com",
-      firstName: params.customer?.firstName ?? "John",
-      lastName: params.customer?.lastName ?? "Doe",
-      phone: params.customer?.phone ?? "+56 123456789",
-    },
-    shippingAddress: {
-      region: params.shippingAddress?.region ?? CountryData.regions[0].name,
-      commune:
-        params.shippingAddress?.commune ?? CountryData.regions[0].communes[0],
-      streetName: params.shippingAddress?.streetName ?? "Main St",
-      streetNumber: params.shippingAddress?.streetNumber ?? "123",
-      additionalInfo: params.shippingAddress?.additionalInfo ?? "Apt 4B",
-    },
-    orderProducts,
-    paymentInfo: {
-      paymentAt:
-        params.paymentInfo?.paymentAt || params.paymentInfo?.paymentAt === null
-          ? params.paymentInfo.paymentAt
-          : new Date(),
-      paymentDeadline:
-        params.paymentInfo?.paymentDeadline ??
-        new Date(Date.now() + 1000 * 60 * 60 * 24),
-      paymentStatus:
-        params.paymentInfo?.paymentStatus ?? orderPaymentStatusOptions.PAID,
-    },
-    creatorDetails: {
-      creatorId: admin.getAdminId(),
-    },
+  const orderProducts: OrderItem[] = primitiveOrderProducts.map(
+    (orderProduct): OrderItem => {
+      const productVariants: OrderVariantWrite[] =
+        orderProduct.productVariants.map((variant): OrderVariantWrite => {
+          const variantSizes: OrderVariantSize[] = variant.variantSizes.map(
+            (size): OrderVariantSize => {
+              return new OrderVariantSize({
+                quantity: new PositiveInteger(size.quantity),
+                sizeValue: new PositiveInteger(size.sizeValue),
+              });
+            }
+          );
+
+          return new OrderVariantWrite({
+            variantId: new UUID(variant.variantId),
+            variantSizes,
+          });
+        });
+
+      return {
+        productId: new UUID(orderProduct.productId),
+        productVariants,
+      };
+    }
+  );
+
+  const customer = new Customer({
+    email: new Email(params?.customer?.email ?? "example@example.com"),
+    firstName: params?.customer?.firstName ?? "John",
+    lastName: params?.customer?.lastName ?? "Doe",
+    phone: new Phone(params?.customer?.phone ?? "+56 123456789"),
   });
+
+  const creatorDetails = new OrderCreatorDetails({
+    orderCreator:
+      params?.creatorDetails || params?.paymentInfo || !params
+        ? OrderCreator.create.admin()
+        : OrderCreator.create.guest(),
+    creatorId: params?.creatorDetails
+      ? new UUID(params?.creatorDetails.creatorId)
+      : params?.paymentInfo || !params
+        ? new UUID(admin.getAdminId())
+        : undefined,
+  });
+
+  const shippingAddress = new ShippingAddress({
+    region: params?.shippingAddress?.region ?? CountryData.regions[0].name,
+    commune:
+      params?.shippingAddress?.commune ?? CountryData.regions[0].communes[0],
+    streetName: params?.shippingAddress?.streetName ?? "Main St",
+    streetNumber: params?.shippingAddress?.streetNumber ?? "123",
+    additionalInfo: params?.shippingAddress?.additionalInfo ?? "Apt 4B",
+  });
+
+  const orderStatus = new OrderStatus(
+    params?.orderStatus ?? orderStatusOptions.WAITING_FOR_SHIPMENT
+  );
+
+  const paymentDeadline =
+    params?.paymentInfo?.paymentDeadline ??
+    new Date(Date.now() + 1000 * 60 * 60 * 24);
+
+  const paymentInfo = new OrderPaymentInfo({
+    paymentAt:
+      params?.paymentInfo?.paymentAt || params?.paymentInfo?.paymentAt === null
+        ? params?.paymentInfo.paymentAt
+        : new Date(),
+    paymentDeadline,
+    paymentStatus: new OrderPaymentStatus(
+      params?.paymentInfo?.paymentStatus ?? orderPaymentStatusOptions.PAID
+    ),
+  });
+
+  const isCreatorPresent =
+    params?.creatorDetails || params?.paymentInfo || !params;
+  const order = isCreatorPresent
+    ? await ServiceContainer.order.createAdminOrder.run({
+        creatorDetails,
+        orderStatus,
+        customer,
+        shippingAddress,
+        orderProducts,
+        paymentInfo,
+      })
+    : await ServiceContainer.order.createCustomerOrder.run({
+        customer,
+        orderProducts,
+        shippingAddress,
+      });
 
   return {
     orderId: order.orderId,

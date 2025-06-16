@@ -12,6 +12,11 @@ test("list orders by customer email", async () => {
     customer: {
       email: customerEmail,
     },
+    paymentInfo: {
+      paymentAt: new Date(),
+      paymentStatus: orderPaymentStatusOptions.PAID,
+      paymentDeadline: new Date(Date.now() + 1000 * 60 * 60 * 24), // 1 day from now
+    },
   });
 
   const token = await loginTest();
@@ -22,6 +27,7 @@ test("list orders by customer email", async () => {
     .query({
       limit,
       offset,
+      customerEmail,
     })
     .set("Cookie", token);
 

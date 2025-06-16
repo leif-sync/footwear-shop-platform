@@ -1,5 +1,6 @@
 import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
 import { UUID } from "../../shared/domain/UUID.js";
+import { InvalidVariantError } from "./errors/invalidVariantError.js";
 import { VariantUpdater } from "./variantUpdater.js";
 
 type variantId = string;
@@ -43,7 +44,7 @@ export class ProductUpdater {
   }) {
     const { variantId, sizeValue, stockToCheck } = params;
     const variant = this.variants.get(variantId.getValue());
-    if (!variant) throw new Error("Variant not present");
+    if (!variant) throw new InvalidVariantError({ variantId });
     return variant.hasEnoughStockForSize({ sizeValue, stockToCheck });
   }
 
@@ -54,7 +55,7 @@ export class ProductUpdater {
   }) {
     const { variantId, sizeValue, stockToAdd } = params;
     const variant = this.variants.get(variantId.getValue());
-    if (!variant) throw new Error("Variant not present");
+    if (!variant) throw new InvalidVariantError({ variantId });
     variant.addStockForSize({ sizeValue, stockToAdd });
   }
 
@@ -65,14 +66,14 @@ export class ProductUpdater {
   }) {
     const { variantId, sizeValue, stockToSubtract } = params;
     const variant = this.variants.get(variantId.getValue());
-    if (!variant) throw new Error("Variant not present");
+    if (!variant) throw new InvalidVariantError({ variantId });
     variant.subtractStockForSize({ sizeValue, stockToSubtract });
   }
 
   hasSizeForVariant(params: { variantId: UUID; sizeValue: PositiveInteger }) {
     const { variantId, sizeValue } = params;
     const variant = this.variants.get(variantId.getValue());
-    if (!variant) throw new Error("Variant not present");
+    if (!variant) throw new InvalidVariantError({ variantId });
     return variant.hasSize({ sizeValue });
   }
 

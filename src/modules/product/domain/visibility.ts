@@ -1,13 +1,11 @@
-export const visibilityOptions = {
-  HIDDEN: "HIDDEN",
-  VISIBLE: "VISIBLE",
-} as const;
+export enum visibilityOptions {
+  HIDDEN = "HIDDEN",
+  VISIBLE = "VISIBLE",
+}
 
 const variantVisibilitySet = new Set(
   Object.keys(visibilityOptions) as [keyof typeof visibilityOptions]
 );
-
-export type visibilityOptions = keyof typeof visibilityOptions;
 
 export class Visibility {
   private readonly value: visibilityOptions;

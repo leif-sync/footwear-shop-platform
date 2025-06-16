@@ -3,12 +3,15 @@ import { OrderCreator } from "./orderCreator.js";
 
 export class OrderCreatorDetails {
   private readonly orderCreator: OrderCreator;
-  private readonly creatorId?: UUID;
+  private readonly creatorId: UUID | undefined;
 
-  constructor(params: { orderCreator: OrderCreator; creatorId?: UUID }) {
+  constructor(params: {
+    orderCreator: OrderCreator;
+    creatorId?: UUID | undefined;
+  }) {
     const { orderCreator, creatorId } = params;
-    this.orderCreator = OrderCreator.clone(orderCreator);
-    this.creatorId = creatorId ? UUID.clone(creatorId) : undefined;
+    this.orderCreator = orderCreator;
+    this.creatorId = creatorId;
   }
 
   static clone(orderCreatedBy: OrderCreatorDetails): OrderCreatorDetails {
@@ -21,7 +24,8 @@ export class OrderCreatorDetails {
   getCreatorType() {
     return this.orderCreator;
   }
-  getCreatorId() {
+
+  getCreatorId(): UUID | undefined {
     return this.creatorId;
   }
 

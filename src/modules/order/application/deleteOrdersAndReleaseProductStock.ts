@@ -45,18 +45,17 @@ export class DeleteOrderAndReleaseProductsStock {
     const orderProductIdsArray = Array.from(orderProductsMap.keys());
     const orderProductIds = orderProductIdsArray.map((id) => new UUID(id));
 
-    const productUpdatersMap = await this.retrieveProductUpdatersMap(
-      orderProductIds
-    );
+    const productUpdatersMap =
+      await this.retrieveProductUpdatersMap(orderProductIds);
 
     orderProductsMap.forEach((orderProduct) => {
       this.validateAndUpdateProductVariants(orderProduct, productUpdatersMap);
     });
 
     const productUpdaterList = Array.from(productUpdatersMap.values());
-    await this.orderAssociatedDataProvider.applyProductUpdaters(
-      productUpdaterList
-    );
+    await this.orderAssociatedDataProvider.applyProductUpdaters({
+      productUpdaters: productUpdaterList,
+    });
 
     const orderIds = ordersPaymentExpired.map(
       (order) => new UUID(order.getId())
@@ -67,9 +66,9 @@ export class DeleteOrderAndReleaseProductsStock {
 
   private async retrieveProductUpdatersMap(orderProductIds: UUID[]) {
     const productUpdaters =
-      await this.orderAssociatedDataProvider.retrieveProductUpdaters(
-        orderProductIds
-      );
+      await this.orderAssociatedDataProvider.retrieveProductUpdaters({
+        productIds: orderProductIds,
+      });
 
     const productUpdatersMap = new Map<string, ProductUpdater>();
     productUpdaters.forEach((productUpdater) => {

@@ -15,7 +15,7 @@ vi.mock("../../../src/modules/payment/infrastructure/webpaySdkHelper", () => ({
   WebpaySdkHelper: {
     createLinkPaymentGateway: vi.fn().mockResolvedValue({
       url: "https://webpay.example.com/pay",
-      token: "example-token",
+      token: Math.random().toString(36).substring(2, 15),
     }),
   },
 }));
@@ -69,12 +69,14 @@ test("creating a new Webpay Plus payment gateway link with already paid order", 
 });
 
 test("creating a new Webpay Plus payment gateway link with expired payment deadline", async () => {
+  const paymentDeadlineTest = new Date(Date.now() - 1000 * 60 * 60 * 24);
+
   const { orderId } = await createTestOrder({
     orderStatus: orderStatusOptions.WAITING_FOR_PAYMENT,
     paymentInfo: {
       paymentStatus: orderPaymentStatusOptions.IN_PAYMENT_GATEWAY,
       paymentAt: null,
-      paymentDeadline: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
+      paymentDeadline: paymentDeadlineTest, // 1 day ago
     },
   });
 
@@ -86,4 +88,3 @@ test("creating a new Webpay Plus payment gateway link with expired payment deadl
 
   expect(response.statusCode).toBe(HTTP_STATUS.CONFLICT);
 });
-

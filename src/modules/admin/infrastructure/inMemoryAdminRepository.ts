@@ -13,20 +13,28 @@ export class InMemoryAdminRepository implements AdminRepository {
 
   async find(params: { adminId: UUID }): Promise<Admin | null>;
   async find(params: { adminEmail: Email }): Promise<Admin | null>;
-  async find(params: {
-    adminId?: UUID;
-    adminEmail?: Email;
-  }): Promise<Admin | null> {
-    const { adminId, adminEmail } = params;
-    if (adminId) {
-      const admin = this.admins.find((a) => adminId.equals(a.getAdminId()));  
+  async find(
+    params:
+      | {
+          adminId: UUID;
+        }
+      | {
+          adminEmail: Email;
+        }
+  ): Promise<Admin | null> {
+    const isAdminId = "adminId" in params;
+    if (isAdminId) {
+      const admin = this.admins.find((a) =>
+        params.adminId.equals(a.getAdminId())
+      );
       return admin ?? null;
     }
-    if (adminEmail) {
-      const admin = this.admins.find((a) => adminEmail.equals(a.getEmail()));
-      return admin ?? null;
-    }
-    throw new TypeError("Either adminId or adminEmail must be provided");
+    
+    const admin = this.admins.find((a) =>
+      params.adminEmail.equals(a.getEmail())
+    );
+
+    return admin ?? null;
   }
 
   async update(params: { admin: Admin }): Promise<void> {

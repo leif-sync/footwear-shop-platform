@@ -109,6 +109,7 @@ export class InMemoryOrderRepository implements OrderRepository {
       if (index === 0) return;
       initialCriteria = initialCriteria.or(params.criteriaToAdd(data));
     });
+
     return params.criteria.and(initialCriteria);
   }
 
