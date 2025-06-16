@@ -2,20 +2,20 @@ import { UUID } from "../../shared/domain/UUID.js";
 import { ActiveCategoryError } from "../domain/errors/activeCategoryError.js";
 import { CategoryNotFoundError } from "../domain/errors/categoryNotFoundError.js";
 import { CategoryRepository } from "../domain/categoryRepository.js";
-import { CategoryValidationService } from "../domain/categoryValidationService.js";
+import { AssociatedDataProvider } from "../domain/associatedDataProvider.js";
 
 type deleteParams = { categoryId?: string; categoryName?: string };
 
 export class DeleteCategory {
   private readonly categoryRepository: CategoryRepository;
-  private readonly categoryValidationService: CategoryValidationService;
+  private readonly associatedDataProvider: AssociatedDataProvider;
 
   constructor(params: {
     categoryRepository: CategoryRepository;
-    categoryValidationService: CategoryValidationService;
+    associatedDataProvider: AssociatedDataProvider;
   }) {
     this.categoryRepository = params.categoryRepository;
-    this.categoryValidationService = params.categoryValidationService;
+    this.associatedDataProvider = params.associatedDataProvider;
   }
 
   private async deleteById(id: string): Promise<void> {
@@ -26,7 +26,7 @@ export class DeleteCategory {
     const categoryName = category.getName();
 
     const isCategoryInUse =
-      await this.categoryValidationService.checkCategoryUsage({
+      await this.associatedDataProvider.checkCategoryUsage({
         categoryName,
       });
 
@@ -41,7 +41,7 @@ export class DeleteCategory {
       throw new CategoryNotFoundError({ categoryName: categoryName });
 
     const isCategoryInUse =
-      await this.categoryValidationService.checkCategoryUsage({
+      await this.associatedDataProvider.checkCategoryUsage({
         categoryName,
       });
 
@@ -50,7 +50,24 @@ export class DeleteCategory {
     await this.categoryRepository.delete({ categoryName });
   }
 
+  /**
+   * Deletes a category by its ID or name.
+   * @param params - The parameters for deletion.
+   * @param params.categoryId - The ID of the category to delete.
+   *
+   * @throws {CategoryNotFoundError} If the category does not exist.
+   * @throws {ActiveCategoryError} If the category is currently in use.
+   */
   async run(params: { categoryId: string }): Promise<void>;
+
+  /**
+   * Deletes a category by its name.
+   * @param params - The parameters for deletion.
+   * @param params.categoryName - The name of the category to delete.
+   *
+   * @throws {CategoryNotFoundError} If the category does not exist.
+   * @throws {ActiveCategoryError} If the category is currently in use.
+   */
   async run(params: { categoryName: string }): Promise<void>;
   async run(params: deleteParams): Promise<void> {
     const { categoryId, categoryName } = params;
