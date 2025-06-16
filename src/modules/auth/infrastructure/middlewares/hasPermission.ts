@@ -18,6 +18,12 @@ declare module "express-serve-static-core" {
   }
 }
 
+/**
+ * Middleware to check if the admin has the required permissions.
+ * @param params - The parameters for the middleware.
+ * @param params.permission - The permission or array of permissions to check.
+ * @returns A request handler function.
+ */
 export function hasPermission(params: {
   permission: validPermissionOptions | validPermissionOptions[];
 }): RequestHandler {
@@ -34,6 +40,19 @@ export function hasPermission(params: {
   };
 }
 
+/**
+ * Handles the permission checking logic.
+ * This function checks if the admin has the required permissions
+ * based on the provided access token in the request cookies.
+ * If the token is valid and the permissions match, it assigns the admin
+ * information to the request object and calls the next middleware.
+ * If the token is invalid or the permissions do not match, it responds with an error.
+ * @param params - The parameters for the permission handler.
+ * @param params.request - The request object.
+ * @param params.response - The response object.
+ * @param params.next - The next middleware function.
+ * @param params.permissions - The permissions to check against.
+ */
 async function permissionHandler(params: {
   request: Request;
   response: Response;

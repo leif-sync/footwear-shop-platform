@@ -6,6 +6,13 @@ import {
 } from "../controllers/loginAdmin.js";
 import jwt from "jsonwebtoken";
 
+/**
+ * Middleware to assign the admin information to the request if the admin is authenticated.
+ * @param req - The request object.
+ * @param res - The response object.
+ * @param next - The next middleware function.
+ * @returns A promise that resolves to void.
+ */
 export async function assignAdminToRequestIfPresent(
   req: Request,
   res: Response,
