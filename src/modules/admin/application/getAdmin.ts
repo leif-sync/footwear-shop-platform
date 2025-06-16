@@ -44,10 +44,11 @@ export class GetAdmin {
    * @throws {AdminNotFoundError} If no admin with the given email is found.
    */
   async run(params: { adminEmail: string }): Promise<Admin>;
-  async run(params: { adminId?: string; adminEmail?: string }): Promise<Admin> {
-    const { adminId, adminEmail } = params;
-    if (adminId) return this.findAdminById(adminId);
-    if (adminEmail) return this.findAdminByEmail(adminEmail);
-    throw new TypeError("Either adminId or adminEmail must be provided");
+  async run(
+    params: { adminId: string } | { adminEmail: string }
+  ): Promise<Admin> {
+    const isAdminId = "adminId" in params;
+    if (isAdminId) return this.findAdminById(params.adminId);
+    return this.findAdminByEmail(params.adminEmail);
   }
 }
