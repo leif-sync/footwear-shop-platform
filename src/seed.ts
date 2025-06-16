@@ -1,3 +1,11 @@
+/**
+ * @file
+ * @description
+ * Seed script to initialize the database with default values.
+ * This script creates an initial super admin user, categories, tags, sizes, details,
+ * and a sample product with variants.
+ */
+
 import { validPermissionOptions } from "./modules/admin/domain/validPermissions.js";
 import {
   productRepository,

@@ -7,6 +7,31 @@ import { AdminFirstName } from "./modules/admin/domain/adminFirstName.js";
 import { AdminLastName } from "./modules/admin/domain/adminLastName.js";
 import { validateCronExpression } from "cron";
 
+/**
+ * Handles a value that may throw an error, returning the value if successful,
+ * or throwing a TypeError with a specified error message if an error occurs.
+ * 
+ * @description This function is useful for safely retrieving environment variables
+ * or other values that may throw errors, ensuring that the error is handled gracefully
+ * and providing a clear error message.
+ * 
+ * @param params The parameters for the function.
+ * @param params.valueToReturn A function that returns the value to be handled.
+ * @param params.errorMessage The error message to throw if an error occurs.
+ * 
+ * @returns The value returned by the `valueToReturn` function.
+ * 
+ * @throws {TypeError} If an error occurs while retrieving the value.
+ * 
+ * @template T The type of the value to be returned.
+ * 
+ * @example
+ * const PORT = handleValueWithError({
+ *   valueToReturn: () => new NonNegativeInteger(process.env.PORT as any).getValue(),
+ *   errorMessage: "PORT must be a non-negative integer",
+ * });
+ * // This will return the PORT value if successful, or throw a TypeError with the specified message.
+ */
 function handleValueWithError<T>(params: {
   valueToReturn: () => T;
   errorMessage: string;
@@ -19,20 +44,35 @@ function handleValueWithError<T>(params: {
   }
 }
 
-function calculateMathInput(entrada: string) {
+/**
+ * Calculates a mathematical expression from a string input.
+ * @description This function evaluates a mathematical expression provided as a string.
+ * It uses the `eval` function to compute the result, but first checks if the input
+ * contains only valid mathematical characters (digits, operators, parentheses, and spaces).
+ * 
+ * @param input The mathematical expression as a string.
+ * @returns The result of the evaluated expression.
+ * @throws {Error} If the input contains invalid characters or if the evaluation fails.
+ * @example
+ * const result = calculateMathInput("2 + 3 * (4 - 1)");
+ * // This will return 11, which is the result of the expression.
+ */
+function calculateMathInput(input: string) {
   const regex = /^[\d+\-*/.()^ ]+$/;
 
-  if (!regex.test(entrada)) {
+  if (!regex.test(input)) {
     throw new Error(
-      "Entrada no válida. Solo se permiten números y operadores matemáticos."
+      "Input must contain only digits, operators (+, -, *, /), parentheses, and spaces.",
     );
   }
 
   try {
-    const resultado = eval(entrada);
+    const resultado = eval(input);
     return resultado;
   } catch {
-    throw new Error("Hubo un error al evaluar la operación.");
+    throw new Error(
+      "Error evaluating the mathematical expression. Ensure it is a valid expression.",
+    );
   }
 }
 

@@ -1,3 +1,9 @@
+/**
+ * @file Helper functions for testing
+ * @description This file contains utility functions to create test data such as products, orders, and login tokens.
+ * @module test/helper
+ */
+
 import { CategoryAlreadyExistsError } from "../src/modules/category/domain/errors/categoryAlreadyExistsError";
 import {
   DiscountType,
