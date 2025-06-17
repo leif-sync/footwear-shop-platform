@@ -7,6 +7,8 @@ import { HTTP_STATUS } from "../../shared/infrastructure/httpStatus.js";
 import { CategoryAlreadyExistsError } from "../domain/errors/categoryAlreadyExistsError.js";
 import { CategoryName } from "../domain/categoryName.js";
 import { UUID } from "../../shared/domain/UUID.js";
+import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
+import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
 
 const categorySchema = z.object({
   categoryName: z.string().nonempty(),
@@ -21,7 +23,11 @@ const listCategoriesQuerySchema = z.object({
 export class CategoryController {
   static async listCategories(req: Request, res: Response) {
     try {
-      const { limit, offset } = listCategoriesQuerySchema.parse(req.query);
+      const result = listCategoriesQuerySchema.parse(req.query);
+
+      const limit = new PositiveInteger(result.limit);
+      const offset = new NonNegativeInteger(result.offset);
+
       const categories = await ServiceContainer.category.litCategories.run({
         limit,
         offset,
@@ -32,8 +38,8 @@ export class CategoryController {
       res.json({
         categories,
         meta: {
-          limit,
-          offset,
+          limit: limit.getValue(),
+          offset: offset.getValue(),
           returnedCategoriesCount: categories.length,
           totalCategoriesCount: totalCategoriesCount,
         },

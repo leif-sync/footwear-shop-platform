@@ -18,9 +18,8 @@ export class ListCategories {
    * @throws {PositiveIntegerError} If the limit is not a positive integer.
    * @throws {NonNegativeIntegerError} If the offset is not a non-negative integer.
    */
-  async run(params: { limit: number; offset: number }) {
-    const limit = new PositiveInteger(params.limit);
-    const offset = new NonNegativeInteger(params.offset);
+  async run(params: { limit: PositiveInteger; offset: NonNegativeInteger }) {
+    const { limit, offset } = params;
     const categories = await this.categoryRepository.list({
       limit,
       offset,
