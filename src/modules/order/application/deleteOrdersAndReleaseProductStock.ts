@@ -59,7 +59,7 @@ export class DeleteOrderAndReleaseProductsStock {
 
     const orderIds = ordersPaymentExpired.map((order) => order.getId());
 
-    await this.orderRepository.delete({ orderIds });
+    await this.orderRepository.delete({ orderId: orderIds });
   }
 
   private async retrieveProductUpdatersMap(orderProductIds: UUID[]) {

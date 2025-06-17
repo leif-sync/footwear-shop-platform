@@ -13,7 +13,7 @@ import { OrderOverview } from "../domain/orderOverview.js";
 import { OrderProduct } from "../domain/orderProduct.js";
 import { OrderVariant } from "../domain/orderVariant.js";
 import {
-  orderFilterCriteria,
+  OrderFilterCriteria,
   OrderRepository,
 } from "../domain/orderRepository.js";
 import { OrderStatus } from "../domain/orderStatus.js";
@@ -116,7 +116,7 @@ export class InMemoryOrderRepository implements OrderRepository {
   }
 
   async listOrderOverviews(
-    params: orderFilterCriteria
+    params: OrderFilterCriteria
   ): Promise<OrderOverview[]> {
     const { limit, offset, orderStatus, paymentStatus, customerEmail } = params;
 
@@ -168,7 +168,7 @@ export class InMemoryOrderRepository implements OrderRepository {
   }
 
   async countStoredOrders(
-    params: SmartOmit<orderFilterCriteria, "limit" | "offset">
+    params: SmartOmit<OrderFilterCriteria, "limit" | "offset">
   ): Promise<NonNegativeInteger> {
     const { orderStatus, paymentStatus, customerEmail } = params;
 
@@ -390,17 +390,17 @@ export class InMemoryOrderRepository implements OrderRepository {
     return filteredOrders;
   }
 
-  async delete(params: { orderId: UUID }): Promise<void>;
-  async delete(params: { orderIds: UUID[] }): Promise<void>;
-  async delete(params: { orderId?: UUID; orderIds?: UUID[] }): Promise<void> {
-    const orderIdsToDelete = params.orderIds ?? [params.orderId!];
+  async delete(params: { orderId: UUID | UUID[] }): Promise<void> {
+    const { orderId } = params;
 
-    orderIdsToDelete.forEach((orderId) => {
+    const orderIdsToDelete = Array.isArray(orderId) ? orderId : [orderId];
+
+    orderIdsToDelete.forEach((id) => {
       const orderIndex = this.orders.findIndex((existingOrder) =>
-        orderId.equals(existingOrder.getId())
+        id.equals(existingOrder.getId())
       );
 
-      if (orderIndex === -1) throw new OrderNotFoundError({ orderId });
+      if (orderIndex === -1) throw new OrderNotFoundError({ orderId: id });
 
       this.orders.splice(orderIndex, 1);
     });

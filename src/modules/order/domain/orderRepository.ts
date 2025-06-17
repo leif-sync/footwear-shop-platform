@@ -10,7 +10,7 @@ import { OrderPaymentStatus } from "./orderPaymentStatus.js";
 import { OrderStatus } from "./orderStatus.js";
 import { OrderWrite } from "./orderWrite.js";
 
-export interface orderFilterCriteria {
+export interface OrderFilterCriteria {
   limit: PositiveInteger;
   offset: NonNegativeInteger;
   orderStatus?: OrderStatus | OrderStatus[];
@@ -19,7 +19,9 @@ export interface orderFilterCriteria {
 }
 
 export abstract class OrderRepository {
-  abstract listOrderOverviews(params: orderFilterCriteria): Promise<OrderOverview[]>;
+  abstract listOrderOverviews(
+    params: OrderFilterCriteria
+  ): Promise<OrderOverview[]>;
 
   abstract find(params: { orderId: UUID }): Promise<OrderFull | null>;
 
@@ -35,10 +37,11 @@ export abstract class OrderRepository {
     creator?: OrderCreator | OrderCreator[];
   }): Promise<OrderWrite[]>;
 
-  abstract delete(params: { orderId: UUID }): Promise<void>;
-  abstract delete(params: { orderIds: UUID[] }): Promise<void>;
+  abstract delete(params: { orderId: UUID | UUID[] }): Promise<void>;
 
-  abstract countStoredOrders(params: SmartOmit<orderFilterCriteria, "limit" | "offset">): Promise<NonNegativeInteger>; // !
+  abstract countStoredOrders(
+    params: SmartOmit<OrderFilterCriteria, "limit" | "offset">
+  ): Promise<NonNegativeInteger>; // !
 
   abstract checkIfProductIsBought(params: {
     productId: UUID;
@@ -49,7 +52,5 @@ export abstract class OrderRepository {
     variantId: UUID;
   }): Promise<boolean>;
 
-  abstract checkIfOrderExists(params: {
-    orderId: UUID;
-  }): Promise<boolean>;
+  abstract checkIfOrderExists(params: { orderId: UUID }): Promise<boolean>;
 }
