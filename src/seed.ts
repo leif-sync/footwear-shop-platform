@@ -34,6 +34,7 @@ import { VariantDetail } from "./modules/product/domain/variantDetail.js";
 import { AppImage } from "./modules/shared/domain/AppImage.js";
 import { AppUrl } from "./modules/shared/domain/appUrl.js";
 import { VariantTag } from "./modules/product/domain/variantTag.js";
+import { CategoryName } from "./modules/category/domain/categoryName.js";
 
 // create initial admin user
 ServiceContainer.admin.createAdmin
@@ -54,10 +55,10 @@ ServiceContainer.admin.createAdmin
   });
 
 // create categories
-await ServiceContainer.category.createCategory.run({ categoryName: "Calzado" });
-await ServiceContainer.category.createCategory.run({ categoryName: "Mujer" });
-await ServiceContainer.category.createCategory.run({ categoryName: "Tacones" });
-await ServiceContainer.category.createCategory.run({ categoryName: "Zapatos" });
+await ServiceContainer.category.createCategory.run({ categoryName: new CategoryName("Calzado") });
+await ServiceContainer.category.createCategory.run({ categoryName: new CategoryName("Mujer") });
+await ServiceContainer.category.createCategory.run({ categoryName: new CategoryName("Tacones") });
+await ServiceContainer.category.createCategory.run({ categoryName: new CategoryName("Zapatos") });
 
 // create tags
 await ServiceContainer.tag.createTag.run({ tagName: "elegante" });

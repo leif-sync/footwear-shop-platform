@@ -1,5 +1,6 @@
 import { CategoryNotFoundError } from "../domain/errors/categoryNotFoundError.js";
 import { CategoryRepository } from "../domain/categoryRepository.js";
+import { CategoryName } from "../domain/categoryName.js";
 
 export class GetCategory {
   private categoryRepository: CategoryRepository;
@@ -14,7 +15,7 @@ export class GetCategory {
    * @returns - A promise that resolves to the found category's details.
    * @throws {CategoryNotFoundError} If no category with the given name is found.
    */
-  async run(params: { categoryName: string }) {
+  async run(params: { categoryName: CategoryName }) {
     const { categoryName } = params;
     const category = await this.categoryRepository.find({ categoryName });
     if (!category) throw new CategoryNotFoundError({ categoryName });

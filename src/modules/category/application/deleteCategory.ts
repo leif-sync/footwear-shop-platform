@@ -3,8 +3,7 @@ import { ActiveCategoryError } from "../domain/errors/activeCategoryError.js";
 import { CategoryNotFoundError } from "../domain/errors/categoryNotFoundError.js";
 import { CategoryRepository } from "../domain/categoryRepository.js";
 import { AssociatedDataProvider } from "../domain/associatedDataProvider.js";
-
-type deleteParams = { categoryId?: string; categoryName?: string };
+import { CategoryName } from "../domain/categoryName.js";
 
 export class DeleteCategory {
   private readonly categoryRepository: CategoryRepository;
@@ -18,8 +17,7 @@ export class DeleteCategory {
     this.associatedDataProvider = params.associatedDataProvider;
   }
 
-  private async deleteById(id: string): Promise<void> {
-    const categoryId = new UUID(id);
+  private async deleteById(categoryId: UUID): Promise<void> {
     const category = await this.categoryRepository.find({ categoryId });
     if (!category) throw new CategoryNotFoundError({ categoryId });
 
@@ -35,7 +33,7 @@ export class DeleteCategory {
     await this.categoryRepository.delete({ categoryId });
   }
 
-  private async deleteByName(categoryName: string): Promise<void> {
+  private async deleteByName(categoryName: CategoryName): Promise<void> {
     const category = await this.categoryRepository.find({ categoryName });
     if (!category)
       throw new CategoryNotFoundError({ categoryName: categoryName });
@@ -58,7 +56,7 @@ export class DeleteCategory {
    * @throws {CategoryNotFoundError} If the category does not exist.
    * @throws {ActiveCategoryError} If the category is currently in use.
    */
-  async run(params: { categoryId: string }): Promise<void>;
+  async run(params: { categoryId: UUID }): Promise<void>;
 
   /**
    * Deletes a category by its name.
@@ -68,11 +66,16 @@ export class DeleteCategory {
    * @throws {CategoryNotFoundError} If the category does not exist.
    * @throws {ActiveCategoryError} If the category is currently in use.
    */
-  async run(params: { categoryName: string }): Promise<void>;
-  async run(params: deleteParams): Promise<void> {
-    const { categoryId, categoryName } = params;
-    if (categoryId) return this.deleteById(categoryId);
-    if (categoryName) return this.deleteByName(categoryName);
-    throw new TypeError("Invalid params");
+  async run(params: { categoryName: CategoryName }): Promise<void>;
+  async run(
+    params: { categoryName: CategoryName } | { categoryId: UUID }
+  ): Promise<void> {
+    const isCategoryId = "categoryId" in params;
+
+    if (isCategoryId) {
+      return this.deleteById(params.categoryId);
+    }
+
+    return this.deleteByName(params.categoryName);
   }
 }

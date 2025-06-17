@@ -1,29 +1,34 @@
 import { test, expect } from "vitest";
-import { ServiceContainer } from "../../../src/modules/shared/infrastructure/serviceContainer";
 import { api } from "../../api";
 import { productsUrlPath, absoluteImagePath } from "../shared";
 import { randomInt } from "node:crypto";
 import { ProductToSend } from "./productBuilder";
 import { createProductFieldData } from "../../../src/modules/product/infrastructure/controllers/createProduct";
-import { loginTest } from "../../helper";
+import {
+  createCategoryIfNotExists,
+  createDetailIfNotExists,
+  createSizeIfNotExists,
+  createTagIfNotExists,
+  loginTest,
+} from "../../helper";
 
 test(`create product variant without required fields`, async () => {
   const cookieToken = await loginTest();
   // * create initial category
   const categoryName = Date.now().toString();
-  await ServiceContainer.category.createCategory.run({ categoryName });
+  await createCategoryIfNotExists(categoryName);
 
   // * create initial tags
   const tagName = Date.now().toString();
-  await ServiceContainer.tag.createTag.run({ tagName });
+  await createTagIfNotExists(tagName);
 
   // * create initial detail
   const detailName = Date.now().toString();
-  await ServiceContainer.detail.createDetail.run({ detailName });
+  await createDetailIfNotExists(detailName);
 
   // * create initial size
   const sizeValue = randomInt(1, 100000);
-  await ServiceContainer.size.createSize.run({ sizeValue });
+  await createSizeIfNotExists(sizeValue);
 
   const imageField = "images1";
 

@@ -63,6 +63,7 @@ import { OrderPaymentInfo } from "../src/modules/order/domain/orderPaymentInfo";
 import { OrderItem } from "../src/modules/order/domain/setupOrderInformation";
 import { CustomerFirstName } from "../src/modules/order/domain/customerFirstName";
 import { CustomerLastName } from "../src/modules/order/domain/customerLastName";
+import { CategoryName } from "../src/modules/category/domain/categoryName";
 
 export async function loginTest() {
   const adminEmail = initialSuperAdminUser.email;
@@ -238,7 +239,8 @@ export async function createTestProduct(params?: {
   await createCategoryIfNotExists(newCategory);
   const categories = params?.categories ?? [newCategory];
 
-  for (const categoryName of categories) {
+  for (const name of categories) {
+    const categoryName = new CategoryName(name);
     await ServiceContainer.category.getCategory.run({ categoryName });
   }
 
@@ -274,7 +276,9 @@ export async function createSizeIfNotExists(sizeValue: number) {
   }
 }
 
-export async function createCategoryIfNotExists(categoryName: string) {
+export async function createCategoryIfNotExists(name: string) {
+  const categoryName = new CategoryName(name);
+
   try {
     return await ServiceContainer.category.createCategory.run({
       categoryName,

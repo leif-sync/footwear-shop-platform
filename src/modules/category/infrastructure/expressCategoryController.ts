@@ -5,6 +5,8 @@ import { ActiveCategoryError } from "../domain/errors/activeCategoryError.js";
 import { Request, Response } from "express";
 import { HTTP_STATUS } from "../../shared/infrastructure/httpStatus.js";
 import { CategoryAlreadyExistsError } from "../domain/errors/categoryAlreadyExistsError.js";
+import { CategoryName } from "../domain/categoryName.js";
+import { UUID } from "../../shared/domain/UUID.js";
 
 const categorySchema = z.object({
   categoryName: z.string().nonempty(),
@@ -60,7 +62,7 @@ export class CategoryController {
     }
 
     try {
-      const { categoryName } = result.data;
+      const categoryName = new CategoryName(result.data.categoryName);
       await ServiceContainer.category.createCategory.run({ categoryName });
       res.status(HTTP_STATUS.CREATED).json({
         message: "Category created",
@@ -82,9 +84,10 @@ export class CategoryController {
     req: Request<{ categoryId: string }>,
     res: Response
   ) {
-    
     try {
-      const categoryId = categoryIdSchema.parse(req.params.categoryId);
+      const categoryId = new UUID(
+        categoryIdSchema.parse(req.params.categoryId)
+      );
       await ServiceContainer.category.deleteCategory.run({ categoryId });
       res.status(HTTP_STATUS.NO_CONTENT).end();
     } catch (error) {

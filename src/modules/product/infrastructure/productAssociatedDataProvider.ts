@@ -1,3 +1,4 @@
+import { CategoryName } from "../../category/domain/categoryName.js";
 import { CategoryRepository } from "../../category/domain/categoryRepository.js";
 import { DetailRepository } from "../../detail/domain/detailRepository.js";
 import { OrderRepository } from "../../order/domain/orderRepository.js";
@@ -34,12 +35,11 @@ export class ProductAssociatedDataProvider
     categoryName: string | string[]
   ): Promise<string[]> {
     const categoryNames = Array.isArray(categoryName)
-      ? categoryName
-      : [categoryName];
+      ? categoryName.map((name) => new CategoryName(name))
+      : [new CategoryName(categoryName)];
 
-    const categories = await this.categoryRepository.retrieveCategoriesByName(
-      categoryNames
-    );
+    const categories =
+      await this.categoryRepository.retrieveCategoriesByName(categoryNames);
 
     return categories.map((category) => category.toPrimitives().categoryName);
   }
@@ -49,9 +49,8 @@ export class ProductAssociatedDataProvider
   ): Promise<string[]> {
     const detailNames = Array.isArray(detailName) ? detailName : [detailName];
 
-    const details = await this.detailRepository.retrieveDetailsByName(
-      detailNames
-    );
+    const details =
+      await this.detailRepository.retrieveDetailsByName(detailNames);
 
     return details.map((detail) => detail.toPrimitives().detailName);
   }

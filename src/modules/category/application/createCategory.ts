@@ -2,6 +2,7 @@ import { UUID } from "../../shared/domain/UUID.js";
 import { Category } from "../domain/category.js";
 import { CategoryAlreadyExistsError } from "../domain/errors/categoryAlreadyExistsError.js";
 import { CategoryRepository } from "../domain/categoryRepository.js";
+import { CategoryName } from "../domain/categoryName.js";
 
 /**
  * Use case for creating a new category.
@@ -20,7 +21,7 @@ export class CreateCategory {
    * @returns - A promise that resolves to the created category's ID.
    * @throws {CategoryAlreadyExistsError} If a category with the same name already exists.
    */
-  async run(params: { categoryName: string }) {
+  async run(params: { categoryName: CategoryName }) {
     const { categoryName } = params;
     const categoryFound = await this.categoryRepository.find({ categoryName });
 
@@ -32,7 +33,7 @@ export class CreateCategory {
 
     const category = new Category({
       categoryId: UUID.generateRandomUUID(),
-      categoryName: categoryName,
+      categoryName,
     });
 
     await this.categoryRepository.create({ category });

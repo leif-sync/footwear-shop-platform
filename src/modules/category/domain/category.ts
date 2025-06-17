@@ -1,13 +1,16 @@
 import { UUID } from "../../shared/domain/UUID.js";
+import { CategoryName } from "./categoryName.js";
+
+export interface PrimitiveCategory {
+  categoryId: string;
+  categoryName: string;
+}
 
 export class Category {
   private readonly categoryId: UUID;
-  private readonly categoryName: string;
+  private readonly categoryName: CategoryName;
 
-  constructor(params: { categoryId: UUID; categoryName: string }) {
-    if (params.categoryName.length === 0)
-      throw new Error("categoryName cannot be empty");
-
+  constructor(params: { categoryId: UUID; categoryName: CategoryName }) {
     this.categoryId = params.categoryId;
     this.categoryName = params.categoryName;
   }
@@ -19,18 +22,18 @@ export class Category {
     });
   }
 
-  getId() {
-    return this.categoryId.getValue();
+  getId(): UUID {
+    return this.categoryId;
   }
 
-  getName() {
+  getName(): CategoryName {
     return this.categoryName;
   }
 
-  toPrimitives() {
+  toPrimitives(): PrimitiveCategory {
     return {
       categoryId: this.categoryId.getValue(),
-      categoryName: this.categoryName,
+      categoryName: this.categoryName.getValue(),
     };
   }
 }
