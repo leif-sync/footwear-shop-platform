@@ -1,14 +1,27 @@
 import { Email } from "../../shared/domain/email.js";
-import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
+import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
 import { UUID } from "../../shared/domain/UUID.js";
-import { OrderPaymentStatus } from "./orderPaymentStatus.js";
-import { OrderStatus } from "./orderStatus.js";
+import {
+  OrderPaymentStatus,
+  OrderPaymentStatusOptions,
+} from "./orderPaymentStatus.js";
+import { OrderStatus, OrderStatusOptions } from "./orderStatus.js";
+
+export interface PrimitiveOrderOverview {
+  orderId: string;
+  orderStatus: OrderStatusOptions;
+  customerEmail: string;
+  totalAmount: number;
+  createdAt: Date;
+  updatedAt: Date;
+  paymentStatus: OrderPaymentStatusOptions;
+}
 
 export class OrderOverview {
   private readonly orderId: UUID;
   private readonly orderStatus: OrderStatus;
   private readonly customerEmail: Email;
-  private readonly totalAmount: PositiveInteger;
+  private readonly totalAmount: NonNegativeInteger;
   private readonly createdAt: Date;
   private readonly updatedAt: Date;
   private readonly paymentStatus: OrderPaymentStatus;
@@ -17,7 +30,7 @@ export class OrderOverview {
     orderId: UUID;
     orderStatus: OrderStatus;
     customerEmail: Email;
-    totalAmount: PositiveInteger;
+    totalAmount: NonNegativeInteger;
     createdAt: Date;
     updatedAt: Date;
     paymentStatus: OrderPaymentStatus;
@@ -36,7 +49,7 @@ export class OrderOverview {
       orderId: UUID.clone(orderOverview.orderId),
       orderStatus: OrderStatus.clone(orderOverview.orderStatus),
       customerEmail: Email.clone(orderOverview.customerEmail),
-      totalAmount: PositiveInteger.clone(orderOverview.totalAmount),
+      totalAmount: NonNegativeInteger.clone(orderOverview.totalAmount),
       createdAt: orderOverview.createdAt,
       updatedAt: orderOverview.updatedAt,
       paymentStatus: OrderPaymentStatus.clone(orderOverview.paymentStatus),
@@ -67,14 +80,14 @@ export class OrderOverview {
     return this.updatedAt;
   }
 
-  toPrimitives() {
+  toPrimitives(): PrimitiveOrderOverview {
     return {
       orderId: this.orderId.getValue(),
       orderStatus: this.orderStatus.getValue(),
       customerEmail: this.customerEmail.getValue(),
       totalAmount: this.totalAmount.getValue(),
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt,
+      createdAt: new Date(this.createdAt),
+      updatedAt: new Date(this.updatedAt),
       paymentStatus: this.paymentStatus.getValue(),
     };
   }

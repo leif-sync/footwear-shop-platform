@@ -3,7 +3,7 @@ import { requestOptionsSchema } from "../schemas/requestOptions.js";
 import { ServiceContainer } from "../../../shared/infrastructure/serviceContainer.js";
 import { ZodError } from "zod";
 import { HTTP_STATUS } from "../../../shared/infrastructure/httpStatus.js";
-import { orderPaymentStatusOptions } from "../../domain/orderPaymentStatus.js";
+import { OrderPaymentStatusOptions } from "../../domain/orderPaymentStatus.js";
 
 export async function listOrderOverviews(
   req: Request<
@@ -30,17 +30,17 @@ export async function listOrderOverviews(
     const validLimit = Math.min(limit, MAX_LIMIT);
 
     const paymentConditionValue =
-      paymentCondition ?? Object.values(orderPaymentStatusOptions);
+      paymentCondition ?? Object.values(OrderPaymentStatusOptions);
 
     const theClientRequiresOrdersInPaymentProcess = paymentCondition?.some(
-      (status) => status === orderPaymentStatusOptions.IN_PAYMENT_GATEWAY
+      (status) => status === OrderPaymentStatusOptions.IN_PAYMENT_GATEWAY
     );
 
     const paymentStatus =
       showOrdersInPaymentProcess || theClientRequiresOrdersInPaymentProcess
         ? paymentConditionValue
         : paymentConditionValue.filter(
-            (status) => status !== orderPaymentStatusOptions.IN_PAYMENT_GATEWAY
+            (status) => status !== OrderPaymentStatusOptions.IN_PAYMENT_GATEWAY
           );
 
     const orders = await ServiceContainer.order.listOrderOverviews.run({

@@ -25,6 +25,10 @@ export class HexColor {
     return new HexColor(hexColor.getValue());
   }
 
+  clone(): HexColor {
+    return HexColor.clone(this);
+  }
+
   private normalizeColor(color: string): string {
     // Elimina espacios y convierte a mayúsculas
     let normalized = color.trim().toUpperCase();

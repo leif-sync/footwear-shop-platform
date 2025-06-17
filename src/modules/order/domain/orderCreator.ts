@@ -1,14 +1,12 @@
-export const orderCreatorOptions = {
-  ADMIN: "ADMIN",
-  GUEST: "GUEST",
-} as const;
-export type orderCreatorOptions =
-  (typeof orderCreatorOptions)[keyof typeof orderCreatorOptions];
+export enum OrderCreatorOptions {
+  ADMIN = "ADMIN",
+  GUEST = "GUEST",
+}
 
 export class OrderCreator {
-  private readonly creatorType: orderCreatorOptions;
+  private readonly creatorType: OrderCreatorOptions;
 
-  constructor(creatorType: orderCreatorOptions) {
+  constructor(creatorType: OrderCreatorOptions) {
     this.creatorType = creatorType;
   }
 
@@ -17,11 +15,11 @@ export class OrderCreator {
   }
 
   static create = {
-    admin: () => new OrderCreator(orderCreatorOptions.ADMIN),
-    guest: () => new OrderCreator(orderCreatorOptions.GUEST),
+    admin: () => new OrderCreator(OrderCreatorOptions.ADMIN),
+    guest: () => new OrderCreator(OrderCreatorOptions.GUEST),
   };
 
-  getValue() {
+  getValue(): OrderCreatorOptions {
     return this.creatorType;
   }
 }

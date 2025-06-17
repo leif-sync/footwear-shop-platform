@@ -1,5 +1,13 @@
 import { UUID } from "../../shared/domain/UUID.js";
-import { OrderVariantSize } from "./orderVariantSize.js";
+import {
+  OrderVariantSize,
+  PrimitiveOrderVariantSize,
+} from "./orderVariantSize.js";
+
+export interface PrimitiveOrderVariantWrite {
+  variantId: string;
+  variantSizes: PrimitiveOrderVariantSize[];
+}
 
 export class OrderVariantWrite {
   private readonly variantId: UUID;
@@ -21,7 +29,7 @@ export class OrderVariantWrite {
     return this.variantId.getValue();
   }
 
-  toPrimitives() {
+  toPrimitives(): PrimitiveOrderVariantWrite {
     return {
       variantId: this.variantId.getValue(),
       variantSizes: this.variantSizes.map((variantSize) =>

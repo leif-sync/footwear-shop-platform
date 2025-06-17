@@ -7,8 +7,8 @@ import { expect, test } from "vitest";
 import { HTTP_STATUS } from "../../../src/modules/shared/infrastructure/httpStatus.js";
 import { api } from "../../api.js";
 import { createSizeIfNotExists, createTestProduct } from "../../helper.js";
-import { orderStatusOptions } from "../../../src/modules/order/domain/orderStatus.js";
-import { orderPaymentStatusOptions } from "../../../src/modules/order/domain/orderPaymentStatus.js";
+import { OrderStatusOptions } from "../../../src/modules/order/domain/orderStatus.js";
+import { OrderPaymentStatusOptions } from "../../../src/modules/order/domain/orderPaymentStatus.js";
 import { UserOrderToSend } from "../orderToSend.js";
 
 test("create valid order for user", async () => {
@@ -54,10 +54,10 @@ test("create valid order for user", async () => {
 
   await compareTestOrder({
     orderId: createOrderResponse.body.order.orderId,
-    status: orderStatusOptions.WAITING_FOR_PAYMENT,
+    status: OrderStatusOptions.WAITING_FOR_PAYMENT,
     paymentInfo: {
       paymentAt: null,
-      paymentStatus: orderPaymentStatusOptions.IN_PAYMENT_GATEWAY,
+      paymentStatus: OrderPaymentStatusOptions.IN_PAYMENT_GATEWAY,
     },
     customer: {
       firstName: orderToSend.customer.firstName,

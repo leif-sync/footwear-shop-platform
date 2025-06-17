@@ -3,8 +3,8 @@ import { api } from "../../api";
 import { HTTP_STATUS } from "../../../src/modules/shared/infrastructure/httpStatus";
 import { paymentsPathUrl } from "../shared";
 import { createTestOrder } from "../../helper";
-import { orderStatusOptions } from "../../../src/modules/order/domain/orderStatus";
-import { orderPaymentStatusOptions } from "../../../src/modules/order/domain/orderPaymentStatus";
+import { OrderStatusOptions } from "../../../src/modules/order/domain/orderStatus";
+import { OrderPaymentStatusOptions } from "../../../src/modules/order/domain/orderPaymentStatus";
 import * as webpay from "../../../src/modules/payment/infrastructure/webpaySdkHelper";
 import { ServiceContainer } from "../../../src/modules/shared/infrastructure/serviceContainer";
 import { UUID } from "../../../src/modules/shared/domain/UUID";
@@ -15,21 +15,23 @@ beforeEach(() => {
 });
 
 test("processing Webpay Plus payment gateway return URL", async () => {
-  const { orderId } = await createTestOrder({
-    orderStatus: orderStatusOptions.WAITING_FOR_PAYMENT,
+  const order = await createTestOrder({
+    orderStatus: OrderStatusOptions.WAITING_FOR_PAYMENT,
     paymentInfo: {
-      paymentStatus: orderPaymentStatusOptions.IN_PAYMENT_GATEWAY,
+      paymentStatus: OrderPaymentStatusOptions.IN_PAYMENT_GATEWAY,
       paymentAt: null,
       paymentDeadline: new Date(Date.now() + 1000 * 60 * 60 * 24), // 1 day from now
     },
   });
+
+  const orderId = new UUID(order.orderId);
 
   vi.spyOn(webpay.WebpaySdkHelper, "commitTransaction").mockResolvedValue({
     vci: webpay.webPayPlusVciOptions.SUCCESSFUL_AUTHENTICATION,
     amount: 10000,
     status: webpay.webpayPlusStatusOptions.AUTHORIZED,
     buy_order: "123456789",
-    session_id: orderId,
+    session_id: orderId.getValue(),
     card_detail: {
       card_number: "3456", // last 4 digits of the card
     },
@@ -66,9 +68,9 @@ test("processing Webpay Plus payment gateway return URL", async () => {
     orderId,
   });
 
-  expect(orderUpdated.status).toBe(orderStatusOptions.WAITING_FOR_SHIPMENT);
+  expect(orderUpdated.status).toBe(OrderStatusOptions.WAITING_FOR_SHIPMENT);
   expect(orderUpdated.paymentInfo.paymentStatus).toBe(
-    orderPaymentStatusOptions.PAID
+    OrderPaymentStatusOptions.PAID
   );
   expect(orderUpdated.paymentInfo.paymentAt).toBeDefined();
 });
@@ -113,21 +115,23 @@ test("processing Webpay Plus payment gateway return URL payment timeout", async 
 });
 
 test("processing Webpay Plus payment gateway return URL with payment not approved", async () => {
-  const { orderId } = await createTestOrder({
-    orderStatus: orderStatusOptions.WAITING_FOR_PAYMENT,
+  const order = await createTestOrder({
+    orderStatus: OrderStatusOptions.WAITING_FOR_PAYMENT,
     paymentInfo: {
-      paymentStatus: orderPaymentStatusOptions.IN_PAYMENT_GATEWAY,
+      paymentStatus: OrderPaymentStatusOptions.IN_PAYMENT_GATEWAY,
       paymentAt: null,
       paymentDeadline: new Date(Date.now() + 1000 * 60 * 60 * 24), // 1 day from now
     },
   });
+
+  const orderId = new UUID(order.orderId);
 
   vi.spyOn(webpay.WebpaySdkHelper, "commitTransaction").mockResolvedValue({
     vci: webpay.webPayPlusVciOptions.SUCCESSFUL_AUTHENTICATION,
     amount: 10000,
     status: webpay.webpayPlusStatusOptions.FAILED,
     buy_order: "12345678R9",
-    session_id: orderId,
+    session_id: orderId.getValue(),
     card_detail: {
       card_number: "3456", // last 4 digits of the card
     },
@@ -153,9 +157,9 @@ test("processing Webpay Plus payment gateway return URL with payment not approve
     orderId,
   });
 
-  expect(orderUpdated.status).toBe(orderStatusOptions.WAITING_FOR_PAYMENT);
+  expect(orderUpdated.status).toBe(OrderStatusOptions.WAITING_FOR_PAYMENT);
   expect(orderUpdated.paymentInfo.paymentStatus).toBe(
-    orderPaymentStatusOptions.IN_PAYMENT_GATEWAY
+    OrderPaymentStatusOptions.IN_PAYMENT_GATEWAY
   );
   expect(orderUpdated.paymentInfo.paymentAt).toBe(null);
 });
@@ -192,9 +196,9 @@ test("processing Webpay Plus payment gateway return URL with order not found", a
 
 test("processing Webpay Plus payment gateway return URL with order already paid", async () => {
   const { orderId } = await createTestOrder({
-    orderStatus: orderStatusOptions.WAITING_FOR_SHIPMENT,
+    orderStatus: OrderStatusOptions.WAITING_FOR_SHIPMENT,
     paymentInfo: {
-      paymentStatus: orderPaymentStatusOptions.PAID,
+      paymentStatus: OrderPaymentStatusOptions.PAID,
       paymentAt: new Date(),
       paymentDeadline: new Date(Date.now() + 1000 * 60 * 60 * 24), // 1 day from now
     },
@@ -235,9 +239,9 @@ test("processing Webpay Plus payment gateway return URL with order already paid"
 
 test("processing Webpay Plus payment gateway return URL with order payment deadline exceeded", async () => {
   const { orderId } = await createTestOrder({
-    orderStatus: orderStatusOptions.WAITING_FOR_PAYMENT,
+    orderStatus: OrderStatusOptions.WAITING_FOR_PAYMENT,
     paymentInfo: {
-      paymentStatus: orderPaymentStatusOptions.IN_PAYMENT_GATEWAY,
+      paymentStatus: OrderPaymentStatusOptions.IN_PAYMENT_GATEWAY,
       paymentAt: null,
       paymentDeadline: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
     },
@@ -276,12 +280,11 @@ test("processing Webpay Plus payment gateway return URL with order payment deadl
   expect(response.body.error.isPaymentRefunded).toBe(true);
 });
 
-
 test("processing Webpay Plus payment gateway return URL with transaction already refunded", async () => {
   const { orderId } = await createTestOrder({
-    orderStatus: orderStatusOptions.WAITING_FOR_PAYMENT,
+    orderStatus: OrderStatusOptions.WAITING_FOR_PAYMENT,
     paymentInfo: {
-      paymentStatus: orderPaymentStatusOptions.IN_PAYMENT_GATEWAY,
+      paymentStatus: OrderPaymentStatusOptions.IN_PAYMENT_GATEWAY,
       paymentAt: null,
       paymentDeadline: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
     },

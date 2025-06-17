@@ -3,65 +3,65 @@ import { expect, test } from "vitest";
 import { createTestOrder, loginTest } from "../../helper.ts";
 import { ordersPathUrl } from "../shared.ts";
 import { HTTP_STATUS } from "../../../src/modules/shared/infrastructure/httpStatus.ts";
-import { orderStatusOptions } from "../../../src/modules/order/domain/orderStatus.ts";
-import { orderPaymentStatusOptions } from "../../../src/modules/order/domain/orderPaymentStatus.ts";
+import { OrderStatusOptions } from "../../../src/modules/order/domain/orderStatus.ts";
+import { OrderPaymentStatusOptions } from "../../../src/modules/order/domain/orderPaymentStatus.ts";
 
 const statusCases = {
-  [orderStatusOptions.CANCELED]: async () => {
+  [OrderStatusOptions.CANCELED]: async () => {
     await createTestOrder({ 
-      orderStatus: orderStatusOptions.CANCELED,
+      orderStatus: OrderStatusOptions.CANCELED,
       paymentInfo: {
-        paymentStatus: orderPaymentStatusOptions.REFUNDED,
+        paymentStatus: OrderPaymentStatusOptions.REFUNDED,
         paymentAt: new Date(),
         paymentDeadline: new Date(Date.now() + 1000 * 60 * 60 * 24),
       },
     });
   },
-  [orderStatusOptions.DELIVERED]: async () => {
+  [OrderStatusOptions.DELIVERED]: async () => {
     await createTestOrder({
-      orderStatus: orderStatusOptions.DELIVERED,
+      orderStatus: OrderStatusOptions.DELIVERED,
       paymentInfo: {
-        paymentStatus: orderPaymentStatusOptions.PAID,
+        paymentStatus: OrderPaymentStatusOptions.PAID,
         paymentAt: new Date(),
         paymentDeadline: new Date(Date.now() + 1000 * 60 * 60 * 24),
       },
     });
   },
-  [orderStatusOptions.RETURNED]: async () => {
+  [OrderStatusOptions.RETURNED]: async () => {
     await createTestOrder({
-      orderStatus: orderStatusOptions.RETURNED,
+      orderStatus: OrderStatusOptions.RETURNED,
       paymentInfo: {
-        paymentStatus: orderPaymentStatusOptions.REFUNDED,
+        paymentStatus: OrderPaymentStatusOptions.REFUNDED,
         paymentAt: new Date(),
         paymentDeadline: new Date(Date.now() + 1000 * 60 * 60 * 24),
       },
     });
   },
-  [orderStatusOptions.WAITING_FOR_PAYMENT]: async () => {
+  [OrderStatusOptions.WAITING_FOR_PAYMENT]: async () => {
     await createTestOrder({
-      orderStatus: orderStatusOptions.WAITING_FOR_PAYMENT,
+      orderStatus: OrderStatusOptions.WAITING_FOR_PAYMENT,
       paymentInfo: {
-        paymentStatus: orderPaymentStatusOptions.PENDING,
+        paymentStatus: OrderPaymentStatusOptions.PENDING,
         paymentAt: null,
         paymentDeadline: new Date(Date.now() + 1000 * 60 * 60 * 24),
       },
     });
   },
-  [orderStatusOptions.SHIPPED]: async () => {
+  [OrderStatusOptions.SHIPPED]: async () => {
     await createTestOrder({
-      orderStatus: orderStatusOptions.SHIPPED,
+      orderStatus: OrderStatusOptions.SHIPPED,
       paymentInfo: {
-        paymentStatus: orderPaymentStatusOptions.PAID,
+        paymentStatus: OrderPaymentStatusOptions.PAID,
         paymentAt: new Date(),
         paymentDeadline: new Date(Date.now() + 1000 * 60 * 60 * 24),
       },
     });
   },
-  [orderStatusOptions.WAITING_FOR_SHIPMENT]: async () => {
+  [OrderStatusOptions.WAITING_FOR_SHIPMENT]: async () => {
     await createTestOrder({
-      orderStatus: orderStatusOptions.WAITING_FOR_SHIPMENT,
+      orderStatus: OrderStatusOptions.WAITING_FOR_SHIPMENT,
       paymentInfo: {
-        paymentStatus: orderPaymentStatusOptions.PAID,
+        paymentStatus: OrderPaymentStatusOptions.PAID,
         paymentAt: new Date(),
         paymentDeadline: new Date(Date.now() + 1000 * 60 * 60 * 24),
       },
@@ -103,7 +103,7 @@ test("list orders with status...", async () => {
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
         paymentStatus: expect.toBeOneOf(
-          Object.values(orderPaymentStatusOptions)
+          Object.values(OrderPaymentStatusOptions)
         ),
       });
     });

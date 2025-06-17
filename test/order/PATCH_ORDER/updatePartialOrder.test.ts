@@ -3,19 +3,21 @@ import { api } from "../../api";
 import { ordersPathUrl } from "../shared";
 import { createTestOrder, loginTest } from "../../helper";
 import { HTTP_STATUS } from "../../../src/modules/shared/infrastructure/httpStatus";
-import { orderPaymentStatusOptions } from "../../../src/modules/order/domain/orderPaymentStatus";
-import { orderStatusOptions } from "../../../src/modules/order/domain/orderStatus";
+import { OrderPaymentStatusOptions } from "../../../src/modules/order/domain/orderPaymentStatus";
+import { OrderStatusOptions } from "../../../src/modules/order/domain/orderStatus";
 import { ServiceContainer } from "../../../src/modules/shared/infrastructure/serviceContainer";
+import { UUID } from "../../../src/modules/shared/domain/UUID";
 
 test("update partial order", async () => {
-  const { orderId } = await createTestOrder({
-    orderStatus: orderStatusOptions.WAITING_FOR_PAYMENT,
+  const order = await createTestOrder({
+    orderStatus: OrderStatusOptions.WAITING_FOR_PAYMENT,
     paymentInfo: {
-      paymentStatus: orderPaymentStatusOptions.PENDING,
+      paymentStatus: OrderPaymentStatusOptions.PENDING,
       paymentDeadline: new Date("2025-12-31T23:59:59.999Z"),
       paymentAt: null,
     },
   });
+  const orderId = new UUID(order.orderId);
 
   const token = await loginTest();
 
@@ -36,14 +38,14 @@ test("update partial order", async () => {
 
   const updatedPaymentInfo = {
     paymentDeadline: new Date("2025-12-31T23:59:59.999Z"),
-    paymentStatus: orderPaymentStatusOptions.PAID,
+    paymentStatus: OrderPaymentStatusOptions.PAID,
     paymentAt: new Date("2025-12-31T23:59:59.999Z"),
   };
 
-  const orderStatus = orderStatusOptions.WAITING_FOR_SHIPMENT;
+  const orderStatus = OrderStatusOptions.WAITING_FOR_SHIPMENT;
 
   const response = await api
-    .patch(`${ordersPathUrl}/${orderId}`)
+    .patch(`${ordersPathUrl}/${orderId.getValue()}`)
     .set("Cookie", token)
     .send({
       customer: updatedCustomer,

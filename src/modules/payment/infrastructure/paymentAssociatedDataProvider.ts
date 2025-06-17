@@ -1,15 +1,14 @@
 import { OrderPaymentInfo } from "../../order/domain/orderPaymentInfo.js";
 import {
   OrderPaymentStatus,
-  orderPaymentStatusOptions,
+  OrderPaymentStatusOptions,
 } from "../../order/domain/orderPaymentStatus.js";
 import { OrderRepository } from "../../order/domain/orderRepository.js";
 import {
   OrderStatus,
-  orderStatusOptions,
+  OrderStatusOptions,
 } from "../../order/domain/orderStatus.js";
 import { OrderWrite } from "../../order/domain/orderWrite.js";
-import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
 import { UUID } from "../../shared/domain/UUID.js";
 import { InvalidOrderError } from "../domain/errors/invalidOrderError.js";
 import { PaymentAssociatedDataProvider as PaymentAssociatedDataProviderPort } from "../domain/PaymentAssociatedDataProvider.js";
@@ -39,10 +38,10 @@ export class PaymentAssociatedDataProvider
     if (!order) return null;
 
     return new PaymentOrder({
-      isPaid: order.getPaymentStatus() === orderPaymentStatusOptions.PAID,
+      isPaid: order.getPaymentStatus().equals(OrderPaymentStatusOptions.PAID),
       paymentDeadline: order.getPaymentDeadline(),
-      orderId: new UUID(order.getOrderId()),
-      finalAmount: new NonNegativeInteger(order.evaluateFinalAmount()),
+      orderId: order.getOrderId(),
+      finalAmount: order.evaluateFinalAmount(),
     });
   }
 
@@ -60,18 +59,18 @@ export class PaymentAssociatedDataProvider
     const orderWrite = OrderWrite.from(order);
 
     const newOrderStatus = new OrderStatus(
-      orderStatusOptions.WAITING_FOR_SHIPMENT
+      OrderStatusOptions.WAITING_FOR_SHIPMENT
     );
 
     const newPaymentInfo = new OrderPaymentInfo({
       paymentAt: new Date(),
-      paymentStatus: new OrderPaymentStatus(orderPaymentStatusOptions.PAID),
+      paymentStatus: new OrderPaymentStatus(OrderPaymentStatusOptions.PAID),
       paymentDeadline: order.getPaymentDeadline(),
     });
-    
+
     orderWrite.setOrderStatusAndPaymentInfo({
-      orderStatus: newOrderStatus,
-      paymentInfo: newPaymentInfo,
+      updatedOrderStatus: newOrderStatus,
+      updatedPaymentInfo: newPaymentInfo,
     });
 
     await this.orderRepository.update({ order: orderWrite });

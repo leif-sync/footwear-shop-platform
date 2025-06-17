@@ -3,10 +3,10 @@ import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
 import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
 import {
   OrderPaymentStatus,
-  orderPaymentStatusOptions,
+  OrderPaymentStatusOptions,
 } from "../domain/orderPaymentStatus.js";
 import { OrderRepository } from "../domain/orderRepository.js";
-import { OrderStatus, orderStatusOptions } from "../domain/orderStatus.js";
+import { OrderStatus, OrderStatusOptions } from "../domain/orderStatus.js";
 
 export class ListOrderOverviews {
   private readonly orderRepository: OrderRepository;
@@ -32,8 +32,8 @@ export class ListOrderOverviews {
   async run(params: {
     limit: number;
     offset: number;
-    orderStatus?: orderStatusOptions | orderStatusOptions[];
-    paymentStatus?: orderPaymentStatusOptions | orderPaymentStatusOptions[];
+    orderStatus?: OrderStatusOptions | OrderStatusOptions[];
+    paymentStatus?: OrderPaymentStatusOptions | OrderPaymentStatusOptions[];
     customerEmail?: string | string[];
   }) {
     const limit = new PositiveInteger(params.limit);

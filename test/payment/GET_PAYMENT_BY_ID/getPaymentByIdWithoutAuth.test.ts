@@ -2,8 +2,8 @@ import { paymentsPathUrl } from "../shared";
 import { api } from "../../api";
 import { test, expect } from "vitest";
 import { createTestOrder } from "../../helper";
-import { orderPaymentStatusOptions } from "../../../src/modules/order/domain/orderPaymentStatus";
-import { orderStatusOptions } from "../../../src/modules/order/domain/orderStatus";
+import { OrderPaymentStatusOptions } from "../../../src/modules/order/domain/orderPaymentStatus";
+import { OrderStatusOptions } from "../../../src/modules/order/domain/orderStatus";
 import { CurrencyOptions } from "../../../src/modules/payment/domain/currency";
 import { PaymentProcessorOptions } from "../../../src/modules/payment/domain/paymentProcessor";
 import { PaymentTransactionStatusOptions } from "../../../src/modules/payment/domain/paymentTransactionStatus";
@@ -13,9 +13,9 @@ import { HTTP_STATUS } from "../../../src/modules/shared/infrastructure/httpStat
 
 test("get payment by id without auth", async () => {
   const { orderId } = await createTestOrder({
-    orderStatus: orderStatusOptions.WAITING_FOR_PAYMENT,
+    orderStatus: OrderStatusOptions.WAITING_FOR_PAYMENT,
     paymentInfo: {
-      paymentStatus: orderPaymentStatusOptions.PENDING,
+      paymentStatus: OrderPaymentStatusOptions.PENDING,
       paymentAt: null,
       paymentDeadline: new Date(Date.now() + 1000 * 60 * 60 * 24),
     },

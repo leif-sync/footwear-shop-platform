@@ -44,12 +44,12 @@ import {
 } from "../src/modules/auth/infrastructure/controllers/loginAdmin";
 import {
   OrderStatus,
-  orderStatusOptions,
+  OrderStatusOptions,
 } from "../src/modules/order/domain/orderStatus";
 import { CountryData } from "../src/modules/order/domain/countryData";
 import {
   OrderPaymentStatus,
-  orderPaymentStatusOptions,
+  OrderPaymentStatusOptions,
 } from "../src/modules/order/domain/orderPaymentStatus";
 import { Email } from "../src/modules/shared/domain/email";
 import { Phone } from "../src/modules/shared/domain/phone";
@@ -61,6 +61,8 @@ import { OrderCreatorDetails } from "../src/modules/order/domain/orderCreatorDet
 import { OrderCreator } from "../src/modules/order/domain/orderCreator";
 import { OrderPaymentInfo } from "../src/modules/order/domain/orderPaymentInfo";
 import { OrderItem } from "../src/modules/order/domain/setupOrderInformation";
+import { CustomerFirstName } from "../src/modules/order/domain/customerFirstName";
+import { CustomerLastName } from "../src/modules/order/domain/customerLastName";
 
 export async function loginTest() {
   const adminEmail = initialSuperAdminUser.email;
@@ -326,7 +328,7 @@ type testOrderProduct = {
 };
 
 export async function createTestOrder(params?: {
-  orderStatus?: orderStatusOptions;
+  orderStatus?: OrderStatusOptions;
   creatorDetails?: {
     creatorId: string;
   };
@@ -346,7 +348,7 @@ export async function createTestOrder(params?: {
   orderProducts?: [testOrderProduct, ...testOrderProduct[]];
   paymentInfo?: {
     paymentAt: Date | null;
-    paymentStatus: orderPaymentStatusOptions;
+    paymentStatus: OrderPaymentStatusOptions;
     paymentDeadline: Date;
   };
 }) {
@@ -422,8 +424,8 @@ export async function createTestOrder(params?: {
 
   const customer = new Customer({
     email: new Email(params?.customer?.email ?? "example@example.com"),
-    firstName: params?.customer?.firstName ?? "John",
-    lastName: params?.customer?.lastName ?? "Doe",
+    firstName: new CustomerFirstName(params?.customer?.firstName ?? "John"),
+    lastName: new CustomerLastName(params?.customer?.lastName ?? "Doe"),
     phone: new Phone(params?.customer?.phone ?? "+56 123456789"),
   });
 
@@ -449,7 +451,7 @@ export async function createTestOrder(params?: {
   });
 
   const orderStatus = new OrderStatus(
-    params?.orderStatus ?? orderStatusOptions.WAITING_FOR_SHIPMENT
+    params?.orderStatus ?? OrderStatusOptions.WAITING_FOR_SHIPMENT
   );
 
   const paymentDeadline =
@@ -463,7 +465,7 @@ export async function createTestOrder(params?: {
         : new Date(),
     paymentDeadline,
     paymentStatus: new OrderPaymentStatus(
-      params?.paymentInfo?.paymentStatus ?? orderPaymentStatusOptions.PAID
+      params?.paymentInfo?.paymentStatus ?? OrderPaymentStatusOptions.PAID
     ),
   });
 
@@ -485,6 +487,6 @@ export async function createTestOrder(params?: {
       });
 
   return {
-    orderId: order.orderId,
+    orderId: order.orderId.getValue(),
   };
 }

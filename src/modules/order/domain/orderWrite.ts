@@ -1,37 +1,103 @@
 import { Email } from "../../shared/domain/email.js";
 import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
 import { UUID } from "../../shared/domain/UUID.js";
-import { Customer } from "./customer.js";
+import { Customer, PrimitiveCustomer } from "./customer.js";
 import { OrderFull } from "./orderFull.js";
-import { OrderPaymentInfo } from "./orderPaymentInfo.js";
+import {
+  OrderPaymentInfo,
+  PrimitiveOrderPaymentInfo,
+} from "./orderPaymentInfo.js";
 import {
   OrderPaymentStatus,
-  orderPaymentStatusOptions,
+  OrderPaymentStatusOptions,
 } from "./orderPaymentStatus.js";
 import { OrderVariantWrite } from "./orderVariantWrite.js";
-import { OrderProductWrite } from "./orderProductWrite.js";
-import { OrderStatus, orderStatusOptions } from "./orderStatus.js";
-import { ShippingAddress } from "./shippingAddress.js";
+import {
+  OrderProductWrite,
+  PrimitiveOrderProductWrite,
+} from "./orderProductWrite.js";
+import { OrderStatus, OrderStatusOptions } from "./orderStatus.js";
+import {
+  PrimitiveShippingAddress,
+  ShippingAddress,
+} from "./shippingAddress.js";
 import { OrderVariantSize } from "./orderVariantSize.js";
-import { OrderCreatorDetails } from "./orderCreatorDetails.js";
+import {
+  OrderCreatorDetails,
+  PrimitiveOrderCreatorDetails,
+} from "./orderCreatorDetails.js";
 import { OrderCreator } from "./orderCreator.js";
 import { Phone } from "../../shared/domain/phone.js";
+import { CustomerFirstName } from "./customerFirstName.js";
+import { CustomerLastName } from "./customerLastName.js";
+import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
+import { InvalidPaymentStatusForOrderStatusError } from "./errors/invalidPaymentStatusForOrderStatusError.js";
+import { InvalidOrderStatusTransitionError } from "./errors/invalidOrderStatusTransitionError.js";
+import { CannotUpdateCustomerForOrderStatusError } from "./errors/cannotUpdateCustomerForOrderStatus.js";
+import { CannotUpdateShippingForOrderStatusError } from "./errors/cannotUpdateShippingAddressForOrderStatus.js";
+import { CannotUpdatePaymentInfoForOrderStatusError } from "./errors/cannotUpdatePaymentInfoForOrderStatus.js";
+import { CannotUpdateProductsForOrderStatusError } from "./errors/cannotUpdateProductsForOrderStatusError.js";
 
-const validPaymentStatusForOrderStatus = new Map<string, string[]>([
+const validPaymentStatusForOrderStatus = new Map([
   [
-    orderStatusOptions.WAITING_FOR_PAYMENT,
+    OrderStatusOptions.WAITING_FOR_PAYMENT,
     [
-      orderPaymentStatusOptions.PENDING,
-      orderPaymentStatusOptions.IN_PAYMENT_GATEWAY,
-      orderPaymentStatusOptions.EXPIRED,
+      OrderPaymentStatusOptions.PENDING,
+      OrderPaymentStatusOptions.IN_PAYMENT_GATEWAY,
+      OrderPaymentStatusOptions.EXPIRED,
     ],
   ],
-  [orderStatusOptions.WAITING_FOR_SHIPMENT, [orderPaymentStatusOptions.PAID]],
-  [orderStatusOptions.SHIPPED, [orderPaymentStatusOptions.PAID]],
-  [orderStatusOptions.DELIVERED, [orderPaymentStatusOptions.PAID]],
-  [orderStatusOptions.CANCELED, [orderPaymentStatusOptions.REFUNDED]],
-  [orderStatusOptions.RETURNED, [orderPaymentStatusOptions.REFUNDED]],
+  [OrderStatusOptions.WAITING_FOR_SHIPMENT, [OrderPaymentStatusOptions.PAID]],
+  [OrderStatusOptions.SHIPPED, [OrderPaymentStatusOptions.PAID]],
+  [OrderStatusOptions.DELIVERED, [OrderPaymentStatusOptions.PAID]],
+  [OrderStatusOptions.CANCELED, [OrderPaymentStatusOptions.REFUNDED]],
+  [OrderStatusOptions.RETURNED, [OrderPaymentStatusOptions.REFUNDED]],
 ]);
+
+const orderStatusValidTransitions = new Map([
+  [
+    OrderStatusOptions.WAITING_FOR_PAYMENT,
+    [OrderStatusOptions.WAITING_FOR_SHIPMENT, OrderStatusOptions.CANCELED],
+  ],
+  [
+    OrderStatusOptions.WAITING_FOR_SHIPMENT,
+    [OrderStatusOptions.SHIPPED, OrderStatusOptions.CANCELED],
+  ],
+  [OrderStatusOptions.SHIPPED, [OrderStatusOptions.DELIVERED]],
+  [OrderStatusOptions.DELIVERED, [OrderStatusOptions.RETURNED]],
+  [OrderStatusOptions.CANCELED, []], // No transitions allowed from CANCELED
+  [OrderStatusOptions.RETURNED, []], // No transitions allowed from RETURNED
+]);
+
+const allowedOrderStatusToUpdateCustomer = [
+  OrderStatusOptions.WAITING_FOR_PAYMENT,
+  OrderStatusOptions.WAITING_FOR_SHIPMENT,
+] as const;
+
+const allowedOrderStatusToUpdateShippingAddress = [
+  OrderStatusOptions.WAITING_FOR_PAYMENT,
+  OrderStatusOptions.WAITING_FOR_SHIPMENT,
+] as const;
+
+const allowedOrderStatusToUpdatePaymentInfo = [
+  OrderStatusOptions.WAITING_FOR_PAYMENT,
+] as const;
+
+const allowedOrderStatusToUpdateProducts = [
+  OrderStatusOptions.WAITING_FOR_PAYMENT,
+] as const;
+
+export interface PrimitiveOrderWrite {
+  orderId: string;
+  orderStatus: OrderStatusOptions;
+  customer: PrimitiveCustomer;
+  shippingAddress: PrimitiveShippingAddress;
+  orderProducts: PrimitiveOrderProductWrite[];
+  createdAt: Date;
+  updatedAt: Date;
+  paymentInfo: PrimitiveOrderPaymentInfo;
+  creatorDetails: PrimitiveOrderCreatorDetails;
+}
 
 export class OrderWrite {
   private readonly orderId: UUID;
@@ -55,39 +121,143 @@ export class OrderWrite {
     paymentInfo: OrderPaymentInfo;
     creatorDetails: OrderCreatorDetails;
   }) {
-    this.orderId = UUID.clone(params.orderId);
-    this.customer = Customer.clone(params.customer);
-    this.orderStatus = OrderStatus.clone(params.orderStatus);
-    this.shippingAddress = ShippingAddress.clone(params.shippingAddress);
+    this.orderId = params.orderId;
+    this.customer = params.customer.clone();
+    this.orderStatus = params.orderStatus;
+    this.shippingAddress = params.shippingAddress.clone();
     this.orderProducts = params.orderProducts.map(OrderProductWrite.clone);
     this.createdAt = new Date(params.createdAt);
     this.updatedAt = new Date(params.updatedAt);
-    this.paymentInfo = OrderPaymentInfo.clone(params.paymentInfo);
-    this.creatorDetails = OrderCreatorDetails.clone(params.creatorDetails);
+    this.paymentInfo = params.paymentInfo.clone();
+    this.creatorDetails = params.creatorDetails.clone();
 
-    this.ensureIsValid();
+    OrderWrite.ensureOrderStatusAndPayment({
+      orderStatus: this.orderStatus,
+      paymentStatus: this.paymentInfo.getPaymentStatus(),
+    });
   }
 
-  ensureIsValid() {
+  private static ensureOrderStatusAndPayment(params: {
+    orderStatus: OrderStatus;
+    paymentStatus: OrderPaymentStatus;
+  }) {
+    const { orderStatus, paymentStatus } = params;
+
     const validPaymentStatus = validPaymentStatusForOrderStatus.get(
-      this.orderStatus.getValue()
+      orderStatus.getValue()
     );
 
     if (!validPaymentStatus) {
-      throw new Error("Invalid order status for payment status");
+      throw new InvalidPaymentStatusForOrderStatusError({
+        orderStatus,
+        paymentStatus,
+      });
     }
 
-    const paymentStatus = this.paymentInfo.getPaymentStatus();
+    if (!validPaymentStatus.includes(paymentStatus.getValue())) {
+      throw new InvalidPaymentStatusForOrderStatusError({
+        orderStatus,
+        paymentStatus,
+      });
+    }
+  }
 
-    if (!validPaymentStatus.includes(paymentStatus)) {
-      throw new Error(
-        `Invalid payment status ${paymentStatus} for order status ${this.orderStatus.getValue()}`
+  private static ensureOrderStatusTransition(params: {
+    currentOrderStatus: OrderStatus;
+    nextOrderStatus: OrderStatus;
+  }) {
+    const { nextOrderStatus, currentOrderStatus } = params;
+
+    const allowedStatusTransitions = orderStatusValidTransitions.get(
+      currentOrderStatus.getValue()
+    );
+
+    if (!allowedStatusTransitions) {
+      throw new InvalidOrderStatusTransitionError({
+        fromStatus: currentOrderStatus,
+        toStatus: nextOrderStatus,
+      });
+    }
+
+    const isValidTransition = allowedStatusTransitions.some((status) =>
+      nextOrderStatus.equals(status)
+    );
+
+    if (!isValidTransition) {
+      throw new InvalidOrderStatusTransitionError({
+        fromStatus: currentOrderStatus,
+        toStatus: nextOrderStatus,
+      });
+    }
+  }
+
+  private static ensureCanUpdateCustomer(params: {
+    currentOrderStatus: OrderStatus;
+  }) {
+    const { currentOrderStatus } = params;
+
+    const isAllowedToUpdateCustomer = allowedOrderStatusToUpdateCustomer.some(
+      (status) => currentOrderStatus.equals(status)
+    );
+
+    if (!isAllowedToUpdateCustomer) {
+      throw new CannotUpdateCustomerForOrderStatusError({
+        orderStatus: currentOrderStatus,
+      });
+    }
+  }
+
+  private static ensureCanUpdateShippingAddress(params: {
+    currentOrderStatus: OrderStatus;
+  }) {
+    const { currentOrderStatus } = params;
+
+    const isAllowedToUpdateShippingAddress =
+      allowedOrderStatusToUpdateShippingAddress.some((status) =>
+        currentOrderStatus.equals(status)
       );
+
+    if (!isAllowedToUpdateShippingAddress) {
+      throw new CannotUpdateShippingForOrderStatusError({
+        orderStatus: currentOrderStatus,
+      });
+    }
+  }
+
+  private static ensureCanUpdatePaymentInfo(params: {
+    currentOrderStatus: OrderStatus;
+  }) {
+    const { currentOrderStatus } = params;
+
+    const isAllowedToUpdatePaymentInfo =
+      allowedOrderStatusToUpdatePaymentInfo.some((status) =>
+        currentOrderStatus.equals(status)
+      );
+
+    if (!isAllowedToUpdatePaymentInfo) {
+      throw new CannotUpdatePaymentInfoForOrderStatusError({
+        orderStatus: currentOrderStatus,
+      });
+    }
+  }
+
+  private static ensureCanUpdateProducts(params: {
+    currentOrderStatus: OrderStatus;
+  }) {
+    const { currentOrderStatus } = params;
+
+    const isAllowedToUpdateProducts = allowedOrderStatusToUpdateProducts.some(
+      (status) => currentOrderStatus.equals(status)
+    );
+
+    if (!isAllowedToUpdateProducts) {
+      throw new CannotUpdateProductsForOrderStatusError({
+        orderStatus: currentOrderStatus,
+      });
     }
   }
 
   static clone(order: OrderWrite): OrderWrite {
-    // la copia profunda de los objetos se hace en los constructores de las clases
     return new OrderWrite({
       orderId: order.orderId,
       orderStatus: order.orderStatus,
@@ -101,14 +271,18 @@ export class OrderWrite {
     });
   }
 
+  clone(): OrderWrite {
+    return OrderWrite.clone(this);
+  }
+
   static from(order: OrderFull) {
-    const orderId = new UUID(order.getOrderId());
+    const orderId = order.getOrderId();
     const orderPrimitives = order.toPrimitives();
     const orderStatus = new OrderStatus(orderPrimitives.status);
     const customer = new Customer({
       email: new Email(orderPrimitives.customer.email),
-      firstName: orderPrimitives.customer.firstName,
-      lastName: orderPrimitives.customer.lastName,
+      firstName: new CustomerFirstName(orderPrimitives.customer.firstName),
+      lastName: new CustomerLastName(orderPrimitives.customer.lastName),
       phone: new Phone(orderPrimitives.customer.phone),
     });
     const shippingAddress = new ShippingAddress({
@@ -161,83 +335,129 @@ export class OrderWrite {
       creatorDetails: new OrderCreatorDetails({
         orderCreator: new OrderCreator(orderPrimitives.creatorDetails.creator),
         creatorId: orderPrimitives.creatorDetails.creatorId
-          ? new UUID(orderPrimitives.creatorDetails.creatorId)
+          ? UUID.from(orderPrimitives.creatorDetails.creatorId)
           : undefined,
       }),
     });
   }
 
-  setPaymentStatus(paymentStatus: OrderPaymentStatus) {
-    this.paymentInfo.setPaymentStatus(paymentStatus);
-    this.ensureIsValid();
-  }
-
-  getPaymentStatus() {
+  getPaymentStatus(): OrderPaymentStatus {
     return this.paymentInfo.getPaymentStatus();
   }
 
-  setOrderStatus(orderStatus: OrderStatus) {
-    this.orderStatus = OrderStatus.clone(orderStatus);
-    this.ensureIsValid();
+  setPaymentStatus(updatedPaymentStatus: OrderPaymentStatus): void {
+    OrderWrite.ensureCanUpdatePaymentInfo({
+      currentOrderStatus: this.orderStatus,
+    });
+    OrderWrite.ensureOrderStatusAndPayment({
+      orderStatus: this.orderStatus,
+      paymentStatus: updatedPaymentStatus,
+    });
+
+    this.paymentInfo = new OrderPaymentInfo({
+      paymentStatus: updatedPaymentStatus,
+      paymentDeadline: this.paymentInfo.getPaymentDeadline(),
+      paymentAt: this.paymentInfo.getPaymentAt(),
+    });
+
+    this.updatedAt = new Date();
+  }
+
+  setOrderStatus(updatedOrderStatus: OrderStatus): void {
+    OrderWrite.ensureOrderStatusTransition({
+      nextOrderStatus: updatedOrderStatus,
+      currentOrderStatus: this.orderStatus,
+    });
+
+    OrderWrite.ensureOrderStatusAndPayment({
+      orderStatus: updatedOrderStatus,
+      paymentStatus: this.paymentInfo.getPaymentStatus(),
+    });
+
+    this.orderStatus = updatedOrderStatus;
+    this.updatedAt = new Date();
   }
 
   updateOrderDetails(params: {
-    orderStatus?: OrderStatus;
-    customer?: Customer;
-    shippingAddress?: ShippingAddress;
-    orderProducts?: OrderProductWrite[];
-    paymentInfo?: OrderPaymentInfo;
+    updatedOrderStatus?: OrderStatus;
+    updatedCustomer?: Customer;
+    updatedShippingAddress?: ShippingAddress;
+    newOrderProducts?: OrderProductWrite[];
+    updatedPaymentInfo?: OrderPaymentInfo;
   }) {
-    if (params.orderStatus) {
-      this.orderStatus = OrderStatus.clone(params.orderStatus);
+    const {
+      updatedCustomer,
+      newOrderProducts,
+      updatedOrderStatus,
+      updatedPaymentInfo,
+      updatedShippingAddress,
+    } = params;
+
+    const currentOrderStatus = this.orderStatus.clone();
+
+    if (updatedOrderStatus) {
+      OrderWrite.ensureOrderStatusTransition({
+        currentOrderStatus,
+        nextOrderStatus: updatedOrderStatus,
+      });
+      this.orderStatus = updatedOrderStatus;
     }
 
-    if (params.customer) {
-      this.setCustomer(params.customer);
+    if (updatedCustomer) {
+      OrderWrite.ensureCanUpdateCustomer({ currentOrderStatus });
+      this.customer = updatedCustomer.clone();
     }
 
-    if (params.shippingAddress) {
-      this.setShippingAddress(params.shippingAddress);
+    if (updatedShippingAddress) {
+      OrderWrite.ensureCanUpdateShippingAddress({ currentOrderStatus });
+      this.shippingAddress = updatedShippingAddress.clone();
     }
 
-    if (params.orderProducts) {
-      this.setProducts(params.orderProducts);
+    if (newOrderProducts) {
+      OrderWrite.ensureCanUpdateProducts({ currentOrderStatus });
+      this.orderProducts = newOrderProducts.map(OrderProductWrite.clone);
     }
 
-    if (params.paymentInfo) {
-      this.paymentInfo = OrderPaymentInfo.clone(params.paymentInfo);
+    if (updatedPaymentInfo) {
+      OrderWrite.ensureCanUpdatePaymentInfo({ currentOrderStatus });
+      this.paymentInfo = updatedPaymentInfo.clone();
+    }
+
+    if (updatedOrderStatus && updatedPaymentInfo) {
+      OrderWrite.ensureOrderStatusAndPayment({
+        orderStatus: updatedOrderStatus,
+        paymentStatus: updatedPaymentInfo.getPaymentStatus(),
+      });
     }
 
     this.updatedAt = new Date();
-
-    this.ensureIsValid();
   }
 
-  getId() {
-    return this.orderId.getValue();
+  getId(): UUID {
+    return this.orderId;
   }
 
-  getOrderStatus() {
-    return this.orderStatus.getValue();
+  getOrderStatus(): OrderStatus {
+    return this.orderStatus;
   }
 
-  getCreatedAt() {
-    return this.createdAt;
+  getCreatedAt(): Date {
+    return new Date(this.createdAt);
   }
 
-  getUpdatedAt() {
-    return this.updatedAt;
+  getUpdatedAt(): Date {
+    return new Date(this.updatedAt);
   }
 
-  isPaid() {
+  isPaid(): boolean {
     return this.paymentInfo.isPaid();
   }
 
-  isExpired() {
+  isExpired(): boolean {
     return this.paymentInfo.isExpired();
   }
 
-  evaluateFinalAmount() {
+  evaluateFinalAmount(): NonNegativeInteger {
     const { orderProducts } = this.toPrimitives();
 
     let totalAmount = 0;
@@ -254,45 +474,98 @@ export class OrderWrite {
       totalAmount += product.unitPrice * totalProductItems;
     });
 
-    return totalAmount;
+    return new NonNegativeInteger(totalAmount);
   }
 
-  setPaymentAt(date: Date) {
-    this.paymentInfo.setPaymentAt(date);
-    this.ensureIsValid();
+  setPaymentAt(date: Date): void {
+    const newPaymentInfo = new OrderPaymentInfo({
+      paymentStatus: this.paymentInfo.getPaymentStatus(),
+      paymentDeadline: this.paymentInfo.getPaymentDeadline(),
+      paymentAt: new Date(date),
+    });
+
+    const currentOrderStatus = this.orderStatus.clone();
+    OrderWrite.ensureCanUpdatePaymentInfo({ currentOrderStatus });
+    OrderWrite.ensureOrderStatusAndPayment({
+      orderStatus: currentOrderStatus,
+      paymentStatus: newPaymentInfo.getPaymentStatus(),
+    });
+
+    this.paymentInfo = newPaymentInfo;
+    this.updatedAt = new Date();
   }
 
-  setProducts(orderProducts: OrderProductWrite[]) {
+  setProducts(orderProducts: OrderProductWrite[]): void {
+    OrderWrite.ensureCanUpdateProducts({
+      currentOrderStatus: this.orderStatus,
+    });
     this.orderProducts = orderProducts.map(OrderProductWrite.clone);
+    this.updatedAt = new Date();
   }
 
-  getPaymentAt() {
-    return this.paymentInfo.getPaymentAt();
+  getPaymentAt(): Date | null {
+    const paymentAt = this.paymentInfo.getPaymentAt();
+    return paymentAt ? new Date(paymentAt) : null;
   }
 
-  setCustomer(customer: Customer) {
-    this.customer = Customer.clone(customer);
+  setCustomer(newCustomer: Customer): void {
+    OrderWrite.ensureCanUpdateCustomer({
+      currentOrderStatus: this.orderStatus,
+    });
+    this.customer = newCustomer;
+    this.updatedAt = new Date();
   }
 
-  setShippingAddress(shippingAddress: ShippingAddress) {
-    this.shippingAddress = ShippingAddress.clone(shippingAddress);
+  setShippingAddress(shippingAddress: ShippingAddress): void {
+    OrderWrite.ensureCanUpdateShippingAddress({
+      currentOrderStatus: this.orderStatus,
+    });
+    this.shippingAddress = shippingAddress.clone();
+    this.updatedAt = new Date();
   }
 
   setPaymentInfo(paymentInfo: OrderPaymentInfo) {
-    this.paymentInfo = OrderPaymentInfo.clone(paymentInfo);
-    this.ensureIsValid();
+    const currentOrderStatus = this.orderStatus.clone();
+
+    OrderWrite.ensureCanUpdatePaymentInfo({
+      currentOrderStatus,
+    });
+
+    OrderWrite.ensureOrderStatusAndPayment({
+      orderStatus: currentOrderStatus,
+      paymentStatus: paymentInfo.getPaymentStatus(),
+    });
+
+    this.paymentInfo = paymentInfo.clone();
+    this.updatedAt = new Date();
   }
 
   setOrderStatusAndPaymentInfo(params: {
-    orderStatus: OrderStatus;
-    paymentInfo: OrderPaymentInfo;
-  }) {
-    this.orderStatus = OrderStatus.clone(params.orderStatus);
-    this.paymentInfo = OrderPaymentInfo.clone(params.paymentInfo);
-    this.ensureIsValid();
+    updatedOrderStatus: OrderStatus;
+    updatedPaymentInfo: OrderPaymentInfo;
+  }): void {
+    const currentOrderStatus = this.orderStatus.clone();
+
+    OrderWrite.ensureOrderStatusTransition({
+      currentOrderStatus,
+      nextOrderStatus: params.updatedOrderStatus,
+    });
+
+    OrderWrite.ensureCanUpdatePaymentInfo({
+      currentOrderStatus,
+    });
+
+    OrderWrite.ensureOrderStatusAndPayment({
+      orderStatus: params.updatedOrderStatus,
+      paymentStatus: params.updatedPaymentInfo.getPaymentStatus(),
+    });
+
+    this.orderStatus = params.updatedOrderStatus;
+    this.paymentInfo = params.updatedPaymentInfo.clone();
+    this.updatedAt = new Date();
   }
 
-  getCreatorId() {
+  getCreatorId(): UUID | undefined {
     return this.creatorDetails.getCreatorId();
   }
 
@@ -300,7 +573,7 @@ export class OrderWrite {
     return this.orderProducts.map((product) => product.getProductId());
   }
 
-  toPrimitives() {
+  toPrimitives(): PrimitiveOrderWrite {
     return {
       orderId: this.orderId.getValue(),
       orderStatus: this.orderStatus.getValue(),

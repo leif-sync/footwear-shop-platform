@@ -6,14 +6,16 @@ import {
 import { EmailSender } from "../../notification/domain/emailSender.js";
 import { OrderRepository } from "../../order/domain/orderRepository.js";
 import { Email } from "../../shared/domain/email.js";
+import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
+import { Phone } from "../../shared/domain/phone.js";
 import { UUID } from "../../shared/domain/UUID.js";
 import { logger } from "../../shared/infrastructure/logger.js";
 
 // TODO: move to a configuration file
 const commerceName = COMMERCE_NAME;
 const timeToShipment = "2 días hábiles.";
-const supportEmail = SUPPORT_EMAIL;
-const whatsAppSupportContact = WHATSAPP_SUPPORT_CONTACT;
+const supportEmail = new Email(SUPPORT_EMAIL);
+const whatsAppSupportContact = new Phone(WHATSAPP_SUPPORT_CONTACT);
 const subject = "¡Tu pedido esta listo para enviarse! 🎉";
 
 export class PaymentOrderNotifier {
@@ -52,12 +54,12 @@ export class PaymentOrderNotifier {
       totalAmount: orderFull.evaluateFinalAmount(),
       timeToShipment,
       supportEmail,
-      whatsAppSupportContact: whatsAppSupportContact,
+      whatsAppSupportContact,
     });
 
     try {
       await this.emailSender.sendTransactionalEmail({
-        to: new Email(customerEmail),
+        to: customerEmail,
         content: emailTemplate,
         subject,
       });
@@ -75,20 +77,17 @@ export class PaymentOrderNotifier {
 //TODO: mejorar el template
 function notifyOrderHasBeenPayTemplate(params: {
   customerFullName: string;
-  orderId: string;
-  totalAmount: number;
+  orderId: UUID;
+  totalAmount: NonNegativeInteger;
   timeToShipment: string;
-  supportEmail: string;
-  whatsAppSupportContact: string;
+  supportEmail: Email;
+  whatsAppSupportContact: Phone;
 }) {
-  const {
-    customerFullName,
-    orderId,
-    totalAmount,
-    timeToShipment,
-    supportEmail: emailSoporteTienda,
-    whatsAppSupportContact: whatsAppSoporteTienda,
-  } = params;
+  const orderId = params.orderId.getValue();
+  const totalAmount = params.totalAmount.getValue();
+  const supportEmail = params.supportEmail.getValue();
+  const whatsAppSupportContact = params.whatsAppSupportContact.getValue();
+  const { customerFullName, timeToShipment } = params;
 
   return `
   <!DOCTYPE html>
@@ -126,8 +125,8 @@ function notifyOrderHasBeenPayTemplate(params: {
 
     <footer>
       <p>
-        ¿Tienes alguna duda? Contáctanos en <a href="mailto:${emailSoporteTienda}">${emailSoporteTienda}</a>
-        o envíanos un mensaje a través de WhatsApp al <a href="tel:${whatsAppSoporteTienda}">${whatsAppSoporteTienda}</a>
+        ¿Tienes alguna duda? Contáctanos en <a href="mailto:${supportEmail}">${supportEmail}</a>
+        o envíanos un mensaje a través de WhatsApp al <a href="tel:${whatsAppSupportContact}">${whatsAppSupportContact}</a>
       </p>
       <p>2025 - ${commerceName}</p>
     </footer>

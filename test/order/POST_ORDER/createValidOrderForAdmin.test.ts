@@ -11,8 +11,8 @@ import {
   createTestProduct,
   loginTest,
 } from "../../helper.js";
-import { orderStatusOptions } from "../../../src/modules/order/domain/orderStatus.js";
-import { orderPaymentStatusOptions } from "../../../src/modules/order/domain/orderPaymentStatus.js";
+import { OrderStatusOptions } from "../../../src/modules/order/domain/orderStatus.js";
+import { OrderPaymentStatusOptions } from "../../../src/modules/order/domain/orderPaymentStatus.js";
 import { AdminOrderToSend } from "../orderToSend.js";
 
 test("create valid order for admin", async () => {
@@ -30,11 +30,11 @@ test("create valid order for admin", async () => {
   const variant = newProduct.variants[0];
 
   const orderToSend = new AdminOrderToSend({
-    orderStatus: orderStatusOptions.WAITING_FOR_PAYMENT,
+    orderStatus: OrderStatusOptions.WAITING_FOR_PAYMENT,
     paymentInfo: {
       paymentDeadline: new Date(Date.now() + 1000 * 60 * 60 * 24),
       paymentAt: null,
-      paymentStatus: orderPaymentStatusOptions.PENDING,
+      paymentStatus: OrderPaymentStatusOptions.PENDING,
     },
     orderProducts: [
       {

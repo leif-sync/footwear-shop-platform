@@ -1,8 +1,8 @@
 import { z, ZodIssueCode } from "zod";
 import { regions, CountryData } from "../../domain/countryData.js";
 import { Phone } from "../../../shared/domain/phone.js";
-import { orderStatusOptions } from "../../domain/orderStatus.js";
-import { orderPaymentStatusOptions } from "../../domain/orderPaymentStatus.js";
+import { OrderStatusOptions } from "../../domain/orderStatus.js";
+import { OrderPaymentStatusOptions } from "../../domain/orderPaymentStatus.js";
 
 //TODO: unificar con las constraints de la entidad de dominio
 const customerConstraints = {
@@ -112,11 +112,11 @@ const orderProductSchema = z.object({
 
 const paymentInfoSchema = z.object({
   paymentDeadline: z.coerce.date(),
-  paymentStatus: z.nativeEnum(orderPaymentStatusOptions),
+  paymentStatus: z.nativeEnum(OrderPaymentStatusOptions),
   paymentAt: z.coerce.date().nullable(),
 });
 
-const orderStatusSchema = z.nativeEnum(orderStatusOptions);
+const orderStatusSchema = z.nativeEnum(OrderStatusOptions);
 
 export const createOrderSchema = z.object({
   customer: customerSchema,

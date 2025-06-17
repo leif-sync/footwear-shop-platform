@@ -2,6 +2,12 @@ import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
 import { UUID } from "../../shared/domain/UUID.js";
 import { OrderVariant } from "./orderVariant.js";
 
+export interface PrimitiveOrderProduct {
+  productId: string;
+  productName: string;
+  unitPrice: number;
+}
+
 export class OrderProduct {
   private readonly productId: UUID;
   private readonly productName: string;

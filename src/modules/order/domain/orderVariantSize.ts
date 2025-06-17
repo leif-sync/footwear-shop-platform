@@ -1,5 +1,10 @@
 import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
 
+export interface PrimitiveOrderVariantSize {
+  sizeValue: number;
+  quantity: number;
+}
+
 export class OrderVariantSize {
   private readonly sizeValue: PositiveInteger;
   private readonly quantity: PositiveInteger;
@@ -27,7 +32,7 @@ export class OrderVariantSize {
     return this.quantity.getValue();
   }
 
-  toPrimitives() {
+  toPrimitives(): PrimitiveOrderVariantSize {
     return {
       sizeValue: this.sizeValue.getValue(),
       quantity: this.quantity.getValue(),

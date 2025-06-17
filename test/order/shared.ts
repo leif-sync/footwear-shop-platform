@@ -1,6 +1,7 @@
 import { expect } from "vitest";
 import { ServiceContainer } from "../../src/modules/shared/infrastructure/serviceContainer";
 import { basePath } from "../api";
+import { UUID } from "../../src/modules/shared/domain/UUID";
 
 export const ordersPathUrl = `${basePath}/orders`;
 
@@ -40,7 +41,7 @@ export async function compareTestOrder(params: {
     }[];
   }[];
 }) {
-  const { orderId } = params;
+  const orderId = new UUID(params.orderId);
   const orderFound = await ServiceContainer.order.getOrder.run({ orderId });
 
   const orderToCompare = {

@@ -1,10 +1,10 @@
 import { Email } from "../../shared/domain/email.js";
 import {
   OrderPaymentStatus,
-  orderPaymentStatusOptions,
+  OrderPaymentStatusOptions,
 } from "../domain/orderPaymentStatus.js";
 import { OrderRepository } from "../domain/orderRepository.js";
-import { OrderStatus, orderStatusOptions } from "../domain/orderStatus.js";
+import { OrderStatus, OrderStatusOptions } from "../domain/orderStatus.js";
 
 export class CountStoredOrders {
   private orderRepository: OrderRepository;
@@ -12,7 +12,6 @@ export class CountStoredOrders {
   constructor(params: { orderRepository: OrderRepository }) {
     this.orderRepository = params.orderRepository;
   }
-
 
   /**
    * Counts the number of stored orders based on the provided filters.
@@ -23,8 +22,8 @@ export class CountStoredOrders {
    * @returns The count of stored orders that match the provided filters.
    */
   async run(params: {
-    orderStatus?: orderStatusOptions | orderStatusOptions[];
-    paymentStatus?: orderPaymentStatusOptions | orderPaymentStatusOptions[];
+    orderStatus?: OrderStatusOptions | OrderStatusOptions[];
+    paymentStatus?: OrderPaymentStatusOptions | OrderPaymentStatusOptions[];
     customerEmail?: string | string[];
   }) {
     const orderStatus = params.orderStatus

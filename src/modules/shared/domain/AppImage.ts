@@ -1,5 +1,10 @@
 import { AppUrl } from "./appUrl.js";
 
+export interface PrimitiveAppImage {
+  imageUrl: string;
+  imageAlt: string;
+}
+
 export class AppImageError extends Error {
   constructor(params: { invalidImageAlt: string });
   constructor(params: { invalidImageUrl: string });
@@ -47,7 +52,7 @@ export class AppImage {
     return this.imageAlt;
   }
 
-  toPrimitives() {
+  toPrimitives(): PrimitiveAppImage {
     return {
       imageUrl: this.imageUrl.getValue(),
       imageAlt: this.imageAlt,

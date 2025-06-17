@@ -1,15 +1,24 @@
 import { Email } from "../../shared/domain/email.js";
 import { Phone } from "../../shared/domain/phone.js";
+import { CustomerFirstName } from "./customerFirstName.js";
+import { CustomerLastName } from "./customerLastName.js";
+
+export interface PrimitiveCustomer {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+}
 
 export class Customer {
-  private readonly firstName: string;
-  private readonly lastName: string;
+  private readonly firstName: CustomerFirstName;
+  private readonly lastName: CustomerLastName;
   private readonly email: Email;
   private readonly phone: Phone;
 
   constructor(params: {
-    firstName: string;
-    lastName: string;
+    firstName: CustomerFirstName;
+    lastName: CustomerLastName;
     email: Email;
     phone: Phone;
   }) {
@@ -17,12 +26,6 @@ export class Customer {
     this.lastName = params.lastName;
     this.email = params.email;
     this.phone = params.phone;
-    this.ensureIsValid();
-  }
-
-  private ensureIsValid() {
-    if (this.firstName.length === 0) throw new Error("First name is required");
-    if (this.lastName.length === 0) throw new Error("Last name is required");
   }
 
   static clone(customer: Customer): Customer {
@@ -34,30 +37,34 @@ export class Customer {
     });
   }
 
-  getFirstName() {
+  clone() {
+    return Customer.clone(this);
+  }
+
+  getFirstName(): CustomerFirstName {
     return this.firstName;
   }
 
-  getLastName() {
+  getLastName(): CustomerLastName {
     return this.lastName;
   }
 
-  getEmail() {
-    return this.email.getValue();
+  getEmail(): Email {
+    return this.email;
   }
 
-  getPhone() {
+  getPhone(): Phone {
     return this.phone;
   }
 
-  getFullName() {
-    return `${this.firstName} ${this.lastName}`;
+  getFullName(): string {
+    return `${this.firstName.getValue()} ${this.lastName.getValue()}`;
   }
 
-  toPrimitives() {
+  toPrimitives(): PrimitiveCustomer {
     return {
-      firstName: this.firstName,
-      lastName: this.lastName,
+      firstName: this.firstName.getValue(),
+      lastName: this.lastName.getValue(),
       email: this.email.getValue(),
       phone: this.phone.getValue(),
     };

@@ -29,6 +29,8 @@ import { Phone } from "../../shared/domain/phone.js";
 import { InvalidProductError } from "../domain/errors/invalidProductError.js";
 import { InvalidVariantError } from "../domain/errors/invalidVariantError.js";
 import { SmartOmit } from "../../shared/domain/helperTypes.js";
+import { CustomerFirstName } from "../domain/customerFirstName.js";
+import { CustomerLastName } from "../domain/customerLastName.js";
 
 function orderStatusCriteria(orderStatus: OrderStatus) {
   const filter = (order: OrderWrite) =>
@@ -152,10 +154,10 @@ export class InMemoryOrderRepository implements OrderRepository {
     return filteredOrders.map(
       (order) =>
         new OrderOverview({
-          orderId: new UUID(order.getId()),
-          orderStatus: new OrderStatus(order.getOrderStatus()),
+          orderId: order.getId(),
+          orderStatus: order.getOrderStatus(),
           customerEmail: new Email(order.toPrimitives().customer.email),
-          totalAmount: new PositiveInteger(order.evaluateFinalAmount()),
+          totalAmount: order.evaluateFinalAmount(),
           createdAt: order.getCreatedAt(),
           updatedAt: order.getUpdatedAt(),
           paymentStatus: new OrderPaymentStatus(
@@ -203,25 +205,16 @@ export class InMemoryOrderRepository implements OrderRepository {
     return new NonNegativeInteger(filteredOrdersCount);
   }
 
-  async update(params: { order: OrderWrite }): Promise<void>;
-  async update(params: { orders: OrderWrite[] }): Promise<void>;
-  async update(params: {
-    order?: OrderWrite;
-    orders?: OrderWrite[];
-  }): Promise<void> {
-    const ordersToUpdate = params.orders ?? [params.order!];
+  async update(params: { order: OrderWrite }): Promise<void> {
+    const orderId = params.order.getId();
 
-    ordersToUpdate.forEach((orderToUpdate) => {
-      const orderId = orderToUpdate.getId();
+    const orderIndex = this.orders.findIndex((existingOrder) =>
+      orderId.equals(existingOrder.getId())
+    );
 
-      const orderIndex = this.orders.findIndex(
-        (existingOrder) => existingOrder.getId() === orderId
-      );
+    if (orderIndex === -1) throw new OrderNotFoundError({ orderId });
 
-      if (orderIndex === -1) throw new OrderNotFoundError({ orderId });
-
-      this.orders[orderIndex] = orderToUpdate;
-    });
+    this.orders[orderIndex] = params.order;
   }
 
   private findAndCreateOrderProduct = async (
@@ -310,8 +303,8 @@ export class InMemoryOrderRepository implements OrderRepository {
 
     const customer = new Customer({
       email: new Email(orderPrimitives.customer.email),
-      firstName: orderPrimitives.customer.firstName,
-      lastName: orderPrimitives.customer.lastName,
+      firstName: new CustomerFirstName(orderPrimitives.customer.firstName),
+      lastName: new CustomerLastName(orderPrimitives.customer.lastName),
       phone: new Phone(orderPrimitives.customer.phone),
     });
 

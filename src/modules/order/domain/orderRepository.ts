@@ -26,7 +26,6 @@ export abstract class OrderRepository {
   abstract create(params: { order: OrderWrite }): Promise<void>;
 
   abstract update(params: { order: OrderWrite }): Promise<void>;
-  abstract update(params: { orders: OrderWrite[] }): Promise<void>;
 
   abstract listOrderWrites(params: {
     limit?: PositiveInteger;

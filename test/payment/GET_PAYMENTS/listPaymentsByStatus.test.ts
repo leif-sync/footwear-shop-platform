@@ -4,11 +4,11 @@ import { paymentsPathUrl } from "../shared";
 import { PaymentTransactionStatusOptions } from "../../../src/modules/payment/domain/paymentTransactionStatus";
 import { TransactionTypeOptions } from "../../../src/modules/payment/domain/transactionType";
 import { PaymentProcessorOptions } from "../../../src/modules/payment/domain/paymentProcessor";
-import { CurrencyOptions } from "../../../src/modules/payment/domain/currency";
+import { CurrencyOptions } from "../../../src/modules/payment/domain/currency.js";
 import { createTestOrder, loginTest } from "../../helper";
 import { ServiceContainer } from "../../../src/modules/shared/infrastructure/serviceContainer";
-import { orderStatusOptions } from "../../../src/modules/order/domain/orderStatus";
-import { orderPaymentStatusOptions } from "../../../src/modules/order/domain/orderPaymentStatus";
+import { OrderStatusOptions } from "../../../src/modules/order/domain/orderStatus";
+import { OrderPaymentStatusOptions } from "../../../src/modules/order/domain/orderPaymentStatus";
 import { HTTP_STATUS } from "../../../src/modules/shared/infrastructure/httpStatus";
 
 test("list payments by status", async () => {
@@ -20,9 +20,9 @@ test("list payments by status", async () => {
 
   // create a test order
   const { orderId } = await createTestOrder({
-    orderStatus: orderStatusOptions.WAITING_FOR_PAYMENT,
+    orderStatus: OrderStatusOptions.WAITING_FOR_PAYMENT,
     paymentInfo: {
-      paymentStatus: orderPaymentStatusOptions.PENDING,
+      paymentStatus: OrderPaymentStatusOptions.PENDING,
       paymentAt: null,
       paymentDeadline: new Date(Date.now() + 1000 * 60 * 60 * 24),
     },

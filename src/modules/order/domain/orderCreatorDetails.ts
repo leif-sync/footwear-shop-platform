@@ -1,5 +1,10 @@
 import { UUID } from "../../shared/domain/UUID.js";
-import { OrderCreator } from "./orderCreator.js";
+import { OrderCreator, OrderCreatorOptions } from "./orderCreator.js";
+
+export interface PrimitiveOrderCreatorDetails {
+  creator: OrderCreatorOptions;
+  creatorId?: string;
+}
 
 export class OrderCreatorDetails {
   private readonly orderCreator: OrderCreator;
@@ -21,6 +26,10 @@ export class OrderCreatorDetails {
     });
   }
 
+  clone(): OrderCreatorDetails {
+    return OrderCreatorDetails.clone(this);
+  }
+
   getCreatorType() {
     return this.orderCreator;
   }
@@ -29,7 +38,7 @@ export class OrderCreatorDetails {
     return this.creatorId;
   }
 
-  toPrimitives() {
+  toPrimitives(): PrimitiveOrderCreatorDetails {
     return {
       creator: this.orderCreator.getValue(),
       creatorId: this.creatorId ? this.creatorId.getValue() : undefined,

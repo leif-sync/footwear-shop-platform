@@ -2,7 +2,16 @@ import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
 import { UUID } from "../../shared/domain/UUID.js";
 import { OrderProduct } from "./orderProduct.js";
 import { OrderVariantSize } from "./orderVariantSize.js";
-import { OrderVariantWrite } from "./orderVariantWrite.js";
+import {
+  OrderVariantWrite,
+  PrimitiveOrderVariantWrite,
+} from "./orderVariantWrite.js";
+
+export interface PrimitiveOrderProductWrite {
+  productId: string;
+  unitPrice: number;
+  productVariants: PrimitiveOrderVariantWrite[];
+}
 
 export class OrderProductWrite {
   private readonly productId: UUID;
@@ -62,7 +71,7 @@ export class OrderProductWrite {
     });
   }
 
-  toPrimitives() {
+  toPrimitives(): PrimitiveOrderProductWrite {
     return {
       productId: this.productId.getValue(),
       unitPrice: this.unitPrice.getValue(),

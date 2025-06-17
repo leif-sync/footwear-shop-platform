@@ -1,6 +1,6 @@
 import { RefinementCtx, z } from "zod";
-import { orderStatusOptions } from "../../domain/orderStatus.js";
-import { orderPaymentStatusOptions } from "../../domain/orderPaymentStatus.js";
+import { OrderStatusOptions } from "../../domain/orderStatus.js";
+import { OrderPaymentStatusOptions } from "../../domain/orderPaymentStatus.js";
 
 function validateUniqueArrayItems(data: string[], ctx: RefinementCtx) {
   const duplicateSet = new Set<string>();
@@ -18,12 +18,11 @@ function transformToArray<T>(value: T | T[]): T[] {
 }
 
 const orderStatusOptionsValues = z.enum(
-  Object.values(orderStatusOptions) as [orderStatusOptions]
+  Object.values(OrderStatusOptions) as [OrderStatusOptions]
 );
 
-
 const paymentStatusOptionsValues = z.enum(
-  Object.values(orderPaymentStatusOptions) as [orderPaymentStatusOptions]
+  Object.values(OrderPaymentStatusOptions) as [OrderPaymentStatusOptions]
 );
 
 export const requestOptionsSchema = z.object({

@@ -25,8 +25,16 @@ import { OrderItem } from "../../domain/setupOrderInformation.js";
 import { OrderStatus } from "../../domain/orderStatus.js";
 import { OrderPaymentInfo } from "../../domain/orderPaymentInfo.js";
 import { OrderPaymentStatus } from "../../domain/orderPaymentStatus.js";
+import { CustomerFirstName } from "../../domain/customerFirstName.js";
+import { CustomerLastName } from "../../domain/customerLastName.js";
 
-function handleError(error: unknown, res: Response) {
+function handleError(
+  error: unknown,
+  res: Response<{
+    message: string;
+    errors: string[] | ZodError["issues"];
+  }>
+) {
   if (error instanceof ZodError) {
     res.status(HTTP_STATUS.BAD_REQUEST).json({
       message: "Invalid request",
@@ -98,8 +106,8 @@ export async function createOrder(req: Request, res: Response) {
 
     const customer = new Customer({
       email: new Email(orderFromRequest.customer.email),
-      firstName: orderFromRequest.customer.firstName,
-      lastName: orderFromRequest.customer.lastName,
+      firstName: new CustomerFirstName(orderFromRequest.customer.firstName),
+      lastName: new CustomerLastName(orderFromRequest.customer.lastName),
       phone: new Phone(orderFromRequest.customer.phone),
     });
 
@@ -143,9 +151,8 @@ export async function createOrder(req: Request, res: Response) {
     });
 
     res.status(HTTP_STATUS.CREATED).json({
-      message: "Order created",
       order: {
-        orderId,
+        orderId: orderId.getValue(),
       },
     });
     return;
@@ -165,8 +172,8 @@ async function createOrderForAdmin(params: {
 
     const customer = new Customer({
       email: new Email(orderFromRequest.customer.email),
-      firstName: orderFromRequest.customer.firstName,
-      lastName: orderFromRequest.customer.lastName,
+      firstName: new CustomerFirstName(orderFromRequest.customer.firstName),
+      lastName: new CustomerLastName(orderFromRequest.customer.lastName),
       phone: new Phone(orderFromRequest.customer.phone),
     });
 
@@ -228,11 +235,11 @@ async function createOrderForAdmin(params: {
       paymentInfo,
       orderProducts,
     });
-
+ 
     res.status(HTTP_STATUS.CREATED).json({
       message: "Order created",
       order: {
-        orderId,
+        orderId: orderId.getValue(),
       },
     });
   } catch (error) {

@@ -1,10 +1,22 @@
+import { Email } from "../../shared/domain/email.js";
+import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
 import { UUID } from "../../shared/domain/UUID.js";
-import { Customer } from "./customer.js";
+import { Customer, PrimitiveCustomer } from "./customer.js";
 import { OrderCreatorDetails } from "./orderCreatorDetails.js";
 import { OrderPaymentInfo } from "./orderPaymentInfo.js";
 import { OrderProduct } from "./orderProduct.js";
-import { OrderStatus } from "./orderStatus.js";
-import { ShippingAddress } from "./shippingAddress.js";
+import { OrderStatus, OrderStatusOptions } from "./orderStatus.js";
+import {
+  PrimitiveShippingAddress,
+  ShippingAddress,
+} from "./shippingAddress.js";
+
+export interface PrimitiveOrderFull {
+  orderId: string;
+  customer: PrimitiveCustomer;
+  shippingAddress: PrimitiveShippingAddress;
+  orderStatus: OrderStatusOptions;
+}
 
 export class OrderFull {
   private readonly orderId: UUID;
@@ -66,12 +78,12 @@ export class OrderFull {
     return new Date(this.paymentInfo.getPaymentDeadline());
   }
 
-  getOrderId() {
-    return this.orderId.getValue();
+  getOrderId(): UUID {
+    return this.orderId;
   }
 
   getOrderStatus() {
-    return this.orderStatus.getValue();
+    return this.orderStatus;
   }
 
   getCustomerData() {
@@ -86,7 +98,7 @@ export class OrderFull {
     return this.paymentInfo.getPaymentStatus();
   }
 
-  evaluateFinalAmount() {
+  evaluateFinalAmount(): NonNegativeInteger {
     const { products } = this.toPrimitives();
 
     let totalAmount = 0;
@@ -103,7 +115,7 @@ export class OrderFull {
       totalAmount += product.unitPrice * totalProductItems;
     });
 
-    return totalAmount;
+    return new NonNegativeInteger(totalAmount);
   }
 
   toPrimitives() {
@@ -120,7 +132,7 @@ export class OrderFull {
     };
   }
 
-  getCustomerEmail(): string {
+  getCustomerEmail(): Email {
     return this.customer.getEmail();
   }
 

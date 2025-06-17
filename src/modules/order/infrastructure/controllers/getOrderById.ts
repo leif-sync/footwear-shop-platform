@@ -3,6 +3,7 @@ import { ServiceContainer } from "../../../shared/infrastructure/serviceContaine
 import { z, ZodError } from "zod";
 import { HTTP_STATUS } from "../../../shared/infrastructure/httpStatus.js";
 import { OrderNotFoundError } from "../../domain/errors/orderNotFoundError.js";
+import { UUID } from "../../../shared/domain/UUID.js";
 
 const idSchema = z.string().uuid();
 
@@ -13,7 +14,7 @@ export async function getOrderById(
   res: Response
 ) {
   try {
-    const orderId = idSchema.parse(req.params.orderId);
+    const orderId = new UUID(idSchema.parse(req.params.orderId));
 
     const order = await ServiceContainer.order.getOrder.run({
       orderId,

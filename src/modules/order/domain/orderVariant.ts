@@ -1,7 +1,17 @@
 import { HexColor } from "../../shared/domain/hexColor.js";
-import { AppImage } from "../../shared/domain/AppImage.js";
+import { AppImage, PrimitiveAppImage } from "../../shared/domain/AppImage.js";
 import { UUID } from "../../shared/domain/UUID.js";
-import { OrderVariantSize } from "./orderVariantSize.js";
+import {
+  OrderVariantSize,
+  PrimitiveOrderVariantSize,
+} from "./orderVariantSize.js";
+
+export interface PrimitiveOrderVariant {
+  variantId: string;
+  hexColor: string;
+  image: PrimitiveAppImage;
+  variantSizes: PrimitiveOrderVariantSize[];
+}
 
 export class OrderVariant {
   private readonly variantId: UUID;
@@ -46,7 +56,7 @@ export class OrderVariant {
     return this.image.getImageAlt();
   }
 
-  toPrimitives() {
+  toPrimitives(): PrimitiveOrderVariant {
     return {
       variantId: this.variantId.getValue(),
       hexColor: this.hexColor.getValue(),

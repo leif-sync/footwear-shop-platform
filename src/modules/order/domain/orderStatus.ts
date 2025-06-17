@@ -1,4 +1,4 @@
-export enum orderStatusOptions {
+export enum OrderStatusOptions {
   WAITING_FOR_PAYMENT = "WAITING_FOR_PAYMENT",
   WAITING_FOR_SHIPMENT = "WAITING_FOR_SHIPMENT",
   SHIPPED = "SHIPPED",
@@ -7,29 +7,33 @@ export enum orderStatusOptions {
   RETURNED = "RETURNED",
 }
 
-const validOrderStatus = new Set(Object.values(orderStatusOptions));
+const validOrderStatus = new Set(Object.values(OrderStatusOptions));
 
 export class OrderStatus {
-  private readonly value: orderStatusOptions;
+  private readonly value: OrderStatusOptions;
 
-  constructor(value: orderStatusOptions) {
+  constructor(value: OrderStatusOptions) {
     this.value = value;
     this.ensureIsValid();
   }
 
   static readonly create = {
     waitingForPayment: () =>
-      new OrderStatus(orderStatusOptions.WAITING_FOR_PAYMENT),
+      new OrderStatus(OrderStatusOptions.WAITING_FOR_PAYMENT),
     waitingForShipment: () =>
-      new OrderStatus(orderStatusOptions.WAITING_FOR_SHIPMENT),
-    shipped: () => new OrderStatus(orderStatusOptions.SHIPPED),
-    canceled: () => new OrderStatus(orderStatusOptions.CANCELED),
-    delivered: () => new OrderStatus(orderStatusOptions.DELIVERED),
-    returned: () => new OrderStatus(orderStatusOptions.RETURNED),
+      new OrderStatus(OrderStatusOptions.WAITING_FOR_SHIPMENT),
+    shipped: () => new OrderStatus(OrderStatusOptions.SHIPPED),
+    canceled: () => new OrderStatus(OrderStatusOptions.CANCELED),
+    delivered: () => new OrderStatus(OrderStatusOptions.DELIVERED),
+    returned: () => new OrderStatus(OrderStatusOptions.RETURNED),
   };
 
   static clone(orderStatus: OrderStatus): OrderStatus {
-    return new OrderStatus(orderStatus.getValue());
+    return new OrderStatus(orderStatus.value);
+  }
+
+  clone(): OrderStatus {
+    return OrderStatus.clone(this);
   }
 
   private ensureIsValid() {
@@ -41,7 +45,7 @@ export class OrderStatus {
     return this.value;
   }
 
-  equals(status: OrderStatus | orderStatusOptions): boolean {
+  equals(status: OrderStatus | OrderStatusOptions): boolean {
     if (status instanceof OrderStatus) return this.value === status.getValue();
     return this.value === status;
   }

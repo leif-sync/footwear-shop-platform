@@ -16,8 +16,8 @@ export class GetOrder {
    * @returns The order represented as a primitive object.
    * @throws {OrderNotFoundError} If the order with the given ID does not exist.
    */
-  async run(params: { orderId: string }) {
-    const orderId = new UUID(params.orderId);
+  async run(params: { orderId: UUID }) {
+    const { orderId } = params;
 
     const order = await this.orderRepository.find({
       orderId,

@@ -1,5 +1,13 @@
 import { CountryData } from "./countryData.js";
 
+export interface PrimitiveShippingAddress {
+  region: string;
+  commune: string;
+  streetName: string;
+  streetNumber: string;
+  additionalInfo?: string;
+}
+
 export class ShippingAddress {
   private readonly region: string;
   private readonly commune: string;
@@ -47,12 +55,16 @@ export class ShippingAddress {
 
   static clone(address: ShippingAddress): ShippingAddress {
     return new ShippingAddress({
-      region: address.getRegion(),
-      commune: address.getCommune(),
-      streetName: address.getStreetName(),
-      streetNumber: address.getStreetNumber(),
-      additionalInfo: address.getAdditionalInfo(),
+      region: address.region,
+      commune: address.commune,
+      streetName: address.streetName,
+      streetNumber: address.streetNumber,
+      additionalInfo: address.additionalInfo,
     });
+  }
+
+  clone(): ShippingAddress {
+    return ShippingAddress.clone(this);
   }
 
   getRegion() {
@@ -75,7 +87,7 @@ export class ShippingAddress {
     return this.additionalInfo;
   }
 
-  toPrimitives() {
+  toPrimitives(): PrimitiveShippingAddress {
     return {
       region: this.region,
       commune: this.commune,

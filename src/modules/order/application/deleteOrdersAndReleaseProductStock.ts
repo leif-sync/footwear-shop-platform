@@ -57,9 +57,7 @@ export class DeleteOrderAndReleaseProductsStock {
       productUpdaters: productUpdaterList,
     });
 
-    const orderIds = ordersPaymentExpired.map(
-      (order) => new UUID(order.getId())
-    );
+    const orderIds = ordersPaymentExpired.map((order) => order.getId());
 
     await this.orderRepository.delete({ orderIds });
   }

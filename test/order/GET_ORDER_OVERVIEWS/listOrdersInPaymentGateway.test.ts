@@ -3,16 +3,16 @@ import { expect, test } from "vitest";
 import { createTestOrder, loginTest } from "../../helper.ts";
 import { ordersPathUrl } from "../shared.ts";
 import { HTTP_STATUS } from "../../../src/modules/shared/infrastructure/httpStatus.ts";
-import { orderStatusOptions } from "../../../src/modules/order/domain/orderStatus.ts";
-import { orderPaymentStatusOptions } from "../../../src/modules/order/domain/orderPaymentStatus.ts";
+import { OrderStatusOptions } from "../../../src/modules/order/domain/orderStatus.ts";
+import { OrderPaymentStatusOptions } from "../../../src/modules/order/domain/orderPaymentStatus.ts";
 
 test("list orders that are not in the payment gateway", async () => {
   for (let i = 0; i < 20; i++) {
     await createTestOrder({
-      orderStatus: orderStatusOptions.WAITING_FOR_PAYMENT,
+      orderStatus: OrderStatusOptions.WAITING_FOR_PAYMENT,
       paymentInfo: {
         paymentAt: null,
-        paymentStatus: orderPaymentStatusOptions.IN_PAYMENT_GATEWAY,
+        paymentStatus: OrderPaymentStatusOptions.IN_PAYMENT_GATEWAY,
         paymentDeadline: new Date(Date.now() + 1000 * 60 * 60 * 24),
       },
     });
@@ -40,12 +40,12 @@ test("list orders that are not in the payment gateway", async () => {
   response.body.orders.forEach((order) => {
     expect(order).toMatchObject({
       orderId: expect.any(String),
-      orderStatus: expect.toBeOneOf(Object.values(orderStatusOptions)),
+      orderStatus: expect.toBeOneOf(Object.values(OrderStatusOptions)),
       customerEmail: expect.any(String),
       totalAmount: expect.any(Number),
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
-      paymentStatus: expect.toBeOneOf(Object.values(orderPaymentStatusOptions)),
+      paymentStatus: expect.toBeOneOf(Object.values(OrderPaymentStatusOptions)),
     });
   });
 

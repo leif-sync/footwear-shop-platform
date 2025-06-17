@@ -3,8 +3,8 @@ import { expect, test } from "vitest";
 import { createTestOrder, loginTest } from "../../helper.ts";
 import { ordersPathUrl } from "../shared.ts";
 import { HTTP_STATUS } from "../../../src/modules/shared/infrastructure/httpStatus.ts";
-import { orderStatusOptions } from "../../../src/modules/order/domain/orderStatus.ts";
-import { orderPaymentStatusOptions } from "../../../src/modules/order/domain/orderPaymentStatus.ts";
+import { OrderStatusOptions } from "../../../src/modules/order/domain/orderStatus.ts";
+import { OrderPaymentStatusOptions } from "../../../src/modules/order/domain/orderPaymentStatus.ts";
 
 test("list orders by customer email", async () => {
   const customerEmail = "test.customer.email@example.com";
@@ -14,7 +14,7 @@ test("list orders by customer email", async () => {
     },
     paymentInfo: {
       paymentAt: new Date(),
-      paymentStatus: orderPaymentStatusOptions.PAID,
+      paymentStatus: OrderPaymentStatusOptions.PAID,
       paymentDeadline: new Date(Date.now() + 1000 * 60 * 60 * 24), // 1 day from now
     },
   });
@@ -40,16 +40,16 @@ test("list orders by customer email", async () => {
   response.body.orders.forEach((order) => {
     expect(order).toMatchObject({
       orderId: expect.any(String),
-      orderStatus: expect.toBeOneOf(Object.values(orderStatusOptions)),
+      orderStatus: expect.toBeOneOf(Object.values(OrderStatusOptions)),
       customerEmail: customerEmail,
       totalAmount: expect.any(Number),
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
-      paymentStatus: expect.toBeOneOf(Object.values(orderPaymentStatusOptions)),
+      paymentStatus: expect.toBeOneOf(Object.values(OrderPaymentStatusOptions)),
     });
 
     expect(order.paymentStatus).not.toBe(
-      orderPaymentStatusOptions.IN_PAYMENT_GATEWAY
+      OrderPaymentStatusOptions.IN_PAYMENT_GATEWAY
     );
   });
 

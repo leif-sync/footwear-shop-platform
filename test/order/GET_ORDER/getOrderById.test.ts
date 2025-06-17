@@ -3,8 +3,8 @@ import { createTestOrder, loginTest } from "../../helper.ts";
 import { api } from "../../api.ts";
 import { HTTP_STATUS } from "../../../src/modules/shared/infrastructure/httpStatus.ts";
 import { ordersPathUrl } from "../shared.ts";
-import { orderStatusOptions } from "../../../src/modules/order/domain/orderStatus.ts";
-import { orderPaymentStatusOptions } from "../../../src/modules/order/domain/orderPaymentStatus.ts";
+import { OrderStatusOptions } from "../../../src/modules/order/domain/orderStatus.ts";
+import { OrderPaymentStatusOptions } from "../../../src/modules/order/domain/orderPaymentStatus.ts";
 import { CountryData } from "../../../src/modules/order/domain/countryData.ts";
 
 test("get order by id", async () => {
@@ -19,7 +19,7 @@ test("get order by id", async () => {
   expect(response.body.order).toBeDefined();
   expect(response.body.order).toMatchObject({
     orderId: expect.any(String),
-    status: expect.toBeOneOf(Object.keys(orderStatusOptions)),
+    status: expect.toBeOneOf(Object.keys(OrderStatusOptions)),
     customer: {
       firstName: expect.any(String),
       lastName: expect.any(String),
@@ -44,7 +44,7 @@ test("get order by id", async () => {
       },
     ],
     paymentInfo: {
-      paymentStatus: expect.toBeOneOf(Object.keys(orderPaymentStatusOptions)),
+      paymentStatus: expect.toBeOneOf(Object.keys(OrderPaymentStatusOptions)),
       paymentDeadline: expect.any(String),
       paymentAt: expect.toBeOneOf([null, expect.any(String)]),
     },

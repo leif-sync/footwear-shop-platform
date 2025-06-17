@@ -1,15 +1,21 @@
 import {
   OrderPaymentStatus,
-  orderPaymentStatusOptions,
+  OrderPaymentStatusOptions,
 } from "./orderPaymentStatus.js";
 
-const isPresentPaymentAtByStatus = new Map<string, boolean>([
-  [orderPaymentStatusOptions.EXPIRED, false],
-  [orderPaymentStatusOptions.IN_PAYMENT_GATEWAY, false],
-  [orderPaymentStatusOptions.PAID, true],
-  [orderPaymentStatusOptions.PENDING, false],
-  [orderPaymentStatusOptions.REFUNDED, true],
+const isPresentPaymentAtByStatus = new Map([
+  [OrderPaymentStatusOptions.EXPIRED, false],
+  [OrderPaymentStatusOptions.IN_PAYMENT_GATEWAY, false],
+  [OrderPaymentStatusOptions.PAID, true],
+  [OrderPaymentStatusOptions.PENDING, false],
+  [OrderPaymentStatusOptions.REFUNDED, true],
 ]);
+
+export interface PrimitiveOrderPaymentInfo {
+  paymentStatus: OrderPaymentStatusOptions;
+  paymentDeadline: Date;
+  paymentAt: Date | null;
+}
 
 export class OrderPaymentInfo {
   private paymentStatus: OrderPaymentStatus;
@@ -62,12 +68,15 @@ export class OrderPaymentInfo {
   }
 
   static clone(paymentInfo: OrderPaymentInfo): OrderPaymentInfo {
-    // copias profundas en el constructor
     return new OrderPaymentInfo({
       paymentStatus: paymentInfo.paymentStatus,
       paymentDeadline: paymentInfo.paymentDeadline,
       paymentAt: paymentInfo.paymentAt,
     });
+  }
+
+  clone(): OrderPaymentInfo {
+    return OrderPaymentInfo.clone(this);
   }
 
   isPaid() {
@@ -78,27 +87,19 @@ export class OrderPaymentInfo {
     return this.paymentStatus.equals(OrderPaymentStatus.create.expired());
   }
 
-  getPaymentStatus() {
-    return this.paymentStatus.getValue();
+  getPaymentStatus(): OrderPaymentStatus {
+    return this.paymentStatus;
   }
 
-  getPaymentDeadline() {
+  getPaymentDeadline(): Date {
     return new Date(this.paymentDeadline);
   }
 
-  setPaymentStatus(status: OrderPaymentStatus) {
-    this.paymentStatus = OrderPaymentStatus.clone(status);
-  }
-
-  setPaymentAt(date: Date) {
-    this.paymentAt = new Date(date);
-  }
-
-  getPaymentAt() {
+  getPaymentAt(): Date | null {
     return this.paymentAt;
   }
 
-  toPrimitives() {
+  toPrimitives(): PrimitiveOrderPaymentInfo {
     return {
       paymentStatus: this.paymentStatus.getValue(),
       paymentDeadline: this.paymentDeadline,

@@ -3,8 +3,8 @@ import { api } from "../../api";
 import { HTTP_STATUS } from "../../../src/modules/shared/infrastructure/httpStatus";
 import { paymentsPathUrl } from "../shared";
 import { createTestOrder } from "../../helper";
-import { orderStatusOptions } from "../../../src/modules/order/domain/orderStatus";
-import { orderPaymentStatusOptions } from "../../../src/modules/order/domain/orderPaymentStatus";
+import { OrderStatusOptions } from "../../../src/modules/order/domain/orderStatus";
+import { OrderPaymentStatusOptions } from "../../../src/modules/order/domain/orderPaymentStatus";
 import crypto from "node:crypto";
 
 beforeEach(() => {
@@ -22,9 +22,9 @@ vi.mock("../../../src/modules/payment/infrastructure/webpaySdkHelper", () => ({
 
 test("creating a new Webpay Plus payment gateway link", async () => {
   const { orderId } = await createTestOrder({
-    orderStatus: orderStatusOptions.WAITING_FOR_PAYMENT,
+    orderStatus: OrderStatusOptions.WAITING_FOR_PAYMENT,
     paymentInfo: {
-      paymentStatus: orderPaymentStatusOptions.IN_PAYMENT_GATEWAY,
+      paymentStatus: OrderPaymentStatusOptions.IN_PAYMENT_GATEWAY,
       paymentAt: null,
       paymentDeadline: new Date(Date.now() + 1000 * 60 * 60 * 24), // 1 day from now
     },
@@ -51,9 +51,9 @@ test("creating a new Webpay Plus payment gateway link with invalid order", async
 
 test("creating a new Webpay Plus payment gateway link with already paid order", async () => {
   const { orderId } = await createTestOrder({
-    orderStatus: orderStatusOptions.WAITING_FOR_SHIPMENT,
+    orderStatus: OrderStatusOptions.WAITING_FOR_SHIPMENT,
     paymentInfo: {
-      paymentStatus: orderPaymentStatusOptions.PAID,
+      paymentStatus: OrderPaymentStatusOptions.PAID,
       paymentAt: new Date(),
       paymentDeadline: new Date(Date.now() + 1000 * 60 * 60 * 24), // 1 day from now
     },
@@ -72,9 +72,9 @@ test("creating a new Webpay Plus payment gateway link with expired payment deadl
   const paymentDeadlineTest = new Date(Date.now() - 1000 * 60 * 60 * 24);
 
   const { orderId } = await createTestOrder({
-    orderStatus: orderStatusOptions.WAITING_FOR_PAYMENT,
+    orderStatus: OrderStatusOptions.WAITING_FOR_PAYMENT,
     paymentInfo: {
-      paymentStatus: orderPaymentStatusOptions.IN_PAYMENT_GATEWAY,
+      paymentStatus: OrderPaymentStatusOptions.IN_PAYMENT_GATEWAY,
       paymentAt: null,
       paymentDeadline: paymentDeadlineTest, // 1 day ago
     },
