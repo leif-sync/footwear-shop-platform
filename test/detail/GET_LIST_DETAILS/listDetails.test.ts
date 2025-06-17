@@ -8,7 +8,7 @@ import { loginTest } from "../../helper";
 const detailReturnSchema = z.array(
   z.object({
     detailId: z.string(),
-    detailName: z.string(),
+    detailTitle: z.string(),
   })
 );
 

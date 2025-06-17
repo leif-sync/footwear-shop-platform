@@ -64,6 +64,7 @@ import { OrderItem } from "../src/modules/order/domain/setupOrderInformation";
 import { CustomerFirstName } from "../src/modules/order/domain/customerFirstName";
 import { CustomerLastName } from "../src/modules/order/domain/customerLastName";
 import { CategoryName } from "../src/modules/category/domain/categoryName";
+import { DetailTitle } from "../src/modules/detail/domain/detailTitle";
 
 export async function loginTest() {
   const adminEmail = initialSuperAdminUser.email;
@@ -162,8 +163,8 @@ export async function createTestProduct(params?: {
     ];
 
     for (const detail of details) {
-      const detailName = detail.getTitle();
-      await ServiceContainer.detail.getDetail.run({ detailName });
+      const detailTitle = new DetailTitle(detail.getTitle());
+      await ServiceContainer.detail.getDetail.run({ detailTitle });
     }
     const tags = variant.tags?.map((tag) => {
       return new VariantTag(tag);
@@ -307,13 +308,14 @@ export async function createTagIfNotExists(tagName: string) {
   }
 }
 
-export async function createDetailIfNotExists(detailName: string) {
+export async function createDetailIfNotExists(title: string) {
+  const detailTitle = new DetailTitle(title);
   try {
-    return await ServiceContainer.detail.createDetail.run({ detailName });
+    return await ServiceContainer.detail.createDetail.run({ detailTitle });
   } catch (error) {
     if (error instanceof DetailAlreadyExistsError) {
       return await ServiceContainer.detail.getDetail.run({
-        detailName,
+        detailTitle,
       });
     }
     throw error;

@@ -3,6 +3,7 @@ import { UUID } from "../../shared/domain/UUID.js";
 import { DetailInUseError } from "../domain/detailInUseError.js";
 import { DetailNotFoundError } from "../domain/detailNotFoundError.js";
 import { DetailRepository } from "../domain/detailRepository.js";
+import { DetailTitle } from "../domain/detailTitle.js";
 
 export class DeleteDetail {
   private readonly detailRepository: DetailRepository;
@@ -16,33 +17,32 @@ export class DeleteDetail {
     this.productRepository = params.productRepository;
   }
 
-  private async deleteById(id: string) {
-    const detailId = new UUID(id);
+  private async deleteById(detailId: UUID) {
     const detailFound = await this.detailRepository.find({ detailId });
-    if (!detailFound) throw new DetailNotFoundError({ detailId: id });
+    if (!detailFound) throw new DetailNotFoundError({ detailId: detailId });
 
-    const detailName = detailFound.getTitle();
+    const detailTitle = detailFound.getTitle();
 
     const isDetailUsed = await this.productRepository.checkDetailUsage({
-      detailName,
+      detailTitle: detailTitle.getValue(),
     });
 
-    if (isDetailUsed) throw new DetailInUseError({ detailName });
+    if (isDetailUsed) throw new DetailInUseError({ detailTitle });
 
     await this.detailRepository.delete({ detailId });
   }
 
-  private async deleteByName(detailName: string) {
-    const detailFound = await this.detailRepository.find({ detailName });
-    if (!detailFound) throw new DetailNotFoundError({ detailName });
+  private async deleteByTitle(detailTitle: DetailTitle) {
+    const detailFound = await this.detailRepository.find({ detailTitle });
+    if (!detailFound) throw new DetailNotFoundError({ detailTitle });
 
     const isDetailUsed = await this.productRepository.checkDetailUsage({
-      detailName,
+      detailTitle: detailTitle.getValue(),
     });
 
-    if (isDetailUsed) throw new DetailInUseError({ detailName });
+    if (isDetailUsed) throw new DetailInUseError({ detailTitle });
 
-    await this.detailRepository.delete({ detailName });
+    await this.detailRepository.delete({ detailTitle });
   }
 
   /**
@@ -53,22 +53,22 @@ export class DeleteDetail {
    * @throws {DetailNotFoundError} If the detail with the given ID does not exist.
    * @throws {DetailInUseError} If the detail is currently in use by a product.
    */
-  async run(params: { detailId: string }): Promise<void>;
+  async run(params: { detailId: UUID }): Promise<void>;
 
   /**
    * Deletes a detail by its name.
    * @param params - The parameters for deleting a detail.
-   * @param params.detailName - The name of the detail to be deleted.
+   * @param params.detailTitle - The title of the detail to be deleted.
    *
-   * @throws {DetailNotFoundError} If the detail with the given name does not exist.
+   * @throws {DetailNotFoundError} If the detail with the given title does not exist.
    * @throws {DetailInUseError} If the detail is currently in use by a product.
    */
-  async run(params: { detailName: string }): Promise<void>;
+  async run(params: { detailTitle: DetailTitle }): Promise<void>;
   async run(
-    params: { detailId: string } | { detailName: string }
+    params: { detailId: UUID } | { detailTitle: DetailTitle }
   ): Promise<void> {
     const isDetailId = "detailId" in params;
     if (isDetailId) return this.deleteById(params.detailId);
-    this.deleteByName(params.detailName);
+    this.deleteByTitle(params.detailTitle);
   }
 }

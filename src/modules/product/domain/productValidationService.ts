@@ -22,7 +22,9 @@ export class ProductValidationService {
       : [categoryName];
 
     const validCategories =
-      await this.productAssociatedDataProvider.retrieveCategoriesByName(categories);
+      await this.productAssociatedDataProvider.retrieveCategoriesByName(
+        categories
+      );
 
     const validCategoriesSet = new Set(validCategories);
 
@@ -37,9 +39,8 @@ export class ProductValidationService {
   async ensureVariantTagValidity(tagName: string | string[]): Promise<void> {
     const tags = Array.isArray(tagName) ? tagName : [tagName];
 
-    const validTags = await this.productAssociatedDataProvider.retrieveTagsByName(
-      tags
-    );
+    const validTags =
+      await this.productAssociatedDataProvider.retrieveTagsByName(tags);
 
     const validTagsSet = new Set(validTags);
 
@@ -54,9 +55,8 @@ export class ProductValidationService {
   ): Promise<void> {
     const sizes = Array.isArray(sizeValue) ? sizeValue : [sizeValue];
 
-    const validSizes = await this.productAssociatedDataProvider.retrieveSizesByValue(
-      sizes
-    );
+    const validSizes =
+      await this.productAssociatedDataProvider.retrieveSizesByValue(sizes);
 
     const validSizesSet = new Set(validSizes);
 
@@ -73,7 +73,7 @@ export class ProductValidationService {
     const details = Array.isArray(detailName) ? detailName : [detailName];
 
     const validDetails =
-      await this.productAssociatedDataProvider.retrieveDetailsByName(details);
+      await this.productAssociatedDataProvider.retrieveDetailsByTitle(details);
 
     const validDetailsSet = new Set(validDetails);
 

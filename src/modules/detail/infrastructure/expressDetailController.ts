@@ -5,13 +5,17 @@ import { ServiceContainer } from "../../shared/infrastructure/serviceContainer.j
 import { DetailAlreadyExistsError } from "../domain/detailAlreadyExistsError.js";
 import { DetailInUseError } from "../domain/detailInUseError.js";
 import { DetailNotFoundError } from "../domain/detailNotFoundError.js";
+import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
+import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
+import { DetailTitle } from "../domain/detailTitle.js";
+import { UUID } from "../../shared/domain/UUID.js";
 
 const createDetailSchema = z.object({
-  detailName: z.string().nonempty(),
+  detailTitle: z.string().nonempty(),
 });
 
 const updateDetailSchema = z.object({
-  detailName: z.string().nonempty(),
+  detailTitle: z.string().nonempty(),
 });
 
 const uuidSchema = z.string().uuid();
@@ -24,7 +28,9 @@ const listDetailsRequestSchema = z.object({
 export class DetailController {
   static async listDetails(req: Request, res: Response) {
     try {
-      const { limit, offset } = listDetailsRequestSchema.parse(req.query);
+      const result = listDetailsRequestSchema.parse(req.query);
+      const limit = new PositiveInteger(result.limit);
+      const offset = new NonNegativeInteger(result.offset);
       const details = await ServiceContainer.detail.listDetails.run({
         limit,
         offset,
@@ -35,8 +41,8 @@ export class DetailController {
       res.json({
         details,
         meta: {
-          limit,
-          offset,
+          limit: limit.getValue(),
+          offset: offset.getValue(),
           returnedDetailCount: details.length,
           totalDetailCount,
         },
@@ -65,8 +71,10 @@ export class DetailController {
     }
 
     try {
-      const { detailName } = result.data;
-      await ServiceContainer.detail.createDetail.run({ detailName });
+      const detailTitle = new DetailTitle(result.data.detailTitle);
+      await ServiceContainer.detail.createDetail.run({
+        detailTitle,
+      });
       res.status(HTTP_STATUS.CREATED).json({
         message: "Detail created",
       });
@@ -91,7 +99,7 @@ export class DetailController {
     }
 
     try {
-      const detailId = result.data;
+      const detailId = new UUID(result.data);
       await ServiceContainer.detail.deleteDetail.run({ detailId });
       res.json({ message: "Detail deleted" });
     } catch (error) {
@@ -128,9 +136,12 @@ export class DetailController {
     }
 
     try {
-      const detailId = result.data;
-      const { detailName } = updateResult.data;
-      await ServiceContainer.detail.updateDetail.run({ detailId, detailName });
+      const detailId = new UUID(result.data);
+      const detailTitle = new DetailTitle(updateResult.data.detailTitle);
+      await ServiceContainer.detail.updateDetail.run({
+        detailId,
+        detailTitle,
+      });
       res.json({ message: "Detail updated" });
       return;
     } catch (error) {

@@ -6,15 +6,15 @@ import { createDetailIfNotExists, loginTest } from "../../helper.js";
 
 test("create duplicate detail", async () => {
   const cookieToken = await loginTest();
-  const newDetailName = "New Detail" + Math.random();
+  const newDetailTitle = "New Detail" + Math.random();
 
-  await createDetailIfNotExists(newDetailName);
+  await createDetailIfNotExists(newDetailTitle);
 
   const response = await api
     .post(detailPathUrl)
     .set("Cookie", cookieToken)
     .send({
-      detailName: newDetailName,
+      detailTitle: newDetailTitle,
     });
 
   expect(response.ok).toBe(false);

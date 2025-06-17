@@ -1,6 +1,7 @@
 import { UUID } from "../../shared/domain/UUID.js";
 import { DetailNotFoundError } from "../domain/detailNotFoundError.js";
 import { DetailRepository } from "../domain/detailRepository.js";
+import { DetailTitle } from "../domain/detailTitle.js";
 
 export class GetDetail {
   private readonly detailRepository: DetailRepository;
@@ -9,32 +10,31 @@ export class GetDetail {
     this.detailRepository = params.detailRepository;
   }
 
-  private async getDetailById(id: string) {
-    const detailId = new UUID(id);
+  private async getDetailById(detailId: UUID) {
     const detail = await this.detailRepository.find({ detailId });
     if (!detail) throw new DetailNotFoundError({ detailId });
     return detail.toPrimitives();
   }
 
-  private async getDetailByName(detailName: string) {
-    const detail = await this.detailRepository.find({ detailName });
-    if (!detail) throw new DetailNotFoundError({ detailName });
+  private async getDetailByTitle(detailTitle: DetailTitle) {
+    const detail = await this.detailRepository.find({ detailTitle });
+    if (!detail) throw new DetailNotFoundError({ detailTitle });
     return detail.toPrimitives();
   }
 
-  async run(params: { detailId: string }): Promise<{
+  async run(params: { detailId: UUID }): Promise<{
     detailId: string;
-    detailName: string;
-  }>;
-  async run(params: { detailName: string }): Promise<{
-    detailId: string;
-    detailName: string;
+    detailTitle: string;
   }>;
 
-  async run(params: { detailId: string } | { detailName: string }) {
+  async run(params: { detailTitle: DetailTitle }): Promise<{
+    detailId: string;
+    detailTitle: string;
+  }>;
+
+  async run(params: { detailId: UUID } | { detailTitle: DetailTitle }) {
     const isDetailId = "detailId" in params;
-
     if (isDetailId) return this.getDetailById(params.detailId);
-    return this.getDetailByName(params.detailName);
+    return this.getDetailByTitle(params.detailTitle);
   }
 }

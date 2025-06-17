@@ -1,6 +1,7 @@
 import { CategoryName } from "../../category/domain/categoryName.js";
 import { CategoryRepository } from "../../category/domain/categoryRepository.js";
 import { DetailRepository } from "../../detail/domain/detailRepository.js";
+import { DetailTitle } from "../../detail/domain/detailTitle.js";
 import { OrderRepository } from "../../order/domain/orderRepository.js";
 import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
 import { UUID } from "../../shared/domain/UUID.js";
@@ -44,15 +45,17 @@ export class ProductAssociatedDataProvider
     return categories.map((category) => category.toPrimitives().categoryName);
   }
 
-  async retrieveDetailsByName(
-    detailName: string | string[]
+  async retrieveDetailsByTitle(
+    detailTitle: string | string[]
   ): Promise<string[]> {
-    const detailNames = Array.isArray(detailName) ? detailName : [detailName];
+    const detailNames = Array.isArray(detailTitle)
+      ? detailTitle.map((title) => new DetailTitle(title))
+      : [new DetailTitle(detailTitle)];
 
     const details =
-      await this.detailRepository.retrieveDetailsByName(detailNames);
+      await this.detailRepository.retrieveDetailsByTitle(detailNames);
 
-    return details.map((detail) => detail.toPrimitives().detailName);
+    return details.map((detail) => detail.toPrimitives().detailTitle);
   }
 
   async retrieveSizesByValue(

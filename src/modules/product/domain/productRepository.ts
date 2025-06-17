@@ -58,7 +58,7 @@ export abstract class ProductRepository {
     sizeValue: PositiveInteger;
   }): Promise<boolean>;
 
-  abstract checkDetailUsage(params: { detailName: string }): Promise<boolean>;
+  abstract checkDetailUsage(params: { detailTitle: string }): Promise<boolean>;
 
   abstract checkCategoryUsage(params: {
     categoryName: string;

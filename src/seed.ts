@@ -35,6 +35,7 @@ import { AppImage } from "./modules/shared/domain/AppImage.js";
 import { AppUrl } from "./modules/shared/domain/appUrl.js";
 import { VariantTag } from "./modules/product/domain/variantTag.js";
 import { CategoryName } from "./modules/category/domain/categoryName.js";
+import { DetailTitle } from "./modules/detail/domain/detailTitle.js";
 
 // create initial admin user
 ServiceContainer.admin.createAdmin
@@ -55,10 +56,18 @@ ServiceContainer.admin.createAdmin
   });
 
 // create categories
-await ServiceContainer.category.createCategory.run({ categoryName: new CategoryName("Calzado") });
-await ServiceContainer.category.createCategory.run({ categoryName: new CategoryName("Mujer") });
-await ServiceContainer.category.createCategory.run({ categoryName: new CategoryName("Tacones") });
-await ServiceContainer.category.createCategory.run({ categoryName: new CategoryName("Zapatos") });
+await ServiceContainer.category.createCategory.run({
+  categoryName: new CategoryName("Calzado"),
+});
+await ServiceContainer.category.createCategory.run({
+  categoryName: new CategoryName("Mujer"),
+});
+await ServiceContainer.category.createCategory.run({
+  categoryName: new CategoryName("Tacones"),
+});
+await ServiceContainer.category.createCategory.run({
+  categoryName: new CategoryName("Zapatos"),
+});
 
 // create tags
 await ServiceContainer.tag.createTag.run({ tagName: "elegante" });
@@ -80,9 +89,11 @@ await ServiceContainer.size.createSize.run({ sizeValue: 40 });
 await ServiceContainer.size.createSize.run({ sizeValue: 41 });
 
 // create details
-await ServiceContainer.detail.createDetail.run({ detailName: "Material" });
 await ServiceContainer.detail.createDetail.run({
-  detailName: "Altura del tacón",
+  detailTitle: new DetailTitle("Material"),
+});
+await ServiceContainer.detail.createDetail.run({
+  detailTitle: new DetailTitle("Altura del tacón"),
 });
 
 // create initial product

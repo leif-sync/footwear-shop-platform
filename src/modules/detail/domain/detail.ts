@@ -1,38 +1,39 @@
 import { UUID } from "../../shared/domain/UUID.js";
+import { DetailTitle } from "./detailTitle.js";
+
+export interface PrimitiveDetail {
+  detailId: string;
+  detailTitle: string;
+}
 
 export class Detail {
   private readonly detailId: UUID;
-  private readonly detailName: string;
+  private readonly detailTitle: DetailTitle;
 
-  constructor(params: { detailId: UUID; detailName: string }) {
+  constructor(params: { detailId: UUID; detailTitle: DetailTitle }) {
     this.detailId = params.detailId;
-    this.detailName = params.detailName;
-    this.ensureIsValid();
+    this.detailTitle = params.detailTitle;
   }
 
   static clone(detail: Detail): Detail {
     return new Detail({
-      detailId: new UUID(detail.getId()),
-      detailName: detail.getTitle(),
+      detailId: detail.detailId,
+      detailTitle: detail.detailTitle,
     });
   }
 
-  private ensureIsValid() {
-    if (this.detailName.length < 1) throw new Error("Title is required");
+  getId(): UUID {
+    return this.detailId;
   }
 
-  getId(): string {
-    return this.detailId.getValue();
+  getTitle(): DetailTitle {
+    return this.detailTitle;
   }
 
-  getTitle(): string {
-    return this.detailName;
-  }
-
-  toPrimitives() {
+  toPrimitives(): PrimitiveDetail {
     return {
       detailId: this.detailId.getValue(),
-      detailName: this.getTitle()
-    }
+      detailTitle: this.detailTitle.getValue(),
+    };
   }
 }

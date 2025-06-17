@@ -6,13 +6,13 @@ import { loginTest } from "../../helper";
 
 test("create detail", async () => {
   const cookieToken = await loginTest();
-  const newDetailName = "New Detail" + Math.random();
+  const newDetailTitle = "New Detail" + Math.random();
 
   const response = await api
     .post(detailPathUrl)
     .set("Cookie", cookieToken)
     .send({
-      detailName: newDetailName,
+      detailTitle: newDetailTitle,
     });
 
   expect(response.status).toBe(HTTP_STATUS.CREATED);

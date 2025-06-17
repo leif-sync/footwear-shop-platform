@@ -2,10 +2,9 @@ import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
 import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
 import { UUID } from "../../shared/domain/UUID.js";
 import { Detail } from "../domain/detail.js";
+import { DetailNotFoundError } from "../domain/detailNotFoundError.js";
 import { DetailRepository } from "../domain/detailRepository.js";
-
-type findParams = { detailId?: UUID; detailName?: string };
-type deleteParams = { detailId?: UUID; detailName?: string };
+import { DetailTitle } from "../domain/detailTitle.js";
 
 export class InMemoryDetailRepository implements DetailRepository {
   private details: Detail[] = [];
@@ -20,21 +19,31 @@ export class InMemoryDetailRepository implements DetailRepository {
     return Detail.clone(detail);
   }
 
-  private async findByName(detailName: string): Promise<Detail | null> {
-    const detail = this.details.find(
-      (detail) => detailName === detail.getTitle()
+  private async findByTitle(detailTitle: DetailTitle): Promise<Detail | null> {
+    const detail = this.details.find((detail) =>
+      detailTitle.equals(detail.getTitle())
     );
     if (!detail) return null;
     return Detail.clone(detail);
   }
 
   async find(params: { detailId: UUID }): Promise<Detail | null>;
-  async find(params: { detailName: string }): Promise<Detail | null>;
-  async find(params: findParams): Promise<Detail | null> {
-    const { detailId, detailName } = params;
-    if (detailId) return this.findById(detailId);
-    if (detailName) return this.findByName(detailName);
-    throw new Error("Invalid params");
+  async find(params: { detailTitle: DetailTitle }): Promise<Detail | null>;
+  async find(
+    params:
+      | {
+          detailId: UUID;
+        }
+      | {
+          detailTitle: DetailTitle;
+        }
+  ): Promise<Detail | null> {
+    const isDetailId = "detailId" in params;
+    if (isDetailId) {
+      const id = params.detailId;
+      return this.findById(id);
+    }
+    return this.findByTitle(params.detailTitle);
   }
 
   async countDetails(): Promise<NonNegativeInteger> {
@@ -56,27 +65,39 @@ export class InMemoryDetailRepository implements DetailRepository {
     this.details = this.details.filter((detail) => !id.equals(detail.getId()));
   }
 
-  private async deleteByName(detailName: string): Promise<void> {
-    this.details = this.details.filter(
-      (detail) => detailName !== detail.getTitle()
+  private async deleteByTitle(detailTitle: DetailTitle): Promise<void> {
+    this.details = this.details.filter((detail) =>
+      detailTitle.equals(detail.getTitle())
     );
   }
 
   async delete(params: { detailId: UUID }): Promise<void>;
-  async delete(params: { detailName: string }): Promise<void>;
-  async delete(params: deleteParams): Promise<void> {
-    const { detailId, detailName } = params;
-    if (detailId) return this.deleteById(detailId);
-    if (detailName) return this.deleteByName(detailName);
-    throw new Error("Invalid params");
+  async delete(params: { detailTitle: DetailTitle }): Promise<void>;
+  async delete(
+    params:
+      | {
+          detailId: UUID;
+        }
+      | {
+          detailTitle: DetailTitle;
+        }
+  ): Promise<void> {
+    const isDetailId = "detailId" in params;
+    if (isDetailId) {
+      const id = params.detailId;
+      return this.deleteById(id);
+    }
+    return this.deleteByTitle(params.detailTitle);
   }
 
-  async retrieveDetailsByName(
-    detailName: string | string[]
+  async retrieveDetailsByTitle(
+    detailTitle: DetailTitle | DetailTitle[]
   ): Promise<Detail[]> {
-    const detailNames = Array.isArray(detailName) ? detailName : [detailName];
+    const detailTitles = Array.isArray(detailTitle)
+      ? detailTitle.map((detailTitle) => detailTitle.getValue())
+      : [detailTitle.getValue()];
     return this.details.filter((detail) =>
-      detailNames.includes(detail.getTitle())
+      detailTitles.includes(detail.getTitle().getValue())
     );
   }
 
@@ -85,7 +106,11 @@ export class InMemoryDetailRepository implements DetailRepository {
     const index = this.details.findIndex(
       (detail) => detail.getId() === detail.getId()
     );
-    if (index === -1) throw new Error("Detail not found");
+    if (index === -1) {
+      throw new DetailNotFoundError({
+        detailId: detail.getId(),
+      });
+    }
     this.details[index] = detail;
   }
 }

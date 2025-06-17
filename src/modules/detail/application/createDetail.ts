@@ -2,6 +2,7 @@ import { UUID } from "../../shared/domain/UUID.js";
 import { Detail } from "../domain/detail.js";
 import { DetailAlreadyExistsError } from "../domain/detailAlreadyExistsError.js";
 import { DetailRepository } from "../domain/detailRepository.js";
+import { DetailTitle } from "../domain/detailTitle.js";
 
 /**
  * CreateDetail is a use case for creating a new detail.
@@ -18,23 +19,26 @@ export class CreateDetail {
   /**
    * Creates a new detail.
    * @param params - The parameters for creating the detail.
-   * @param params.detailName - The name of the detail to be created.
+   * @param params.detailTitle - The title of the detail to be created.
    * @returns The ID of the created detail.
-   * @throws {DetailAlreadyExistsError} If a detail with the same name already exists.
+   * @throws {DetailAlreadyExistsError} If a detail with the same title already exists.
    */
-  async run(params: { detailName: string }) {
-    const { detailName } = params;
+  async run(params: { detailTitle: DetailTitle }) {
+    const { detailTitle } = params;
 
     const id = UUID.generateRandomUUID();
-    const detail = new Detail({ detailId: id, detailName });
+    const detail = new Detail({ detailId: id, detailTitle });
 
-    const existingDetail = await this.detailRepository.find({ detailName });
-    if (existingDetail) throw new DetailAlreadyExistsError({ detailName });
+    const existingDetail = await this.detailRepository.find({
+      detailTitle: detailTitle,
+    });
+    if (existingDetail)
+      throw new DetailAlreadyExistsError({ detailTitle: detailTitle });
 
     await this.detailRepository.create({ detail });
 
     return {
       detailId: id.getValue(),
-    }
+    };
   }
 }

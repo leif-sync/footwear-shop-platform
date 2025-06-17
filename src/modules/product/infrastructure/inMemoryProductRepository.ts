@@ -207,16 +207,18 @@ export class InMemoryProductRepository implements ProductRepository {
     );
   }
 
-  async checkDetailUsage(params: { detailName: string }): Promise<boolean> {
-    const { detailName } = params;
+  async checkDetailUsage(params: { detailTitle: string }): Promise<boolean> {
+    const { detailTitle } = params;
     return this.products.some((product) =>
       product
         .toPrimitives()
         .variants.some((variant) =>
-          variant.details.some((detail) => detail.title === detailName)
+          variant.details.some((detail) => detail.title === detailTitle)
         )
     );
   }
+
+
 
   async checkTagUsage(params: { tagName: string }): Promise<boolean> {
     const { tagName } = params;

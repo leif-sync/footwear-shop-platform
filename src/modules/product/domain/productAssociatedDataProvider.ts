@@ -9,8 +9,8 @@ export abstract class ProductAssociatedDataProvider {
   abstract retrieveSizesByValue(
     sizeValue: PositiveInteger | PositiveInteger[]
   ): Promise<number[]>;
-  abstract retrieveDetailsByName(
-    detailName: string | string[]
+  abstract retrieveDetailsByTitle(
+    detailTitle: string | string[]
   ): Promise<string[]>;
   abstract checkIfProductPurchased(params: {
     productId: UUID;
