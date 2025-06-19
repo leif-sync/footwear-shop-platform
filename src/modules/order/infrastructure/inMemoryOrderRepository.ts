@@ -15,6 +15,7 @@ import { OrderVariant } from "../domain/orderVariant.js";
 import {
   OrderFilterCriteria,
   OrderRepository,
+  PaginatedOrderFilterCriteria,
 } from "../domain/orderRepository.js";
 import { OrderStatus } from "../domain/orderStatus.js";
 import { OrderWrite } from "../domain/orderWrite.js";
@@ -28,7 +29,6 @@ import { OrderCreator } from "../domain/orderCreator.js";
 import { Phone } from "../../shared/domain/phone.js";
 import { InvalidProductError } from "../domain/errors/invalidProductError.js";
 import { InvalidVariantError } from "../domain/errors/invalidVariantError.js";
-import { SmartOmit } from "../../shared/domain/helperTypes.js";
 import { CustomerFirstName } from "../domain/customerFirstName.js";
 import { CustomerLastName } from "../domain/customerLastName.js";
 
@@ -116,7 +116,7 @@ export class InMemoryOrderRepository implements OrderRepository {
   }
 
   async listOrderOverviews(
-    params: OrderFilterCriteria
+    params: PaginatedOrderFilterCriteria
   ): Promise<OrderOverview[]> {
     const { limit, offset, orderStatus, paymentStatus, customerEmail } = params;
 
@@ -168,7 +168,7 @@ export class InMemoryOrderRepository implements OrderRepository {
   }
 
   async countStoredOrders(
-    params: SmartOmit<OrderFilterCriteria, "limit" | "offset">
+    params: OrderFilterCriteria
   ): Promise<NonNegativeInteger> {
     const { orderStatus, paymentStatus, customerEmail } = params;
 
@@ -344,7 +344,7 @@ export class InMemoryOrderRepository implements OrderRepository {
     });
   }
 
-  async listOrderWrites(params: {
+  async listAllOrders(params: {
     limit?: PositiveInteger;
     offset?: NonNegativeInteger;
     orderStatus?: OrderStatus | OrderStatus[];

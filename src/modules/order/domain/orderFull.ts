@@ -2,9 +2,15 @@ import { Email } from "../../shared/domain/email.js";
 import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
 import { UUID } from "../../shared/domain/UUID.js";
 import { Customer, PrimitiveCustomer } from "./customer.js";
-import { OrderCreatorDetails } from "./orderCreatorDetails.js";
-import { OrderPaymentInfo } from "./orderPaymentInfo.js";
-import { OrderProduct } from "./orderProduct.js";
+import {
+  OrderCreatorDetails,
+  PrimitiveOrderCreatorDetails,
+} from "./orderCreatorDetails.js";
+import {
+  OrderPaymentInfo,
+  PrimitiveOrderPaymentInfo,
+} from "./orderPaymentInfo.js";
+import { OrderProduct, PrimitiveOrderProduct } from "./orderProduct.js";
 import { OrderStatus, OrderStatusOptions } from "./orderStatus.js";
 import {
   PrimitiveShippingAddress,
@@ -13,9 +19,14 @@ import {
 
 export interface PrimitiveOrderFull {
   orderId: string;
+  status: OrderStatusOptions;
   customer: PrimitiveCustomer;
   shippingAddress: PrimitiveShippingAddress;
-  orderStatus: OrderStatusOptions;
+  createdAt: Date;
+  updatedAt: Date;
+  products: PrimitiveOrderProduct[];
+  paymentInfo: PrimitiveOrderPaymentInfo;
+  creatorDetails: PrimitiveOrderCreatorDetails;
 }
 
 export class OrderFull {
@@ -118,7 +129,7 @@ export class OrderFull {
     return new NonNegativeInteger(totalAmount);
   }
 
-  toPrimitives() {
+  toPrimitives(): PrimitiveOrderFull {
     return {
       orderId: this.orderId.getValue(),
       status: this.orderStatus.getValue(),

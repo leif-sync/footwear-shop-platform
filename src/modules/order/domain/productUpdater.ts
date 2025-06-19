@@ -59,11 +59,20 @@ export class ProductUpdater {
     variant.addStockForSize({ sizeValue, stockToAdd });
   }
 
+  /**
+   * Subtracts stock for a specific variant and size.
+   * @param params.variantId - The ID of the variant.
+   * @param params.sizeValue - The size value for which to subtract stock.
+   * @param params.stockToSubtract - The amount of stock to subtract.
+   * @throws {InvalidVariantError} - If the variant with the given ID does not exist.
+   * @throws {SizeNotAvailableForVariantError} - If the size is not available for the variant.
+   * @throws {NotEnoughStockError} - If there is not enough stock to subtract for the specified size.
+   */
   subtractStockForVariant(params: {
     variantId: UUID;
     sizeValue: PositiveInteger;
     stockToSubtract: PositiveInteger;
-  }) {
+  }): void {
     const { variantId, sizeValue, stockToSubtract } = params;
     const variant = this.variants.get(variantId.getValue());
     if (!variant) throw new InvalidVariantError({ variantId });

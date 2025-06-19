@@ -30,8 +30,8 @@ export class DeleteOrderAndReleaseProductsStock {
     this.orderAssociatedDataProvider = params.orderAssociatedDataProvider;
   }
 
-  async run() {
-    const ordersPaymentExpired = await this.orderRepository.listOrderWrites({
+  async run(): Promise<void> {
+    const ordersPaymentExpired = await this.orderRepository.listAllOrders({
       orderStatus: OrderStatus.create.waitingForPayment(),
       paymentStatus: OrderPaymentStatus.create.expired(),
     });

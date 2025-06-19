@@ -1,11 +1,12 @@
-import { Email } from "../../shared/domain/email.js";
+import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
 import {
-  OrderPaymentStatus,
-  OrderPaymentStatusOptions,
-} from "../domain/orderPaymentStatus.js";
-import { OrderRepository } from "../domain/orderRepository.js";
-import { OrderStatus, OrderStatusOptions } from "../domain/orderStatus.js";
+  OrderFilterCriteria,
+  OrderRepository,
+} from "../domain/orderRepository.js";
 
+/**
+ * Class to count stored orders based on different filters.
+ */
 export class CountStoredOrders {
   private orderRepository: OrderRepository;
 
@@ -14,42 +15,14 @@ export class CountStoredOrders {
   }
 
   /**
-   * Counts the number of stored orders based on the provided filters.
-   * @param params - The parameters for counting stored orders.
-   * @param params.orderStatus - The status of the orders to count. Can be a single status or an array of statuses.
-   * @param params.paymentStatus - The payment status of the orders to count. Can be a single status or an array of statuses.
-   * @param params.customerEmail - The email of the customer whose orders to count. Can be a single email or an array of emails.
-   * @returns The count of stored orders that match the provided filters.
+   * Counts stored orders based on optional filter criteria.
+   *
+   * @param params - Filters to apply. See {@link OrderFilterCriteria} for details.
+   * @returns A Promise resolving to the number of matching stored orders.
    */
-  async run(params: {
-    orderStatus?: OrderStatusOptions | OrderStatusOptions[];
-    paymentStatus?: OrderPaymentStatusOptions | OrderPaymentStatusOptions[];
-    customerEmail?: string | string[];
-  }) {
-    const orderStatus = params.orderStatus
-      ? Array.isArray(params.orderStatus)
-        ? params.orderStatus.map((status) => new OrderStatus(status))
-        : new OrderStatus(params.orderStatus)
-      : undefined;
-
-    const paymentStatus = params.paymentStatus
-      ? Array.isArray(params.paymentStatus)
-        ? params.paymentStatus.map((status) => new OrderPaymentStatus(status))
-        : new OrderPaymentStatus(params.paymentStatus)
-      : undefined;
-
-    const customerEmail = params.customerEmail
-      ? Array.isArray(params.customerEmail)
-        ? params.customerEmail.map((email) => new Email(email))
-        : new Email(params.customerEmail)
-      : undefined;
-
-    const storedOrdersCount = await this.orderRepository.countStoredOrders({
-      orderStatus,
-      paymentStatus,
-      customerEmail,
-    });
-
-    return storedOrdersCount.getValue();
+  async run(params: OrderFilterCriteria): Promise<NonNegativeInteger> {
+    const storedOrdersCount =
+      await this.orderRepository.countStoredOrders(params);
+    return storedOrdersCount;
   }
 }

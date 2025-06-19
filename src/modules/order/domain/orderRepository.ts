@@ -1,5 +1,4 @@
 import { Email } from "../../shared/domain/email.js";
-import { SmartOmit } from "../../shared/domain/helperTypes.js";
 import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
 import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
 import { UUID } from "../../shared/domain/UUID.js";
@@ -10,38 +9,70 @@ import { OrderPaymentStatus } from "./orderPaymentStatus.js";
 import { OrderStatus } from "./orderStatus.js";
 import { OrderWrite } from "./orderWrite.js";
 
+/**
+ * Interface for defining order filter criteria.
+ */
 export interface OrderFilterCriteria {
-  limit: PositiveInteger;
-  offset: NonNegativeInteger;
+  /**
+   * Optional filter for order status. Can be a single status or an array of statuses.
+   */
   orderStatus?: OrderStatus | OrderStatus[];
+  /**
+   * Optional filter for payment status. Can be a single status or an array of statuses.
+   */
   paymentStatus?: OrderPaymentStatus | OrderPaymentStatus[];
+  /**
+   * Optional filter for customer email. Can be a single email or an array of emails.
+   */
   customerEmail?: Email | Email[];
+  /**
+   * Optional filter for order creator. Can be a single creator or an array of creators.
+   */
+  creator?: OrderCreator | OrderCreator[];
+}
+
+/**
+ * Interface for defining paginated order filter criteria, extending OrderFilterCriteria.
+ */
+export interface PaginatedOrderFilterCriteria extends OrderFilterCriteria {
+  /**
+   * Maximum number of results to return.
+   */
+  limit: PositiveInteger;
+  /**
+   * Number of results to skip from the beginning.
+   */
+  offset: NonNegativeInteger;
+}
+
+/**
+ * Interface for defining order search options.
+ */
+export interface OrderSearchOptions {
+  /**
+   * ID of the order to search for.
+   */
+  orderId: UUID;
 }
 
 export abstract class OrderRepository {
   abstract listOrderOverviews(
-    params: OrderFilterCriteria
+    params: PaginatedOrderFilterCriteria
   ): Promise<OrderOverview[]>;
 
-  abstract find(params: { orderId: UUID }): Promise<OrderFull | null>;
+  abstract find(params: OrderSearchOptions): Promise<OrderFull | null>;
 
   abstract create(params: { order: OrderWrite }): Promise<void>;
 
   abstract update(params: { order: OrderWrite }): Promise<void>;
 
-  abstract listOrderWrites(params: {
-    limit?: PositiveInteger;
-    offset?: NonNegativeInteger;
-    orderStatus?: OrderStatus | OrderStatus[];
-    paymentStatus?: OrderPaymentStatus | OrderPaymentStatus[];
-    creator?: OrderCreator | OrderCreator[];
-  }): Promise<OrderWrite[]>;
+  abstract listAllOrders(params: OrderFilterCriteria): Promise<OrderWrite[]>;
 
   abstract delete(params: { orderId: UUID | UUID[] }): Promise<void>;
 
   abstract countStoredOrders(
-    params: SmartOmit<OrderFilterCriteria, "limit" | "offset">
-  ): Promise<NonNegativeInteger>; // !
+    params: OrderFilterCriteria
+  ): Promise<NonNegativeInteger>;
 
   abstract checkIfProductIsBought(params: {
     productId: UUID;
@@ -52,5 +83,5 @@ export abstract class OrderRepository {
     variantId: UUID;
   }): Promise<boolean>;
 
-  abstract checkIfOrderExists(params: { orderId: UUID }): Promise<boolean>;
+  abstract checkIfOrderExists(params: OrderSearchOptions): Promise<boolean>;
 }

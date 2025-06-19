@@ -76,6 +76,7 @@ import { PaymentAssociatedDataProvider } from "../../payment/infrastructure/paym
 import { PrepareOrderForPayment } from "../../payment/application/prepareOrderForPayment.js";
 import { AssociatedDataProvider as CategoryAssociatedDataProvider } from "../../category/infrastructure/associatedDataProvider.js";
 import { CreateAdminOrder } from "../../order/application/createAdminOrder.js";
+import { NonNegativeInteger } from "../domain/nonNegativeInteger.js";
 
 // repositories
 // ! change to valid repositories
@@ -238,7 +239,7 @@ export const ServiceContainer = {
     createCustomerOrder: new CreateCustomerOrder({
       orderAssociatedDataProvider,
       orderTransactionManager,
-      paymentTimeoutDuration: PAYMENT_TIMEOUT_SECONDS,
+      paymentTimeoutDuration: new NonNegativeInteger(PAYMENT_TIMEOUT_SECONDS),
     }),
     createAdminOrder: new CreateAdminOrder({
       orderAssociatedDataProvider,

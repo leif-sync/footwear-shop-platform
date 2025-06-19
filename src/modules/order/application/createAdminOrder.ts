@@ -11,7 +11,11 @@ import {
   setupOrderInformation,
 } from "../domain/setupOrderInformation.js";
 import { OrderCreatorIsRequiredError } from "../domain/errors/orderCreatorIsRequiredError.js";
+import { UUID } from "../../shared/domain/UUID.js";
 
+/**
+ * Use case for creating an order by an admin.
+ */
 export class CreateAdminOrder {
   private readonly associatedDataProvider: OrderAssociatedDataProvider;
   private readonly orderTransactionManager: OrderTransactionManager;
@@ -24,6 +28,24 @@ export class CreateAdminOrder {
     this.orderTransactionManager = params.orderTransactionManager;
   }
 
+  /**
+   * Executes the use case to create an order by an admin.
+   * @param params - Parameters required for creating the order.
+   * @param params.customer - Customer for whom the order is created.
+   * @param params.shippingAddress - Shipping address for the order.
+   * @param params.creatorDetails - Details of the admin creating the order.
+   * @param params.orderStatus - Status of the order.
+   * @param params.paymentInfo - Payment information for the order.
+   * @param params.orderProducts - List of products in the order.
+   * @returns An object containing the order ID.
+   *
+   * @throws {OrderCreatorIsRequiredError} If the creator details are not provided.
+   * @throws {InvalidCreatorError} If the creator ID does not correspond to a valid admin.
+   * @throws {InvalidProductError} If any product in the order is invalid.
+   * @throws {InvalidVariantError} If any variant in the order is invalid.
+   * @throws {SizeNotAvailableForVariantError} If a size is not available for a variant in the order.
+   * @throws {NotEnoughStockError} If there is not enough stock for a variant in the order.
+   */
   async run(params: {
     customer: Customer;
     shippingAddress: ShippingAddress;
@@ -31,7 +53,7 @@ export class CreateAdminOrder {
     orderStatus: OrderStatus;
     paymentInfo: OrderPaymentInfo;
     orderProducts: OrderItem[];
-  }) {
+  }): Promise<{ orderId: UUID }> {
     const {
       customer,
       shippingAddress,

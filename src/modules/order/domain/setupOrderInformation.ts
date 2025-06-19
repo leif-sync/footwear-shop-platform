@@ -11,11 +11,31 @@ import { OrderWrite } from "./orderWrite.js";
 import { ProductUpdater } from "./productUpdater.js";
 import { ShippingAddress } from "./shippingAddress.js";
 
+/**
+ * Represents an item in an order, containing the product ID and its variants.
+ */
 export interface OrderItem {
   productId: UUID;
   productVariants: OrderVariantWrite[];
 }
 
+/**
+ * Sets up the order information, including product details, customer information,
+ * shipping address, creator details, order status, and payment information.
+ * @param params - Parameters required to set up the order information.
+ * @param params.productUpdaters - List of product updaters.
+ * @param params.customer - Customer placing the order.
+ * @param params.shippingAddress - Shipping address for the order.
+ * @param params.creatorDetails - Details of the order creator.
+ * @param params.orderStatus - Status of the order.
+ * @param params.paymentInfo - Payment information for the order.
+ * @param params.orderProducts - List of products in the order.
+ * @returns The created order write object.
+ * @throws {InvalidProductError} - If any product in the order is invalid.
+ * @throws {InvalidVariantError} - If any variant in the order is invalid.
+ * @throws {SizeNotAvailableForVariantError} - If a size is not available for a variant in the order.
+ * @throws {NotEnoughStockError} - If there is not enough stock for a variant in the order.
+ */
 export function setupOrderInformation(params: {
   productUpdaters: ProductUpdater[];
   customer: Customer;
@@ -24,7 +44,7 @@ export function setupOrderInformation(params: {
   orderStatus: OrderStatus;
   paymentInfo: OrderPaymentInfo;
   orderProducts: OrderItem[];
-}) {
+}): OrderWrite {
   const {
     productUpdaters,
     customer,

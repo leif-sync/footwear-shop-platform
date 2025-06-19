@@ -1,7 +1,13 @@
-import { UUID } from "../../shared/domain/UUID.js";
 import { OrderNotFoundError } from "../domain/errors/orderNotFoundError.js";
-import { OrderRepository } from "../domain/orderRepository.js";
+import { PrimitiveOrderFull } from "../domain/orderFull.js";
+import {
+  OrderRepository,
+  OrderSearchOptions,
+} from "../domain/orderRepository.js";
 
+/**
+ * Use case for retrieving an order.
+ */
 export class GetOrder {
   private readonly orderRepository: OrderRepository;
 
@@ -10,21 +16,15 @@ export class GetOrder {
   }
 
   /**
-   * Retrieves an order by its ID.
-   * @param params - The parameters for retrieving the order.
-   * @param params.orderId - The ID of the order to retrieve.
-   * @returns The order represented as a primitive object.
-   * @throws {OrderNotFoundError} If the order with the given ID does not exist.
+   * Executes the use case to retrieve an order.
+   * @param params - Parameters for searching the order, see {@link OrderSearchOptions} for details.
+   * @returns A promise that resolves to the full order details as a {@link PrimitiveOrderFull} object.
+   * @throws {OrderNotFoundError} If the order is not found.
    */
-  async run(params: { orderId: UUID }) {
+  async run(params: OrderSearchOptions): Promise<PrimitiveOrderFull> {
     const { orderId } = params;
-
-    const order = await this.orderRepository.find({
-      orderId,
-    });
-
+    const order = await this.orderRepository.find(params);
     if (!order) throw new OrderNotFoundError({ orderId });
-
     return order.toPrimitives();
   }
 }

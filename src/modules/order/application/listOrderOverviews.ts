@@ -1,13 +1,12 @@
-import { Email } from "../../shared/domain/email.js";
-import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
-import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
+import { PrimitiveOrderOverview } from "../domain/orderOverview.js";
 import {
-  OrderPaymentStatus,
-  OrderPaymentStatusOptions,
-} from "../domain/orderPaymentStatus.js";
-import { OrderRepository } from "../domain/orderRepository.js";
-import { OrderStatus, OrderStatusOptions } from "../domain/orderStatus.js";
+  OrderRepository,
+  PaginatedOrderFilterCriteria,
+} from "../domain/orderRepository.js";
 
+/**
+ * Class to list order overviews based on pagination and filter criteria.
+ */
 export class ListOrderOverviews {
   private readonly orderRepository: OrderRepository;
 
@@ -16,55 +15,14 @@ export class ListOrderOverviews {
   }
 
   /**
-   * Lists order overviews with pagination and optional filters.
-   * @param params - The parameters for listing order overviews.
-   * @param params.limit - The maximum number of orders to return. must be a positive integer.
-   * @param params.offset - The offset for pagination. Must be a non-negative integer.
-   * @param params.orderStatus - Optional filter for order status. Can be a single status or an array of statuses.
-   * @param params.paymentStatus - Optional filter for payment status. Can be a single status or an array of statuses.
-   * @param params.customerEmail - Optional filter for customer email. Can be a single email or an array of emails.
-   * @returns An array of order overviews represented as primitive objects.
-   *
-   * @throws {PositiveIntegerError} If the limit is not a positive integer.
-   * @throws {NonNegativeIntegerError} If the offset is not a non-negative integer.
-   * @throws {EmailError} If any provided email is invalid.
+   * Lists order overviews based on the provided pagination and filter criteria.
+   * @param params Object containing pagination and filter criteria, see {@link PaginatedOrderFilterCriteria}.
+   * @returns A promise that resolves to an array of primitive order overviews, see {@link PrimitiveOrderOverview}.
    */
-  async run(params: {
-    limit: number;
-    offset: number;
-    orderStatus?: OrderStatusOptions | OrderStatusOptions[];
-    paymentStatus?: OrderPaymentStatusOptions | OrderPaymentStatusOptions[];
-    customerEmail?: string | string[];
-  }) {
-    const limit = new PositiveInteger(params.limit);
-    const offset = new NonNegativeInteger(params.offset);
-
-    const orderStatus = params.orderStatus
-      ? Array.isArray(params.orderStatus)
-        ? params.orderStatus.map((status) => new OrderStatus(status))
-        : new OrderStatus(params.orderStatus)
-      : undefined;
-
-    const paymentStatus = params.paymentStatus
-      ? Array.isArray(params.paymentStatus)
-        ? params.paymentStatus.map((status) => new OrderPaymentStatus(status))
-        : new OrderPaymentStatus(params.paymentStatus)
-      : undefined;
-
-    const customerEmail = params.customerEmail
-      ? Array.isArray(params.customerEmail)
-        ? params.customerEmail.map((email) => new Email(email))
-        : new Email(params.customerEmail)
-      : undefined;
-
-    const orders = await this.orderRepository.listOrderOverviews({
-      limit,
-      offset,
-      orderStatus,
-      paymentStatus,
-      customerEmail,
-    });
-
+  async run(
+    params: PaginatedOrderFilterCriteria
+  ): Promise<PrimitiveOrderOverview[]> {
+    const orders = await this.orderRepository.listOrderOverviews(params);
     return orders.map((order) => order.toPrimitives());
   }
 }

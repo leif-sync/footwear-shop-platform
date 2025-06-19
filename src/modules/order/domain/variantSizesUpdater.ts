@@ -44,7 +44,12 @@ export class VariantSizesUpdater {
     return currentStock >= stockToCheck.getValue();
   }
 
-  subtractStock(params: { stockToSubtract: PositiveInteger }) {
+  /**
+   * @description Subtracts stock from the variant size.
+   * @param params.stockToSubtract - The amount of stock to subtract.
+   * @throws {NotEnoughStockError} - If subtracting the stock results in a negative stock value.
+   */
+  subtractStock(params: { stockToSubtract: PositiveInteger }): void {
     const { stockToSubtract } = params;
     const currentStock = this.getCurrentStock();
     const newStock = currentStock - stockToSubtract.getValue();

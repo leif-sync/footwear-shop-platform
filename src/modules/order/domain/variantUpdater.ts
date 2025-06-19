@@ -60,6 +60,13 @@ export class VariantUpdater {
     size.addStock({ stockToAdd });
   }
 
+  /**
+   * Subtracts stock for a specific size of the variant.
+   * @param params.sizeValue - The size value for which to subtract stock.
+   * @param params.stockToSubtract - The amount of stock to subtract.
+   * @throws {SizeNotAvailableForVariantError} - If the size is not available for the variant.
+   * @throws {NotEnoughStockError} - If there is not enough stock to subtract.
+   */
   subtractStockForSize(params: {
     sizeValue: PositiveInteger;
     stockToSubtract: PositiveInteger;
