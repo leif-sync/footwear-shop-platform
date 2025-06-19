@@ -48,6 +48,14 @@ export class ProductUpdater {
     return variant.hasEnoughStockForSize({ sizeValue, stockToCheck });
   }
 
+  /**
+   * Adds stock for a specific variant and size.
+   * @param params.variantId - The ID of the variant.
+   * @param params.sizeValue - The size value for which to add stock.
+   * @param params.stockToAdd - The amount of stock to add.
+   * @throws {InvalidVariantError} - If the variant with the given ID does not exist.
+   * @throws {SizeNotAvailableForVariantError} - If the size is not available for the variant.
+   */
   addStockForVariant(params: {
     variantId: UUID;
     sizeValue: PositiveInteger;

@@ -64,6 +64,10 @@ export class VariantSizesUpdater {
     );
   }
 
+  /**
+   * Adds stock to the variant size.
+   * @param params.stockToAdd - The amount of stock to add.
+   */
   addStock(params: { stockToAdd: PositiveInteger }) {
     const { stockToAdd } = params;
     const currentStockAdjustment = this.stockAdjustment.getValue();

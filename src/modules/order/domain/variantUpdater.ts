@@ -45,6 +45,12 @@ export class VariantUpdater {
     return size.hasEnoughStock({ stockToCheck });
   }
 
+  /**
+   * Adds stock for a specific size of the variant.
+   * @param params.sizeValue - The size value for which to add stock.
+   * @param params.stockToAdd - The amount of stock to add.
+   * @throws {SizeNotAvailableForVariantError} - If the size is not available for the variant.
+   */
   addStockForSize(params: {
     sizeValue: PositiveInteger;
     stockToAdd: PositiveInteger;

@@ -6,6 +6,7 @@ import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
 import { OrderWrite } from "../domain/orderWrite.js";
 import { OrderStatus } from "../domain/orderStatus.js";
 import { OrderPaymentStatus } from "../domain/orderPaymentStatus.js";
+import { InvalidProductError } from "../domain/errors/invalidProductError.js";
 
 type orderProduct = {
   productId: string;
@@ -30,6 +31,15 @@ export class DeleteOrderAndReleaseProductsStock {
     this.orderAssociatedDataProvider = params.orderAssociatedDataProvider;
   }
 
+  /**
+   * Deletes orders that have expired payment status and releases the stock of their associated products.
+   * It aggregates the order products, retrieves product updaters, validates and updates product variants,
+   * and finally applies the product updaters to release the stock.
+   * @returns {Promise<void>} A promise that resolves when the operation is complete.
+   * @throws {InvalidProductError} If there are duplicate products in the repository.
+   * @throws {InvalidVariantError} If a variant is not found in the product updater.
+   * @throws {SizeNotAvailableForVariantError} If a size is not available for a variant in the product updater.
+   */
   async run(): Promise<void> {
     const ordersPaymentExpired = await this.orderRepository.listAllOrders({
       orderStatus: OrderStatus.create.waitingForPayment(),
@@ -81,18 +91,33 @@ export class DeleteOrderAndReleaseProductsStock {
     return productUpdatersMap;
   }
 
+  /**
+   * Validates and updates the product variants for a specific order product.
+   * @param orderProduct - The order product to validate and update.
+   * @param productUpdaters - A map of product updaters keyed by product ID.
+   * @throws {InvalidProductError} - If the product updater is not found for the given product ID.
+   * @throws {InvalidVariantError} - If a variant is not found in the product updater.
+   * @throws {SizeNotAvailableForVariantError} - If a size is not available
+   */
   private validateAndUpdateProductVariants(
     orderProduct: orderProduct,
     productUpdaters: Map<string, ProductUpdater>
   ) {
     const productUpdater = productUpdaters.get(orderProduct.productId);
-    if (!productUpdater) throw new Error("Product updater not found");
+    if (!productUpdater) throw new InvalidProductError({ productId: orderProduct.productId });
 
     orderProduct.variants.forEach((orderVariant) => {
       this.validateAndUpdateVariantSizes(orderVariant, productUpdater);
     });
   }
 
+  /**
+   * Validates and updates the variant sizes for a specific order variant.
+   * @param orderVariant - The order variant to validate and update.
+   * @param productUpdater - The product updater to apply the changes.
+   * @throws {InvalidVariantError} - If the variant is not found in the product updater.
+   * @throws {SizeNotAvailableForVariantError} - If a size is not available
+   */
   private validateAndUpdateVariantSizes(
     orderVariant: orderProduct["variants"][number],
     productUpdater: ProductUpdater
