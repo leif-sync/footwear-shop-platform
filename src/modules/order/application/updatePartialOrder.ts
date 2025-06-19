@@ -14,7 +14,7 @@ import { OrderWrite } from "../domain/orderWrite.js";
 import { ProductUpdater } from "../domain/productUpdater.js";
 import { ShippingAddress } from "../domain/shippingAddress.js";
 
-interface updateOrderParams {
+export interface updateOrderParams {
   orderId: UUID;
   customer?: Customer;
   shippingAddress?: ShippingAddress;
@@ -98,6 +98,20 @@ export class UpdatePartialOrder {
     return productUpdaters;
   }
 
+  /**
+   * Executes the use case to update a partial order.
+   * @param params - Parameters for updating the order, see {@link updateOrderParams} for details.
+   * @returns A promise that resolves when the order is successfully updated.
+   * @throws {OrderNotFoundError} If the order is not found.
+   * @throws {InvalidProductError} If any product in the order is invalid.
+   * @throws {InvalidVariantError} If any variant in the order is invalid.
+   * @throws {SizeNotAvailableForVariantError} If a size is not available for a variant in the order.
+   * @throws {InvalidOrderStatusTransitionError} If trying to transition to an invalid order status.
+   * @throws {CannotUpdateCustomerForOrderStatusError} If trying to update customer when not allowed.
+   * @throws {CannotUpdateShippingForOrderStatusError} If trying to update shipping address when not allowed.
+   * @throws {CannotUpdatePaymentInfoForOrderStatusError} If trying to update payment info when not allowed.
+   * @throws {CannotUpdateProductsForOrderStatusError} If trying to update products when not allowed.
+   */
   async run(params: updateOrderParams): Promise<void> {
     const { orderId, orderStatus, customer, paymentInfo, shippingAddress } =
       params;

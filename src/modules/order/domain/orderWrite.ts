@@ -137,6 +137,12 @@ export class OrderWrite {
     });
   }
 
+  /**
+   * Ensures that the order status and payment status are compatible.
+   * Throws an error if the payment status is not valid for the given order status.
+   * @param params - The parameters containing the order status and payment status.
+   * @throws {InvalidPaymentStatusForOrderStatusError} If the payment status is not valid for the order status.
+   */
   private static ensureOrderStatusAndPayment(params: {
     orderStatus: OrderStatus;
     paymentStatus: OrderPaymentStatus;
@@ -162,6 +168,12 @@ export class OrderWrite {
     }
   }
 
+  /**
+   * Ensures that the transition from the current order status to the next order status is valid.
+   * Throws an error if the transition is not allowed.
+   * @param params - The parameters containing the current and next order statuses.
+   * @throws {InvalidOrderStatusTransitionError} If the transition is not valid.
+   */
   private static ensureOrderStatusTransition(params: {
     currentOrderStatus: OrderStatus;
     nextOrderStatus: OrderStatus;
@@ -191,6 +203,12 @@ export class OrderWrite {
     }
   }
 
+  /**
+   * Ensures that the current order status allows updating the customer information.
+   * Throws an error if the order status does not allow updating the customer.
+   * @param params - The parameters containing the current order status.
+   * @throws {CannotUpdateCustomerForOrderStatusError} If the order status does not allow updating the customer.
+   */
   private static ensureCanUpdateCustomer(params: {
     currentOrderStatus: OrderStatus;
   }) {
@@ -207,6 +225,12 @@ export class OrderWrite {
     }
   }
 
+  /**
+   * Ensures that the current order status allows updating the shipping address.
+   * Throws an error if the order status does not allow updating the shipping address.
+   * @param params - The parameters containing the current order status.
+   * @throws {CannotUpdateShippingForOrderStatusError} If the order status does not allow updating the shipping address.
+   */
   private static ensureCanUpdateShippingAddress(params: {
     currentOrderStatus: OrderStatus;
   }) {
@@ -224,6 +248,12 @@ export class OrderWrite {
     }
   }
 
+  /**
+   * Ensures that the current order status allows updating the payment information.
+   * Throws an error if the order status does not allow updating the payment information.
+   * @param params - The parameters containing the current order status.
+   * @throws {CannotUpdatePaymentInfoForOrderStatusError} If the order status does not allow updating the payment information.
+   */
   private static ensureCanUpdatePaymentInfo(params: {
     currentOrderStatus: OrderStatus;
   }) {
@@ -241,6 +271,12 @@ export class OrderWrite {
     }
   }
 
+  /**
+   * Ensures that the current order status allows updating the products in the order.
+   * Throws an error if the order status does not allow updating the products.
+   * @param params - The parameters containing the current order status.
+   * @throws {CannotUpdateProductsForOrderStatusError} If the order status does not allow updating the products.
+   */
   private static ensureCanUpdateProducts(params: {
     currentOrderStatus: OrderStatus;
   }) {
@@ -378,6 +414,22 @@ export class OrderWrite {
     this.updatedAt = new Date();
   }
 
+  /**
+   * Updates the order details with the provided parameters.
+   * Ensures that the updates are valid based on the current order status.
+   * @param params - The parameters containing the updates for the order.
+   * @param params.updatedOrderStatus - The new order status to set.
+   * @param params.updatedCustomer - The new customer details to set.
+   * @param params.updatedShippingAddress - The new shipping address to set.
+   * @param params.newOrderProducts - The new products to set in the order.
+   * @param params.updatedPaymentInfo - The new payment information to set.
+   * 
+   * @throws {InvalidOrderStatusTransitionError} If trying to transition to an invalid order status.
+   * @throws {CannotUpdateCustomerForOrderStatusError} If trying to update customer when not allowed.
+   * @throws {CannotUpdateShippingForOrderStatusError} If trying to update shipping address when not allowed.
+   * @throws {CannotUpdatePaymentInfoForOrderStatusError} If trying to update payment info when not allowed.
+   * @throws {CannotUpdateProductsForOrderStatusError} If trying to update products when not allowed.
+   */
   updateOrderDetails(params: {
     updatedOrderStatus?: OrderStatus;
     updatedCustomer?: Customer;
