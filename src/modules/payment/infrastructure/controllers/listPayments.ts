@@ -3,10 +3,40 @@ import { listPaymentsQuerySchema } from "../schemas/listPaymentsQuery.js";
 import { HTTP_STATUS } from "../../../shared/infrastructure/httpStatus.js";
 import { ServiceContainer } from "../../../shared/infrastructure/serviceContainer.js";
 import { ZodError } from "zod";
+import { PrimitivePaymentTransaction } from "../../domain/paymentTransaction.js";
+import { PositiveInteger } from "../../../shared/domain/positiveInteger.js";
+import { NonNegativeInteger } from "../../../shared/domain/nonNegativeInteger.js";
+import { PaymentTransactionStatus } from "../../domain/paymentTransactionStatus.js";
 
-export async function listPayments(req: Request, res: Response) {
+interface SuccessApiResponse {
+  payments: PrimitivePaymentTransaction[];
+  meta: {
+    limit: number;
+    offset: number;
+    currentTransactionsCount: number;
+    storedTransactionsCount: number;
+  };
+}
+
+interface ErrorApiResponse {
+  error: {
+    message: string;
+    errors?: ZodError["issues"];
+  };
+}
+
+export async function listPayments(
+  req: Request,
+  res: Response<SuccessApiResponse | ErrorApiResponse>
+) {
   try {
-    const { limit, offset, status } = listPaymentsQuerySchema.parse(req.query);
+    const result = listPaymentsQuerySchema.parse(req.query);
+
+    const limit = new PositiveInteger(result.limit);
+    const offset = new NonNegativeInteger(result.offset);
+    const status = result.status
+      ? new PaymentTransactionStatus(result.status)
+      : undefined;
 
     const payments = await ServiceContainer.payment.listPaymentTransactions.run(
       {
@@ -16,23 +46,25 @@ export async function listPayments(req: Request, res: Response) {
       }
     );
 
-    const currentPaymentsCount =
+    const storedTransactionsCount =
       await ServiceContainer.payment.countPaymentTransactions.run({ status });
 
     res.status(HTTP_STATUS.OK).json({
       meta: {
-        limit,
-        offset,
+        limit: limit.getValue(),
+        offset: offset.getValue(),
         currentTransactionsCount: payments.length,
-        storedTransactionsCount: currentPaymentsCount,
+        storedTransactionsCount: storedTransactionsCount.getValue(),
       },
       payments,
     });
   } catch (error) {
     if (error instanceof ZodError) {
       res.status(HTTP_STATUS.BAD_REQUEST).json({
-        message: "Invalid request",
-        errors: error.issues,
+        error: {
+          message: "Invalid request",
+          errors: error.issues,
+        },
       });
       return;
     }

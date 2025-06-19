@@ -1,9 +1,29 @@
 import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
 import { UUID } from "../../shared/domain/UUID.js";
-import { Currency } from "./currency.js";
-import { PaymentProcessor } from "./paymentProcessor.js";
-import { PaymentTransactionStatus } from "./paymentTransactionStatus.js";
-import { TransactionType } from "./transactionType.js";
+import { Currency, CurrencyOptions } from "./currency.js";
+import {
+  PaymentProcessor,
+  PaymentProcessorOptions,
+} from "./paymentProcessor.js";
+import {
+  PaymentTransactionStatus,
+  PaymentTransactionStatusOptions,
+} from "./paymentTransactionStatus.js";
+import { TransactionType, TransactionTypeOptions } from "./transactionType.js";
+
+export interface PrimitivePaymentTransaction {
+  transactionId: string;
+  orderId: string;
+  transactionType: TransactionTypeOptions;
+  transactionStatus: PaymentTransactionStatusOptions;
+  amount: number;
+  paymentProcessor: PaymentProcessorOptions;
+  rawResponse: string;
+  currency: CurrencyOptions;
+  createdAt: Date;
+  updatedAt: Date;
+  gatewaySessionId?: string;
+}
 
 export class PaymentTransaction {
   private readonly transactionId: UUID;
@@ -113,7 +133,7 @@ export class PaymentTransaction {
     return NonNegativeInteger.clone(this.amount);
   }
 
-  toPrimitives() {
+  toPrimitives(): PrimitivePaymentTransaction {
     return {
       transactionId: this.transactionId.getValue(),
       orderId: this.orderId.getValue(),

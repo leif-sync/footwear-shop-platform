@@ -1,8 +1,8 @@
-import { PaymentTransactionRepository } from "../domain/paymentTransactionRepository.js";
+import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
 import {
-  PaymentTransactionStatus,
-  PaymentTransactionStatusOptions,
-} from "../domain/paymentTransactionStatus.js";
+  PaymentFilterCriteria,
+  PaymentTransactionRepository,
+} from "../domain/paymentTransactionRepository.js";
 
 export class CountTransactions {
   private readonly paymentTransactionRepository: PaymentTransactionRepository;
@@ -13,15 +13,8 @@ export class CountTransactions {
     this.paymentTransactionRepository = params.paymentTransactionRepository;
   }
 
-  async run(params: { status?: PaymentTransactionStatusOptions }): Promise<number> {
-    const transactionStatus = params.status
-      ? new PaymentTransactionStatus(params.status)
-      : undefined;
-
-    const count = await this.paymentTransactionRepository.count({
-      status: transactionStatus,
-    });
-
-    return count.getValue();
+  async run(params: PaymentFilterCriteria): Promise<NonNegativeInteger> {
+    const count = await this.paymentTransactionRepository.count(params);
+    return count;
   }
 }

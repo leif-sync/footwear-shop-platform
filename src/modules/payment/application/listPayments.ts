@@ -1,10 +1,8 @@
-import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
-import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
-import { PaymentTransactionRepository } from "../domain/paymentTransactionRepository.js";
+import { PrimitivePaymentTransaction } from "../domain/paymentTransaction.js";
 import {
-  PaymentTransactionStatus,
-  PaymentTransactionStatusOptions,
-} from "../domain/paymentTransactionStatus.js";
+  PaginatedPaymentFilterCriteria,
+  PaymentTransactionRepository,
+} from "../domain/paymentTransactionRepository.js";
 
 export class ListPayments {
   private readonly paymentTransactionRepository: PaymentTransactionRepository;
@@ -15,23 +13,10 @@ export class ListPayments {
     this.paymentTransactionRepository = params.paymentTransactionRepository;
   }
 
-  async run(params: {
-    limit: number;
-    offset: number;
-    status?: PaymentTransactionStatusOptions;
-  }) {
-    const limit = new PositiveInteger(params.limit);
-    const offset = new NonNegativeInteger(params.offset);
-    const status = params.status
-      ? new PaymentTransactionStatus(params.status)
-      : undefined;
-
-    const transactions = await this.paymentTransactionRepository.list({
-      limit,
-      offset,
-      status,
-    });
-
+  async run(
+    params: PaginatedPaymentFilterCriteria
+  ): Promise<PrimitivePaymentTransaction[]> {
+    const transactions = await this.paymentTransactionRepository.list(params);
     return transactions.map((transaction) => transaction.toPrimitives());
   }
 }
