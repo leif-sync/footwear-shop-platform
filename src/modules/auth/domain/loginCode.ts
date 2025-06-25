@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { Email } from "../../shared/domain/email.js";
 import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
+import { UUID } from "../../shared/domain/UUID.js";
 
 export const loginCodeConstraints = {
   length: 6,
@@ -14,6 +15,7 @@ function generateLoginCode() {
 }
 
 export class LoginCode {
+  private readonly loginCodeId: UUID;
   private readonly code: string;
   private readonly createdAt: Date;
   private readonly expiresInSeconds: NonNegativeInteger;
@@ -21,12 +23,14 @@ export class LoginCode {
   private isUsed: boolean;
 
   constructor(params: {
+    loginCodeId: UUID;
     code: string;
     createdAt: Date;
     expiresInSeconds: NonNegativeInteger;
     notificationEmail: Email;
     isUsed: boolean;
   }) {
+    this.loginCodeId = UUID.clone(params.loginCodeId);
     this.code = params.code;
     this.createdAt = new Date(params.createdAt);
     this.expiresInSeconds = NonNegativeInteger.clone(params.expiresInSeconds);
@@ -45,6 +49,7 @@ export class LoginCode {
   }
 
   static create(params: {
+    loginCodeId: UUID;
     notificationEmail: Email;
     expiresInSeconds: NonNegativeInteger;
   }): LoginCode {
@@ -52,6 +57,7 @@ export class LoginCode {
     const createdAt = new Date();
 
     return new LoginCode({
+      loginCodeId: params.loginCodeId,
       code,
       createdAt,
       expiresInSeconds: params.expiresInSeconds,
@@ -62,6 +68,7 @@ export class LoginCode {
 
   static clone(loginCode: LoginCode): LoginCode {
     return new LoginCode({
+      loginCodeId: UUID.clone(loginCode.loginCodeId),
       code: loginCode.getCode(),
       createdAt: loginCode.createdAt,
       expiresInSeconds: loginCode.expiresInSeconds,

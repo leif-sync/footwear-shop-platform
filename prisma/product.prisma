@@ -1,0 +1,60 @@
+enum PriceDiscountType {
+  PERCENT
+  FIXED
+  NONE
+}
+
+enum Visibility {
+  HIDDEN
+  VISIBLE
+}
+
+model Product {
+  productId String @id @db.Uuid
+  name String
+  description String
+  priceBaseValue Int
+  priceDiscountType PriceDiscountType
+  priceDiscountValue Int
+  priceDiscountStartAt DateTime? @db.Timestamptz()
+  priceDiscountEndAt DateTime? @db.Timestamptz()
+  categories Category[]
+  variants Variant[]
+  visibility Visibility
+  orderProducts OrderProduct[]
+}
+
+model VariantDetailContent{
+  content String
+  detailId String @db.Uuid
+  variantId String @db.Uuid
+  detail VariantDetail @relation(fields: [detailId], references: [variantDetailId])
+  variant Variant @relation(fields: [variantId], references: [variantId])
+  @@id([detailId, variantId])
+}
+
+model VariantSize {
+  variantSizeId String @id @db.Uuid
+  stock Int
+  sizeId String @db.Uuid
+  variantId String @db.Uuid
+  variant Variant @relation(fields: [variantId], references: [variantId])
+  size Size @relation(fields: [sizeId], references: [sizeId])
+  @@unique([sizeId, variantId])
+  orderVariants OrderVariant[]
+}
+
+model Variant {
+  variantId String @id @db.Uuid
+  hexColor String
+  images Json
+  details VariantDetailContent[]
+  sizes VariantSize[]
+  tags Tag[]
+  createdAt DateTime @db.Timestamptz()
+  updatedAt DateTime @db.Timestamptz()
+  visibility Visibility
+  productId String @db.Uuid
+  product Product @relation(fields: [productId], references: [productId])
+}
+

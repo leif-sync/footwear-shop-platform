@@ -1,0 +1,5 @@
+model Tag {
+  tagId String @id @db.Uuid
+  name String
+  variants Variant[] 
+}

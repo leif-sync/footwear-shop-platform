@@ -1,0 +1,5 @@
+model Category {
+  categoryId String @id @db.Uuid
+  name String
+  products Product[] 
+}

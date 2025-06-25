@@ -11,6 +11,7 @@ import { LoginCode } from "../../domain/loginCode.js";
 import { Request, Response } from "express";
 import { AdminNotFoundError } from "../../../admin/domain/errors/adminNotFoundError.js";
 import { isProduction } from "../../../../environmentVariables.js";
+import { UUID } from "../../../shared/domain/UUID.js";
 
 const loginCodeExpiresInSeconds = 60 * 5;
 
@@ -58,6 +59,7 @@ export async function sendLoginCode(req: Request, res: Response) {
   }
 
   const loginCode = LoginCode.create({
+    loginCodeId: UUID.generateRandomUUID(),
     expiresInSeconds: new NonNegativeInteger(loginCodeExpiresInSeconds),
     notificationEmail: email,
   });

@@ -1,0 +1,64 @@
+enum OrderStatus {
+  WAITING_FOR_PAYMENT
+  WAITING_FOR_SHIPMENT
+  SHIPPED
+  CANCELED
+  DELIVERED
+  RETURNED
+}
+
+enum OrderPaymentStatus {
+  IN_PAYMENT_GATEWAY
+  PENDING
+  PAID
+  EXPIRED
+  REFUNDED
+}
+
+enum OrderCreatorType {
+  GUEST
+  ADMIN
+}
+
+model Order {
+  orderId String @id @db.Uuid
+  orderStatus OrderStatus
+  customerFirstName String
+  customerLastName String
+  customerEmail String
+  customerPhone String
+  shippingAddressRegion String
+  shippingAddressCommune String
+  shippingAddressStreetName String
+  shippingAddressStreetNumber String
+  shippingAddressAdditionalInfo String?
+  paymentStatus OrderPaymentStatus
+  paymentDeadline DateTime @db.Timestamptz()
+  paymentAt DateTime? @db.Timestamptz()
+  createdAt DateTime @db.Timestamptz()
+  updatedAt DateTime @db.Timestamptz()
+  creatorType OrderCreatorType
+  creatorId String? @db.Uuid
+  products OrderProduct[]
+}
+
+model OrderProduct {
+  orderProductId String @id @db.Uuid
+  unitPrice Int
+  productId String @db.Uuid
+  orderId String @db.Uuid
+  orderVariants OrderVariant[]
+  order Order @relation(fields: [orderId], references: [orderId])
+  product Product @relation(fields: [productId], references: [productId])
+  @@unique([orderId, productId]) // Ensure a product can only be ordered once per order
+}
+
+model OrderVariant {
+  orderVariantId String @id @db.Uuid
+  quantity Int
+  orderProductId String @db.Uuid
+  variantSizeId String @db.Uuid
+  variantSize VariantSize @relation(fields: [variantSizeId], references: [variantSizeId])
+  orderProduct OrderProduct @relation(fields: [orderProductId], references: [orderProductId])
+  @@unique([orderProductId, variantSizeId]) // Ensure a variant can only be ordered once per order product
+}

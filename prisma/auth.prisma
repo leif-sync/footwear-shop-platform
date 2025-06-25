@@ -1,0 +1,13 @@
+model AdminRefreshToken {
+  tokenId String @id @db.Uuid
+  adminId String @unique @db.Uuid
+}
+
+model LoginCode {
+  loginCodeId String @id @db.Uuid
+  code String
+  createdAt DateTime @db.Timestamptz()
+  expiresInSeconds Int
+  notificationEmail String
+  isUsed Boolean
+}

@@ -1,0 +1,5 @@
+model Size {
+  sizeId String @id @db.Uuid
+  sizeValue Int
+  variantSizes VariantSize[]
+}

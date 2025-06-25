@@ -1,0 +1,33 @@
+enum TransactionType {
+  PAYMENT
+  REFUND
+}
+
+enum TransactionStatus {
+  APPROVED
+  DECLINED
+  CANCELED
+  PENDING
+}
+
+enum Currency {
+  CLP
+}
+
+enum PaymentProcessor {
+  WEBPAY
+}
+
+model PaymentTransaction {
+  transactionId String @id @db.Uuid
+  orderId String @db.Uuid
+  transactionType TransactionType
+  transactionStatus TransactionStatus
+  amount Int
+  paymentProcessor PaymentProcessor
+  rawResponse Json
+  currency Currency
+  createdAt DateTime @db.Timestamptz()
+  updatedAt DateTime @db.Timestamptz()
+  gatewaySessionId String?
+}

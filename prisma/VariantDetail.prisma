@@ -1,0 +1,5 @@
+model VariantDetail {
+  variantDetailId String @id @db.Uuid
+  title String
+  variantContent VariantDetailContent[]
+}

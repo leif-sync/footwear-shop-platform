@@ -1,0 +1,17 @@
+
+model Admin {
+  adminId String @id @db.Uuid
+  firstName String
+  lastName String
+  email String @unique
+  phoneNumber String
+  createdAt DateTime @db.Timestamptz()
+  updatedAt DateTime @db.Timestamptz()
+  permissions Permissions[]
+}
+
+model Permissions {
+  permissionId String @id @db.Uuid
+  name String @unique
+  admins Admin[]
+}
