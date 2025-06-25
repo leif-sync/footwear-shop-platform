@@ -16,7 +16,7 @@ import {
   JWT_SECRET,
 } from "../../../../environmentVariables.js";
 import { UUID } from "../../../shared/domain/UUID.js";
-import { AdminRefreshTokenPrimitive } from "../../domain/adminRefreshToken.js";
+import { PrimitiveAdminRefreshToken } from "../../domain/adminRefreshToken.js";
 
 export async function refreshAccessToken(req: Request, res: Response) {
   const refreshTokenFromCookies = req.cookies[adminRefreshTokenName] as
@@ -30,13 +30,13 @@ export async function refreshAccessToken(req: Request, res: Response) {
     return;
   }
 
-  let tokenPayload: AdminRefreshTokenPrimitive;
+  let tokenPayload: PrimitiveAdminRefreshToken;
 
   try {
     tokenPayload = jwt.verify(
       refreshTokenFromCookies,
       JWT_SECRET
-    ) as AdminRefreshTokenPrimitive;
+    ) as PrimitiveAdminRefreshToken;
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
       res.status(HTTP_STATUS.UNAUTHORIZED).json({

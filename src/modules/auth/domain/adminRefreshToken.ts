@@ -1,6 +1,6 @@
 import { UUID } from "../../shared/domain/UUID.js";
 
-export type AdminRefreshTokenPrimitive = {
+export type PrimitiveAdminRefreshToken = {
   tokenId: string;
   adminId: string;
 };
@@ -29,7 +29,7 @@ export class AdminRefreshToken {
     });
   }
 
-  toPrimitives(): AdminRefreshTokenPrimitive {
+  toPrimitives(): PrimitiveAdminRefreshToken {
     return {
       tokenId: this.tokenId.getValue(),
       adminId: this.adminId.getValue(),
