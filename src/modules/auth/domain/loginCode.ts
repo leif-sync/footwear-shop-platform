@@ -14,6 +14,15 @@ function generateLoginCode() {
   return code;
 }
 
+export interface PrimitiveLoginCode {
+  loginCodeId: string;
+  code: string;
+  createdAt: string;
+  expiresInSeconds: number;
+  notificationEmail: string;
+  isUsed: boolean;
+}
+
 export class LoginCode {
   private readonly loginCodeId: UUID;
   private readonly code: string;
@@ -116,5 +125,16 @@ export class LoginCode {
 
   isValid(): boolean {
     return !this.isExpired() && !this.isUsed;
+  }
+
+  toPrimitives(): PrimitiveLoginCode {
+    return {
+      loginCodeId: this.loginCodeId.getValue(),
+      code: this.code,
+      createdAt: this.createdAt.toISOString(),
+      expiresInSeconds: this.expiresInSeconds.getValue(),
+      notificationEmail: this.notificationEmail.getValue(),
+      isUsed: this.isUsed,
+    };
   }
 }

@@ -8,6 +8,6 @@ model LoginCode {
   code String
   createdAt DateTime @db.Timestamptz()
   expiresInSeconds Int
-  notificationEmail String
+  notificationEmail String @unique
   isUsed Boolean
 }
