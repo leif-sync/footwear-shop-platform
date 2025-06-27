@@ -3,6 +3,12 @@ export enum TransactionTypeOptions {
   REFUND = "REFUND",
 }
 
+export class TransactionTypeError extends Error {
+  constructor(params: { invalidTransactionType: string }) {
+    super(`Invalid transaction type: ${params.invalidTransactionType}`);
+  }
+}
+
 export class TransactionType {
   private readonly value: TransactionTypeOptions;
 
@@ -36,5 +42,16 @@ export class TransactionType {
 
   isRefund() {
     return this.equals(TransactionTypeOptions.REFUND);
+  }
+
+  static from(value: string): TransactionType {
+    if (
+      !Object.values(TransactionTypeOptions).includes(
+        value as TransactionTypeOptions
+      )
+    ) {
+      throw new Error(`Invalid transaction type: ${value}`);
+    }
+    return new TransactionType(value as TransactionTypeOptions);
   }
 }

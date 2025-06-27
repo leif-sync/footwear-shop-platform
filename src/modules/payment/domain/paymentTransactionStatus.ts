@@ -5,6 +5,14 @@ export enum PaymentTransactionStatusOptions {
   PENDING = "PENDING",
 }
 
+export class PaymentTransactionStatusError extends Error {
+  constructor(params: { invalidPaymentTransactionStatus: string }) {
+    super(
+      `Invalid payment transaction status: ${params.invalidPaymentTransactionStatus}`
+    );
+  }
+}
+
 export class PaymentTransactionStatus {
   private readonly value: PaymentTransactionStatusOptions;
 
@@ -40,5 +48,20 @@ export class PaymentTransactionStatus {
 
   isApproved() {
     return this.equals(PaymentTransactionStatusOptions.APPROVED);
+  }
+
+  static from(value: string): PaymentTransactionStatus {
+    if (
+      !Object.values(PaymentTransactionStatusOptions).includes(
+        value as PaymentTransactionStatusOptions
+      )
+    ) {
+      throw new PaymentTransactionStatusError({
+        invalidPaymentTransactionStatus: value,
+      });
+    }
+    return new PaymentTransactionStatus(
+      value as PaymentTransactionStatusOptions
+    );
   }
 }
