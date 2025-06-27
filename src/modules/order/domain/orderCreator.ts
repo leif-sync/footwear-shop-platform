@@ -3,6 +3,12 @@ export enum OrderCreatorOptions {
   GUEST = "GUEST",
 }
 
+export class OrderCreatorError extends Error {
+  constructor(params: { invalidCreatorType: string }) {
+    super(`Invalid order creator type: ${params.invalidCreatorType}`);
+  }
+}
+
 export class OrderCreator {
   private readonly creatorType: OrderCreatorOptions;
 
@@ -21,5 +27,17 @@ export class OrderCreator {
 
   getValue(): OrderCreatorOptions {
     return this.creatorType;
+  }
+
+  static from(value: string): OrderCreator {
+    const creatorType = Object.values(OrderCreatorOptions).find(
+      (type) => type === value
+    );
+
+    if (!creatorType) {
+      throw new OrderCreatorError({ invalidCreatorType: value });
+    }
+
+    return new OrderCreator(creatorType);
   }
 }

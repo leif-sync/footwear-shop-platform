@@ -106,4 +106,18 @@ export class OrderPaymentInfo {
       paymentAt: this.paymentAt,
     };
   }
+
+  static fromPrimitives(
+    primitive: PrimitiveOrderPaymentInfo
+  ): OrderPaymentInfo {
+    return new OrderPaymentInfo({
+      paymentStatus: OrderPaymentStatus.from(primitive.paymentStatus),
+      paymentDeadline: new Date(primitive.paymentDeadline),
+      paymentAt: primitive.paymentAt ? new Date(primitive.paymentAt) : null,
+    });
+  }
+
+  static from(data: PrimitiveOrderPaymentInfo): OrderPaymentInfo {
+    return OrderPaymentInfo.fromPrimitives(data);
+  }
 }

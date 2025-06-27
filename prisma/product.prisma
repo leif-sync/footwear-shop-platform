@@ -40,21 +40,21 @@ model VariantSize {
   variantId String @db.Uuid
   variant Variant @relation(fields: [variantId], references: [variantId])
   size Size @relation(fields: [sizeId], references: [sizeId])
-  @@unique([sizeId, variantId])
   orderVariants OrderVariant[]
+  @@unique([sizeId, variantId])
 }
 
 model Variant {
   variantId String @id @db.Uuid
   hexColor String
-  images Json
+  images Json // { imageUrl: string, imageAlt: string }[]
+  createdAt DateTime @db.Timestamptz()
+  updatedAt DateTime @db.Timestamptz()
+  productId String @db.Uuid
+  product Product @relation(fields: [productId], references: [productId])
+  visibility Visibility
   details VariantDetailContent[]
   sizes VariantSize[]
   tags Tag[]
-  createdAt DateTime @db.Timestamptz()
-  updatedAt DateTime @db.Timestamptz()
-  visibility Visibility
-  productId String @db.Uuid
-  product Product @relation(fields: [productId], references: [productId])
 }
 

@@ -44,4 +44,14 @@ export class OrderCreatorDetails {
       creatorId: this.creatorId ? this.creatorId.getValue() : undefined,
     };
   }
+
+  static from(data: PrimitiveOrderCreatorDetails): OrderCreatorDetails {
+    const orderCreator = new OrderCreator(data.creator);
+    const creatorId = data.creatorId ? new UUID(data.creatorId) : undefined;
+
+    return new OrderCreatorDetails({
+      orderCreator,
+      creatorId,
+    });
+  }
 }

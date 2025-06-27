@@ -37,4 +37,19 @@ export class OrderVariantWrite {
       ),
     };
   }
+
+  static from(data: PrimitiveOrderVariantWrite): OrderVariantWrite {
+    return this.fromPrimitives(data);
+  }
+
+  static fromPrimitives(
+    primitive: PrimitiveOrderVariantWrite
+  ): OrderVariantWrite {
+    return new OrderVariantWrite({
+      variantId: new UUID(primitive.variantId),
+      variantSizes: primitive.variantSizes.map((size) => {
+        return OrderVariantSize.from(size);
+      }),
+    });
+  }
 }

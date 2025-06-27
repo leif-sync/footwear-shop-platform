@@ -38,4 +38,11 @@ export class OrderVariantSize {
       quantity: this.quantity.getValue(),
     };
   }
+
+  static from(primitive: PrimitiveOrderVariantSize): OrderVariantSize {
+    return new OrderVariantSize({
+      sizeValue: new PositiveInteger(primitive.sizeValue),
+      quantity: new PositiveInteger(primitive.quantity),
+    });
+  }
 }

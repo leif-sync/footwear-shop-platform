@@ -28,7 +28,30 @@ export class OrderProductWrite {
     this.productVariants = params.productVariants;
   }
 
-  static from(product: OrderProduct) {
+  static from(
+    data: OrderProduct | PrimitiveOrderProductWrite
+  ): OrderProductWrite {
+    const isFromOrderProduct = data instanceof OrderProduct;
+    if (isFromOrderProduct) {
+      return this.fromOrderProduct(data);
+    }
+    return this.fromPrimitives(data);
+  }
+
+  static fromPrimitives(data: PrimitiveOrderProductWrite): OrderProductWrite {
+    const productId = new UUID(data.productId);
+    const unitPrice = new PositiveInteger(data.unitPrice);
+    const productVariants = data.productVariants.map((variant) =>
+      OrderVariantWrite.fromPrimitives(variant)
+    );
+
+    return new OrderProductWrite({
+      productId,
+      productVariants,
+      unitPrice,
+    });
+  }
+  static fromOrderProduct(product: OrderProduct): OrderProductWrite {
     const productId = new UUID(product.getProductId());
     const unitPrice = new PositiveInteger(product.getUnitPrice());
 

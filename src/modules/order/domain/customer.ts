@@ -69,4 +69,13 @@ export class Customer {
       phone: this.phone.getValue(),
     };
   }
+
+  static from(primitive: PrimitiveCustomer): Customer {
+    return new Customer({
+      firstName: new CustomerFirstName(primitive.firstName),
+      lastName: new CustomerLastName(primitive.lastName),
+      email: new Email(primitive.email),
+      phone: new Phone(primitive.phone),
+    });
+  }
 }

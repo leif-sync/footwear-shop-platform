@@ -311,7 +311,7 @@ export class OrderWrite {
     return OrderWrite.clone(this);
   }
 
-  static from(order: OrderFull) {
+  static fromOrderFull(order: OrderFull) {
     const orderId = order.getOrderId();
     const orderPrimitives = order.toPrimitives();
     const orderStatus = new OrderStatus(orderPrimitives.status);
@@ -423,7 +423,7 @@ export class OrderWrite {
    * @param params.updatedShippingAddress - The new shipping address to set.
    * @param params.newOrderProducts - The new products to set in the order.
    * @param params.updatedPaymentInfo - The new payment information to set.
-   * 
+   *
    * @throws {InvalidOrderStatusTransitionError} If trying to transition to an invalid order status.
    * @throws {CannotUpdateCustomerForOrderStatusError} If trying to update customer when not allowed.
    * @throws {CannotUpdateShippingForOrderStatusError} If trying to update shipping address when not allowed.
@@ -639,5 +639,29 @@ export class OrderWrite {
       paymentInfo: this.paymentInfo.toPrimitives(),
       creatorDetails: this.creatorDetails.toPrimitives(),
     };
+  }
+
+  static fromPrimitives(data: PrimitiveOrderWrite): OrderWrite {
+    return new OrderWrite({
+      orderId: new UUID(data.orderId),
+      orderStatus: new OrderStatus(data.orderStatus),
+      customer: Customer.from(data.customer),
+      shippingAddress: ShippingAddress.from(data.shippingAddress),
+      orderProducts: data.orderProducts.map((product) =>
+        OrderProductWrite.fromPrimitives(product)
+      ),
+      createdAt: new Date(data.createdAt),
+      updatedAt: new Date(data.updatedAt),
+      paymentInfo: OrderPaymentInfo.from(data.paymentInfo),
+      creatorDetails: OrderCreatorDetails.from(data.creatorDetails),
+    });
+  }
+
+  static from(data: PrimitiveOrderWrite | OrderFull): OrderWrite {
+    const isFromOrderFull = data instanceof OrderFull;
+    if (isFromOrderFull) {
+      return this.fromOrderFull(data);
+    }
+    return this.fromPrimitives(data);
   }
 }

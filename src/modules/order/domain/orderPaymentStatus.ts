@@ -6,17 +6,16 @@ export enum OrderPaymentStatusOptions {
   REFUNDED = "REFUNDED",
 }
 
-const paymentStatusOptionsSet = new Set(
-  Object.values(OrderPaymentStatusOptions)
-);
+export class OrderPaymentStatusError extends Error {
+  constructor(params: { invalidPaymentStatus: string }) {
+    super(`Invalid order payment status: ${params.invalidPaymentStatus}`);
+  }
+}
 
 export class OrderPaymentStatus {
   private readonly value: OrderPaymentStatusOptions;
 
   constructor(value: OrderPaymentStatusOptions) {
-    if (!paymentStatusOptionsSet.has(value))
-      throw new Error("Invalid payment status");
-
     this.value = value;
   }
 
@@ -41,5 +40,15 @@ export class OrderPaymentStatus {
     if (status instanceof OrderPaymentStatus)
       return this.value === status.getValue();
     return this.value === status;
+  }
+
+  static from(value: string): OrderPaymentStatus {
+    const status = Object.values(OrderPaymentStatusOptions).find(
+      (option) => option === value
+    );
+    if (!status) {
+      throw new OrderPaymentStatusError({ invalidPaymentStatus: value });
+    }
+    return new OrderPaymentStatus(status);
   }
 }

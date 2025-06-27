@@ -121,6 +121,7 @@ export class UpdatePartialOrder {
 
     const orderWrite = OrderWrite.from(orderFound);
 
+    // TODO: Create a new entity to be able to update orders, since at the moment it is not possible to update orderProducts
     orderWrite.updateOrderDetails({
       updatedOrderStatus: orderStatus,
       updatedCustomer: customer,

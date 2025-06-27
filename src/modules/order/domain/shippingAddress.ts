@@ -96,4 +96,14 @@ export class ShippingAddress {
       additionalInfo: this.additionalInfo,
     };
   }
+
+  static from(primitive: PrimitiveShippingAddress): ShippingAddress {
+    return new ShippingAddress({
+      region: primitive.region,
+      commune: primitive.commune,
+      streetName: primitive.streetName,
+      streetNumber: primitive.streetNumber,
+      additionalInfo: primitive.additionalInfo,
+    });
+  }
 }

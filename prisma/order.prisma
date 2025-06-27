@@ -39,7 +39,7 @@ model Order {
   updatedAt DateTime @db.Timestamptz()
   creatorType OrderCreatorType
   creatorId String? @db.Uuid
-  products OrderProduct[]
+  orderProducts OrderProduct[]
 }
 
 model OrderProduct {
