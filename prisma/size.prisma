@@ -1,5 +1,5 @@
 model Size {
   sizeId String @id @db.Uuid
-  sizeValue Int
+  sizeValue Int @unique
   variantSizes VariantSize[]
 }
