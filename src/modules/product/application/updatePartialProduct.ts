@@ -1,7 +1,7 @@
 import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
 import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
 import { UUID } from "../../shared/domain/UUID.js";
-import { discountOptions, DiscountType } from "../domain/discountType.js";
+import { DiscountOptions, DiscountType } from "../domain/discountType.js";
 import { ProductNotFoundError } from "../domain/errors/productNotFoundError.js";
 import { ProductPrice } from "../domain/productPrice.js";
 import { ProductRepository } from "../domain/productRepository.js";
@@ -15,7 +15,7 @@ type UpdatePartialProductParams = {
   productCategories?: string[];
   price?: {
     baseValue: number;
-    discountType: discountOptions;
+    discountType: DiscountOptions;
     discountValue: number;
     discountStartAt: Date | null;
     discountEndAt: Date | null;

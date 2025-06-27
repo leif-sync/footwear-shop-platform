@@ -1,40 +1,31 @@
-export const discountOptions = {
-  PERCENT: "PERCENT",
-  FIXED: "FIXED",
-  NONE: "NONE",
-} as const;
-
-export type discountOptions = keyof typeof discountOptions;
-const validDiscountTypes = new Set(Object.keys(discountOptions));
+export enum DiscountOptions {
+  PERCENT = "PERCENT",
+  FIXED = "FIXED",
+  NONE = "NONE",
+}
 
 export class DiscountType {
-  private readonly value: discountOptions;
+  private readonly value: DiscountOptions;
 
-  constructor(value: discountOptions) {
+  constructor(value: DiscountOptions) {
     this.value = value;
-    this.ensureIsValid();
   }
 
   static create = {
-    percent: () => new DiscountType(discountOptions.PERCENT),
-    fixed: () => new DiscountType(discountOptions.FIXED),
-    none: () => new DiscountType(discountOptions.NONE),
+    percent: () => new DiscountType(DiscountOptions.PERCENT),
+    fixed: () => new DiscountType(DiscountOptions.FIXED),
+    none: () => new DiscountType(DiscountOptions.NONE),
   };
 
   static clone(discountType: DiscountType) {
     return new DiscountType(discountType.getValue());
   }
 
-  private ensureIsValid() {
-    if (!validDiscountTypes.has(this.value))
-      throw new Error("Invalid discount type");
-  }
-
   getValue() {
     return this.value;
   }
 
-  equals(discountType: DiscountType | discountOptions) {
+  equals(discountType: DiscountType | DiscountOptions) {
     if (discountType instanceof DiscountType)
       return this.value === discountType.getValue();
 

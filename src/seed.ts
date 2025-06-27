@@ -22,7 +22,7 @@ import {
 import { ProductPrice } from "./modules/product/domain/productPrice.js";
 import { PositiveInteger } from "./modules/shared/domain/positiveInteger.js";
 import {
-  discountOptions,
+  DiscountOptions,
   DiscountType,
 } from "./modules/product/domain/discountType.js";
 import { NonNegativeInteger } from "./modules/shared/domain/nonNegativeInteger.js";
@@ -99,7 +99,7 @@ await ServiceContainer.detail.createDetail.run({
 // create initial product
 const price = new ProductPrice({
   baseValue: new PositiveInteger(120),
-  discountType: new DiscountType(discountOptions.PERCENT),
+  discountType: new DiscountType(DiscountOptions.PERCENT),
   discountValue: new NonNegativeInteger(15),
   discountStartAt: new Date("2025-02-18T00:00:00.000Z"),
   discountEndAt: new Date("2025-03-18T00:00:00.000Z"),

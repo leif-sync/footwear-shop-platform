@@ -10,7 +10,7 @@ import { messagesFromMulterError, multerFileFilter } from "../multerConfig.js";
 import { productSchema } from "../schemas/product.js";
 import { ZodError } from "zod";
 import { visibilityOptions } from "../../domain/visibility.js";
-import { discountOptions } from "../../domain/discountType.js";
+import { DiscountOptions } from "../../domain/discountType.js";
 import { variantConstraint } from "../../domain/variantConstraints.js";
 import { productConstraint } from "../../domain/productConstraints.js";
 
@@ -44,7 +44,7 @@ export interface ProductUploaded {
   productCategories: string[];
   price: {
     baseValue: number;
-    discountType: discountOptions;
+    discountType: DiscountOptions;
     discountValue: number;
     discountStartAt: Date | null;
     discountEndAt: Date | null;
@@ -124,7 +124,9 @@ export const createProductFieldData = "productData";
 // * los errores son manejados por el errorHandler
 async function handleProductUpload(req: Request, res: Response) {
   // Verifica si el producto está presente y es un JSON válido
-  const parsedProduct = productSchema.parse(JSON.parse(req.body?.[createProductFieldData]));
+  const parsedProduct = productSchema.parse(
+    JSON.parse(req.body?.[createProductFieldData])
+  );
 
   if (!Array.isArray(req.files) || req.files.length < minFilesRequired) {
     res.status(HTTP_STATUS.BAD_REQUEST).json({
@@ -209,9 +211,8 @@ async function handleProductUpload(req: Request, res: Response) {
     })),
   };
 
-  const { productId } = await ServiceContainer.product.createProduct.run(
-    validProduct
-  );
+  const { productId } =
+    await ServiceContainer.product.createProduct.run(validProduct);
 
   return res.status(HTTP_STATUS.CREATED).json({
     product: {

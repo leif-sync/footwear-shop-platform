@@ -7,7 +7,7 @@ import {
 } from "../domain/productRepository.js";
 import { Specification } from "../../shared/domain/specification.js";
 import { Visibility } from "../domain/visibility.js";
-import { VariantFull, VariantFullPrimitives } from "../domain/variantFull.js";
+import { VariantFull, PrimitiveVariantFull } from "../domain/variantFull.js";
 import { VariantDetail } from "../domain/variantDetail.js";
 import { AppUrl } from "../../shared/domain/appUrl.js";
 import { ProductPrice } from "../domain/productPrice.js";
@@ -51,7 +51,7 @@ function productIdFilter(ids: UUID[]) {
 
 // ? esto podría ser un método de la clase Variant o quizá se podría hacer que la clase product tenga métodos que devuelvan directamente los objetos variant
 function variantFullFromPrimitives(
-  primitives: VariantFullPrimitives
+  primitives: PrimitiveVariantFull
 ): VariantFull {
   const sizes = primitives.sizes.map((size) => {
     return new VariantSize({
@@ -217,8 +217,6 @@ export class InMemoryProductRepository implements ProductRepository {
         )
     );
   }
-
-
 
   async checkTagUsage(params: { tagName: string }): Promise<boolean> {
     const { tagName } = params;

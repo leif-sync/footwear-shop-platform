@@ -1,7 +1,7 @@
 import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
 import { UUID } from "../../shared/domain/UUID.js";
 import { VariantDetail } from "../domain/variantDetail.js";
-import { discountOptions, DiscountType } from "../domain/discountType.js";
+import { DiscountOptions, DiscountType } from "../domain/discountType.js";
 import { ProductPrice } from "../domain/productPrice.js";
 import { ImageUploader } from "../domain/imageUploader.js";
 import { ProductRepository } from "../domain/productRepository.js";
@@ -40,7 +40,7 @@ type CreateProductParams = {
   productCategories: string[];
   price: {
     baseValue: number;
-    discountType: discountOptions;
+    discountType: DiscountOptions;
     discountValue: number;
     discountStartAt: Date | null;
     discountEndAt: Date | null;
@@ -86,9 +86,8 @@ export class CreateProduct {
 
       // upload images
       const imageBuffers = variant.images.map((image) => image.imageBuffer);
-      const imageUrls = await this.imageUploader.uploadMultipleImages(
-        imageBuffers
-      );
+      const imageUrls =
+        await this.imageUploader.uploadMultipleImages(imageBuffers);
 
       const variantImages = variant.images.map(
         (image, index) =>

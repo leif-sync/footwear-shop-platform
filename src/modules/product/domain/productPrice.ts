@@ -1,6 +1,14 @@
 import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
 import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
-import { discountOptions, DiscountType } from "./discountType.js";
+import { DiscountOptions, DiscountType } from "./discountType.js";
+
+export interface PrimitiveProductPrice {
+  baseValue: number;
+  discountType: DiscountOptions;
+  discountValue: number;
+  discountStartAt: Date | null;
+  discountEndAt: Date | null;
+}
 
 export class ProductPrice {
   private readonly baseValue: PositiveInteger;
@@ -56,14 +64,14 @@ export class ProductPrice {
       throw new Error("Discount start date must be before the end date");
 
     if (
-      this.discountType.equals(discountOptions.PERCENT) &&
+      this.discountType.equals(DiscountOptions.PERCENT) &&
       this.discountValue.getValue() > 100
     ) {
       throw new Error("Discount value must be less than 100%");
     }
 
     if (
-      this.discountType.equals(discountOptions.FIXED) &&
+      this.discountType.equals(DiscountOptions.FIXED) &&
       this.discountValue.getValue() > this.baseValue.getValue()
     ) {
       throw new Error("Discount value must be less than the base value");
@@ -71,7 +79,7 @@ export class ProductPrice {
   }
 
   evaluateFinalCost(): number {
-    if (this.discountType.equals(discountOptions.NONE))
+    if (this.discountType.equals(DiscountOptions.NONE))
       return this.baseValue.getValue();
 
     if (!this.discountStartAt || !this.discountEndAt)
@@ -80,7 +88,7 @@ export class ProductPrice {
     if (this.discountStartAt > new Date()) return this.baseValue.getValue();
     if (this.discountEndAt < new Date()) return this.baseValue.getValue();
 
-    if (this.discountType.equals(discountOptions.PERCENT)) {
+    if (this.discountType.equals(DiscountOptions.PERCENT)) {
       return (
         this.baseValue.getValue() -
         this.baseValue.getValue() * (this.discountValue.getValue() / 100)
@@ -90,7 +98,7 @@ export class ProductPrice {
     return this.baseValue.getValue() - this.discountValue.getValue();
   }
 
-  toPrimitives() {
+  toPrimitives(): PrimitiveProductPrice {
     return {
       baseValue: this.baseValue.getValue(),
       discountType: this.discountType.getValue(),

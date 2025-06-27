@@ -1,6 +1,11 @@
 import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
 import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
 
+export interface PrimitiveVariantSize {
+  sizeValue: number;
+  stock: number;
+}
+
 export class VariantSize {
   private readonly sizeValue: PositiveInteger;
   private stock: NonNegativeInteger;
@@ -58,7 +63,7 @@ export class VariantSize {
     return this.stock.getValue();
   }
 
-  toPrimitives() {
+  toPrimitives(): PrimitiveVariantSize {
     const sizeValue = this.sizeValue.getValue();
     const stock = this.stock.getValue();
     return { sizeValue, stock };

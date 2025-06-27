@@ -1,24 +1,24 @@
 import { z } from "zod";
-import { discountOptions } from "../../domain/discountType.js";
+import { DiscountOptions } from "../../domain/discountType.js";
 
 const priceConstraints = {
   // minDiscountStartDate: new Date("2025-01-01"),
-  discountTypeValues: Object.values(discountOptions) as [
-    keyof typeof discountOptions
+  discountTypeValues: Object.values(DiscountOptions) as [
+    keyof typeof DiscountOptions,
   ],
 } as const;
 
 type productPrice =
   | {
       baseValue: number;
-      discountType: keyof typeof discountOptions;
+      discountType: keyof typeof DiscountOptions;
       discountValue: number;
       discountStartAt: Date;
       discountEndAt: Date;
     }
   | {
       baseValue: number;
-      discountType: keyof typeof discountOptions;
+      discountType: keyof typeof DiscountOptions;
       discountValue: 0;
       discountStartAt: null;
       discountEndAt: null;
@@ -52,7 +52,7 @@ function validateProductPrice(
   //     code: "invalid_date",
   //   });
   // }
-  if (discountType === discountOptions.FIXED && discountValue > baseValue) {
+  if (discountType === DiscountOptions.FIXED && discountValue > baseValue) {
     ctx.addIssue({
       path: ["discountValue"],
       message: "The discount value cannot be greater than the product value",
@@ -62,7 +62,7 @@ function validateProductPrice(
       type: "number",
     });
   }
-  if (discountType === discountOptions.PERCENT && discountValue > 100) {
+  if (discountType === DiscountOptions.PERCENT && discountValue > 100) {
     ctx.addIssue({
       path: ["discountValue"],
       message: "The discount value cannot be greater than 100%",
@@ -91,7 +91,7 @@ export const productPriceSchema = z
   .or(
     z.object({
       baseValue: z.number().positive().int(),
-      discountType: z.literal(discountOptions.NONE),
+      discountType: z.literal(DiscountOptions.NONE),
       discountValue: z.literal(0),
       discountStartAt: z.null(),
       discountEndAt: z.null(),

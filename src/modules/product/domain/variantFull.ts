@@ -1,27 +1,18 @@
 import { UUID } from "../../shared/domain/UUID.js";
-import { VariantDetail } from "./variantDetail.js";
+import { PrimitiveVariantDetail, VariantDetail } from "./variantDetail.js";
 import { HexColor } from "../../shared/domain/hexColor.js";
 import { Visibility, visibilityOptions } from "./visibility.js";
-import { VariantSize } from "./variantSize.js";
-import { AppImage } from "../../shared/domain/AppImage.js";
+import { PrimitiveVariantSize, VariantSize } from "./variantSize.js";
+import { AppImage, PrimitiveAppImage } from "../../shared/domain/AppImage.js";
 import { variantConstraint } from "./variantConstraints.js";
 import { VariantTag } from "./variantTag.js";
 
-export type VariantFullPrimitives = {
+export type PrimitiveVariantFull = {
   variantId: string;
   hexColor: string;
-  images: {
-    imageUrl: string;
-    imageAlt: string;
-  }[];
-  details: {
-    title: string;
-    content: string;
-  }[];
-  sizes: {
-    sizeValue: number;
-    stock: number;
-  }[];
+  images: PrimitiveAppImage[];
+  details: PrimitiveVariantDetail[];
+  sizes: PrimitiveVariantSize[];
   tags: string[];
   createdAt: Date;
   updatedAt: Date;
@@ -151,7 +142,7 @@ export class VariantFull {
     this.images.splice(imageIndex, 1);
   }
 
-  toPrimitives(): VariantFullPrimitives {
+  toPrimitives(): PrimitiveVariantFull {
     return {
       variantId: this.variantId.getValue(),
       hexColor: this.hexColor.getValue(),

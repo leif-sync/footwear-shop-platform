@@ -2,11 +2,21 @@ import { UUID } from "../../shared/domain/UUID.js";
 import { DuplicatedCategoryError } from "./errors/duplicatedCategoryError.js";
 import { DuplicatedVariantError } from "./errors/duplicatedVariantError.js";
 import { productConstraint } from "./productConstraints.js";
-import { ProductPrice } from "./productPrice.js";
-import { VariantFull } from "./variantFull.js";
-import { Visibility } from "./visibility.js";
+import { PrimitiveProductPrice, ProductPrice } from "./productPrice.js";
+import { PrimitiveVariantFull, VariantFull } from "./variantFull.js";
+import { Visibility, visibilityOptions } from "./visibility.js";
 
 type productId = string;
+
+export interface PrimitiveProductFull {
+  productId: string;
+  name: string;
+  description: string;
+  price: PrimitiveProductPrice;
+  categories: string[];
+  variants: PrimitiveVariantFull[];
+  visibility: visibilityOptions;
+}
 
 export class ProductFull {
   private readonly productId: UUID;

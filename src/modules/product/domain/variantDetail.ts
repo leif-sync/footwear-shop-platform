@@ -1,5 +1,10 @@
 import { variantConstraint } from "./variantConstraints.js";
 
+export interface PrimitiveVariantDetail {
+  title: string;
+  content: string;
+}
+
 export class VariantDetail {
   private readonly title: string;
   private readonly content: string;
@@ -48,7 +53,7 @@ export class VariantDetail {
     return this.content;
   }
 
-  toPrimitives() {
+  toPrimitives(): PrimitiveVariantDetail {
     return {
       title: this.title,
       content: this.content,
