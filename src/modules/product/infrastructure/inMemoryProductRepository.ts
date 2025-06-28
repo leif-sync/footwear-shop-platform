@@ -2,8 +2,8 @@ import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
 import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
 import { UUID } from "../../shared/domain/UUID.js";
 import {
-  countProductsParams,
   ProductRepository,
+  ProductsFilterCriteria,
 } from "../domain/productRepository.js";
 import { Specification } from "../../shared/domain/specification.js";
 import { Visibility } from "../domain/visibility.js";
@@ -146,7 +146,7 @@ export class InMemoryProductRepository implements ProductRepository {
   }
 
   async countProducts(
-    params: countProductsParams
+    params: ProductsFilterCriteria
   ): Promise<NonNegativeInteger> {
     const { categories, productVisibility } = params;
 

@@ -3,18 +3,17 @@ export enum visibilityOptions {
   VISIBLE = "VISIBLE",
 }
 
-const variantVisibilitySet = new Set(
-  Object.keys(visibilityOptions) as [keyof typeof visibilityOptions]
-);
+export class VisibilityError extends Error {
+  constructor(params: { invalidVisibility: string }) {
+    const { invalidVisibility } = params;
+    super(`Invalid visibility: ${invalidVisibility}`);
+  }
+}
 
 export class Visibility {
   private readonly value: visibilityOptions;
 
   constructor(visibility: visibilityOptions) {
-    if (!variantVisibilitySet.has(visibility)) {
-      throw new Error(`Invalid visibility: ${visibility}`);
-    }
-
     this.value = visibility;
   }
 
@@ -33,6 +32,17 @@ export class Visibility {
     }
 
     return this.value === visibility;
+  }
+
+  static from(visibility: string): Visibility {
+    const validVisibilities = Object.values(visibilityOptions);
+    const isVisibilityValid = validVisibilities.includes(
+      visibility as visibilityOptions
+    );
+    if (!isVisibilityValid) {
+      throw new VisibilityError({ invalidVisibility: visibility });
+    }
+    return new Visibility(visibility as visibilityOptions);
   }
 
   getValue() {

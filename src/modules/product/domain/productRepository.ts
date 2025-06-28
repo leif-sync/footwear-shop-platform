@@ -1,7 +1,6 @@
 import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
 import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
 import { UUID } from "../../shared/domain/UUID.js";
-// import { ProductSalesData } from "./productSalesData.js";
 import { ProductFull } from "./productFull.js";
 import { ProductPreview } from "./productPreview.js";
 import { partialProductDetailsDto } from "./dto/partialProductDetails.js";
@@ -9,31 +8,35 @@ import { ProductPrice } from "./productPrice.js";
 import { VariantFull } from "./variantFull.js";
 import { Integer } from "../../shared/domain/integer.js";
 import { Visibility } from "./visibility.js";
-import { SmartOmit } from "../../shared/domain/helperTypes.js";
 
-export type listProductsParams = {
+export interface ProductsFilterCriteria {
+  categories?: string[];
+  productVisibility?: Visibility | Visibility[];
+}
+
+export interface PaginatedProductsFilterCriteria {
   limit: PositiveInteger;
   offset: NonNegativeInteger;
   categories?: string[];
   productVisibility?: Visibility | Visibility[];
+}
+
+export type ProductSearchOptions = {
+  productId: UUID;
 };
 
-export type countProductsParams = SmartOmit<
-  listProductsParams,
-  "limit" | "offset"
->;
-
 export abstract class ProductRepository {
-  // TODO:
-  abstract list(params: listProductsParams): Promise<ProductPreview[]>;
+  abstract list(
+    params: PaginatedProductsFilterCriteria
+  ): Promise<ProductPreview[]>;
 
   abstract countProducts(
-    params: countProductsParams
+    params: ProductsFilterCriteria
   ): Promise<NonNegativeInteger>;
 
   abstract create(params: { product: ProductFull }): Promise<void>;
 
-  abstract find(params: { productId: UUID }): Promise<ProductFull | null>;
+  abstract find(params: ProductSearchOptions): Promise<ProductFull | null>;
 
   abstract updatePartialProduct(params: {
     productId: UUID;

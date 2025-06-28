@@ -1,5 +1,5 @@
 model Category {
   categoryId String @id @db.Uuid
   name String @unique
-  products Product[] 
+  products ProductCategory[] 
 }

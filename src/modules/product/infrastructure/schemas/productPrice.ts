@@ -1,13 +1,6 @@
 import { z } from "zod";
 import { DiscountOptions } from "../../domain/discountType.js";
 
-const priceConstraints = {
-  // minDiscountStartDate: new Date("2025-01-01"),
-  discountTypeValues: Object.values(DiscountOptions) as [
-    keyof typeof DiscountOptions,
-  ],
-} as const;
-
 type productPrice =
   | {
       baseValue: number;
@@ -77,7 +70,7 @@ function validateProductPrice(
 export const productPriceSchema = z
   .object({
     baseValue: z.number().positive().int(),
-    discountType: z.enum(priceConstraints.discountTypeValues),
+    discountType: z.nativeEnum(DiscountOptions),
     discountValue: z.number().positive().int(),
     discountStartAt: z.preprocess((value, ctx) => {
       if (value !== null) return value;

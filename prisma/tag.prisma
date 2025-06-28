@@ -1,5 +1,5 @@
 model Tag {
   tagId String @id @db.Uuid
   name String @unique
-  variants Variant[] 
+  variants VariantTag[] 
 }

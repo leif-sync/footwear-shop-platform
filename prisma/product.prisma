@@ -9,6 +9,14 @@ enum Visibility {
   VISIBLE
 }
 
+model ProductCategory {
+  productId String @db.Uuid
+  categoryId String @db.Uuid
+  product Product @relation(fields: [productId], references: [productId])
+  category Category @relation(fields: [categoryId], references: [categoryId])
+  @@id([productId, categoryId])
+}
+
 model Product {
   productId String @id @db.Uuid
   name String
@@ -18,9 +26,9 @@ model Product {
   priceDiscountValue Int
   priceDiscountStartAt DateTime? @db.Timestamptz()
   priceDiscountEndAt DateTime? @db.Timestamptz()
-  categories Category[]
-  variants Variant[]
   visibility Visibility
+  productCategories ProductCategory[]
+  variants Variant[]
   orderProducts OrderProduct[]
 }
 
@@ -44,6 +52,14 @@ model VariantSize {
   @@unique([sizeId, variantId])
 }
 
+model VariantTag {
+  tagId String @db.Uuid
+  variantId String @db.Uuid
+  tag Tag @relation(fields: [tagId], references: [tagId])
+  variant Variant @relation(fields: [variantId], references: [variantId])
+  @@id([tagId, variantId])
+}
+
 model Variant {
   variantId String @id @db.Uuid
   hexColor String
@@ -53,8 +69,8 @@ model Variant {
   productId String @db.Uuid
   product Product @relation(fields: [productId], references: [productId])
   visibility Visibility
-  details VariantDetailContent[]
-  sizes VariantSize[]
-  tags Tag[]
+  variantDetails VariantDetailContent[]
+  variantSizes VariantSize[]
+  variantTags VariantTag[]
 }
 

@@ -1,3 +1,4 @@
+import { storedVariantImage } from "../../product/infrastructure/postgreSqlProductRepository.js";
 import { AppImage } from "../../shared/domain/AppImage.js";
 import { AppUrl } from "../../shared/domain/appUrl.js";
 import { Email } from "../../shared/domain/email.js";
@@ -34,11 +35,6 @@ import { OrderVariantSize } from "../domain/orderVariantSize.js";
 import { OrderVariantWrite } from "../domain/orderVariantWrite.js";
 import { OrderWrite } from "../domain/orderWrite.js";
 import { ShippingAddress } from "../domain/shippingAddress.js";
-
-type storedVariantImage = {
-  imageUrl: string;
-  imageAlt: string;
-};
 
 export class PostgresOrderRepository implements OrderRepository {
   async create(params: { order: OrderWrite }): Promise<void> {

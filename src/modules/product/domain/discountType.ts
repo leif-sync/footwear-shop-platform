@@ -4,6 +4,13 @@ export enum DiscountOptions {
   NONE = "NONE",
 }
 
+export class DiscountTypeError extends Error {
+  constructor(params: { invalidDiscountType: string }) {
+    const { invalidDiscountType } = params;
+    super(`Invalid discount type: ${invalidDiscountType}`);
+  }
+}
+
 export class DiscountType {
   private readonly value: DiscountOptions;
 
@@ -30,5 +37,14 @@ export class DiscountType {
       return this.value === discountType.getValue();
 
     return this.value === discountType;
+  }
+
+  static from(value: string): DiscountType {
+    const validDiscounts = Object.values(DiscountOptions);
+    const isValid = validDiscounts.includes(value as DiscountOptions);
+    if (!isValid) {
+      throw new DiscountTypeError({ invalidDiscountType: value });
+    }
+    return new DiscountType(value as DiscountOptions);
   }
 }
