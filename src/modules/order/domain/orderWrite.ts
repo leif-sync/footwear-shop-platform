@@ -57,16 +57,33 @@ const validPaymentStatusForOrderStatus = new Map([
 const orderStatusValidTransitions = new Map([
   [
     OrderStatusOptions.WAITING_FOR_PAYMENT,
-    [OrderStatusOptions.WAITING_FOR_SHIPMENT, OrderStatusOptions.CANCELED],
+    [
+      OrderStatusOptions.WAITING_FOR_PAYMENT, // Can remain in the same status
+      OrderStatusOptions.WAITING_FOR_SHIPMENT,
+      OrderStatusOptions.CANCELED,
+    ],
   ],
   [
     OrderStatusOptions.WAITING_FOR_SHIPMENT,
-    [OrderStatusOptions.SHIPPED, OrderStatusOptions.CANCELED],
+    [
+      OrderStatusOptions.WAITING_FOR_SHIPMENT, // Can remain in the same status
+      OrderStatusOptions.SHIPPED,
+      OrderStatusOptions.CANCELED,
+    ],
   ],
-  [OrderStatusOptions.SHIPPED, [OrderStatusOptions.DELIVERED]],
-  [OrderStatusOptions.DELIVERED, [OrderStatusOptions.RETURNED]],
-  [OrderStatusOptions.CANCELED, []], // No transitions allowed from CANCELED
-  [OrderStatusOptions.RETURNED, []], // No transitions allowed from RETURNED
+  [
+    OrderStatusOptions.SHIPPED,
+    [OrderStatusOptions.SHIPPED, OrderStatusOptions.DELIVERED], // Can remain in the same status
+  ],
+  [
+    OrderStatusOptions.DELIVERED,
+    [
+      OrderStatusOptions.DELIVERED, // Can remain in the same status
+      OrderStatusOptions.RETURNED,
+    ],
+  ],
+  [OrderStatusOptions.CANCELED, [OrderStatusOptions.CANCELED]], // can remain in the same status and no other transitions allowed
+  [OrderStatusOptions.RETURNED, [OrderStatusOptions.RETURNED]], // can remain in the same status and no other transitions allowed
 ]);
 
 const allowedOrderStatusToUpdateCustomer = [

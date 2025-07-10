@@ -1,12 +1,8 @@
 import { fileTypeFromBuffer } from "file-type";
-import { ImageUploader } from "../domain/imageUploader.js";
+import { ImageStorageEngine } from "../domain/imageStorageEngine.js";
 import { randomBytes } from "node:crypto";
 import { access, mkdir, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import {
-  isDiskImageUploader,
-  SERVER_BASE_URL,
-} from "../../../environmentVariables.js";
 import { AppUrl } from "../../shared/domain/appUrl.js";
 
 export const absoluteImageStoragePath = join(process.cwd(), "public", "images");
@@ -26,11 +22,6 @@ async function createNestedFolders(folderPath: string) {
     throw error;
   }
 }
-
-(async () => {
-  if (!isDiskImageUploader) return;
-  await createNestedFolders(absoluteImageStoragePath);
-})();
 
 //TODO: centralizar el allowedMimeTypes
 const allowedMimeTypes = new Map([
@@ -65,7 +56,23 @@ async function deleteFile(filePath: string) {
 
 export const publicImagesAPIEndpoint = `/api/v1/public/images`;
 
-export class DiskImageUploader implements ImageUploader {
+export class DiskImageUploader implements ImageStorageEngine {
+  private readonly serverBaseUrl: AppUrl;
+
+  private constructor(params: { serverBaseUrl: AppUrl }) {
+    this.serverBaseUrl = params.serverBaseUrl;
+  }
+
+  static async create(params: {
+    serverBaseUrl: AppUrl;
+  }): Promise<DiskImageUploader> {
+    await createNestedFolders(absoluteImageStoragePath);
+    const instance = new DiskImageUploader({
+      serverBaseUrl: params.serverBaseUrl,
+    });
+    return instance;
+  }
+
   async uploadMultipleImages(imageBuffer: Buffer[]): Promise<string[]> {
     const uploadPromises = imageBuffer.map((buffer) =>
       this.uploadSingleImage(buffer)
@@ -88,7 +95,7 @@ export class DiskImageUploader implements ImageUploader {
     await writeFile(imagePath, imageBuffer);
 
     const imgUrl = new AppUrl(
-      SERVER_BASE_URL,
+      this.serverBaseUrl,
       publicImagesAPIEndpoint,
       imageNameWithExtension
     );

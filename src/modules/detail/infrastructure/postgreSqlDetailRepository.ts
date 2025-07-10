@@ -6,7 +6,7 @@ import { Detail } from "../domain/detail.js";
 import { DetailRepository } from "../domain/detailRepository.js";
 import { DetailTitle } from "../domain/detailTitle.js";
 
-export class PostgresDetailRepository implements DetailRepository {
+export class PostgreSqlDetailRepository implements DetailRepository {
   async create(params: { detail: Detail }): Promise<void> {
     const { detail } = params;
     const { detailId, detailTitle } = detail.toPrimitives();

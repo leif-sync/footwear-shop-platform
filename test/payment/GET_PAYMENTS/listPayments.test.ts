@@ -6,7 +6,7 @@ import { TransactionTypeOptions } from "../../../src/modules/payment/domain/tran
 import { PaymentProcessorOptions } from "../../../src/modules/payment/domain/paymentProcessor";
 import { CurrencyOptions } from "../../../src/modules/payment/domain/currency";
 import { createTestOrder, loginTest } from "../../helper";
-import { ServiceContainer } from "../../../src/modules/shared/infrastructure/serviceContainer";
+import { ServiceContainer } from "../../../src/modules/shared/infrastructure/setupDependencies";
 import { OrderStatusOptions } from "../../../src/modules/order/domain/orderStatus";
 import { OrderPaymentStatusOptions } from "../../../src/modules/order/domain/orderPaymentStatus";
 
@@ -28,7 +28,7 @@ test("list payments", async () => {
     currency: CurrencyOptions.CLP,
     orderId,
     paymentProcessor: PaymentProcessorOptions.WEBPAY,
-    rawResponse: "test-raw-response",
+    rawResponse: `{"message":"Test response"}`,
     transactionStatus: PaymentTransactionStatusOptions.APPROVED,
     transactionType: TransactionTypeOptions.PAYMENT,
     updatedAt: new Date(),

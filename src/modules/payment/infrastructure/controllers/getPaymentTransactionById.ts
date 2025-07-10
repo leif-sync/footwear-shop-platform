@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { HTTP_STATUS } from "../../../shared/infrastructure/httpStatus.js";
-import { ServiceContainer } from "../../../shared/infrastructure/serviceContainer.js";
+import { ServiceContainer } from "../../../shared/infrastructure/setupDependencies.js";
 import { PaymentTransactionNotFoundError } from "../../domain/errors/paymentTransactionNotFoundError.js";
 
 import { z, ZodError } from "zod";

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { ServiceContainer } from "../../../shared/infrastructure/serviceContainer.js";
+import { ServiceContainer } from "../../../shared/infrastructure/setupDependencies.js";
 import { z, ZodError } from "zod";
 import { HTTP_STATUS } from "../../../shared/infrastructure/httpStatus.js";
 import { OrderNotFoundError } from "../../domain/errors/orderNotFoundError.js";

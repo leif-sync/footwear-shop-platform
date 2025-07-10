@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { HTTP_STATUS } from "../../../shared/infrastructure/httpStatus.js";
-import { ServiceContainer } from "../../../shared/infrastructure/serviceContainer.js";
+import { ServiceContainer } from "../../../shared/infrastructure/setupDependencies.js";
 import { z, ZodError } from "zod";
 import { visibilityOptions } from "../../domain/visibility.js";
 import { visibilitySchema } from "../schemas/visibility.js";

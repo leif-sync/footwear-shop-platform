@@ -16,13 +16,13 @@ export abstract class Logger {
 
   abstract error(params: {
     message: string;
-    error?: Error;
+    error?: unknown;
     meta?: Record<string, any>;
   }): Promise<void>;
 
   abstract fatal(params: {
     message: string;
     meta?: Record<string, any>;
-    error?: Error;
+    error?: unknown;
   }): Promise<void>;
 }

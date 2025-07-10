@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { ServiceContainer } from "../../../shared/infrastructure/serviceContainer.js";
+import { ServiceContainer } from "../../../shared/infrastructure/setupDependencies.js";
 import { HTTP_STATUS } from "../../../shared/infrastructure/httpStatus.js";
 import { CannotUpdateOrderError } from "../../domain/errors/cannotUpdateOrderError.js";
 import { OrderNotFoundError } from "../../domain/errors/orderNotFoundError.js";
@@ -15,6 +15,14 @@ import { OrderStatus } from "../../domain/orderStatus.js";
 import { ShippingAddress } from "../../domain/shippingAddress.js";
 import { OrderPaymentInfo } from "../../domain/orderPaymentInfo.js";
 import { OrderPaymentStatus } from "../../domain/orderPaymentStatus.js";
+import { InvalidProductError } from "../../domain/errors/invalidProductError.js";
+import { InvalidVariantError } from "../../domain/errors/invalidVariantError.js";
+import { SizeNotAvailableForVariantError } from "../../domain/errors/sizeNotAvailableForVariantError.js";
+import { InvalidOrderStatusTransitionError } from "../../domain/errors/invalidOrderStatusTransitionError.js";
+import { CannotUpdateCustomerForOrderStatusError } from "../../domain/errors/cannotUpdateCustomerForOrderStatus.js";
+import { CannotUpdateShippingForOrderStatusError } from "../../domain/errors/cannotUpdateShippingAddressForOrderStatus.js";
+import { CannotUpdatePaymentInfoForOrderStatusError } from "../../domain/errors/cannotUpdatePaymentInfoForOrderStatus.js";
+import { CannotUpdateProductsForOrderStatusError } from "../../domain/errors/cannotUpdateProductsForOrderStatusError.js";
 
 const idSchema = z.string().uuid();
 
@@ -79,6 +87,70 @@ export async function updatePartialOrder(
     if (error instanceof OrderNotFoundError) {
       res.status(HTTP_STATUS.NOT_FOUND).json({
         message: "Order not found",
+        errors: error.message,
+      });
+      return;
+    }
+
+    if (error instanceof InvalidProductError) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
+        message: "Invalid product",
+        errors: error.message,
+      });
+      return;
+    }
+
+    if (error instanceof InvalidVariantError) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
+        message: "Invalid variant",
+        errors: error.message,
+      });
+      return;
+    }
+
+    if (error instanceof SizeNotAvailableForVariantError) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
+        message: "Size not available for variant",
+        errors: error.message,
+      });
+      return;
+    }
+
+    if (error instanceof InvalidOrderStatusTransitionError) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
+        message: "Invalid order status transition",
+        errors: error.message,
+      });
+      return;
+    }
+
+    if (error instanceof CannotUpdateCustomerForOrderStatusError) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
+        message: "Cannot update customer for order status",
+        errors: error.message,
+      });
+      return;
+    }
+
+    if (error instanceof CannotUpdateShippingForOrderStatusError) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
+        message: "Cannot update shipping address for order status",
+        errors: error.message,
+      });
+      return;
+    }
+
+    if (error instanceof CannotUpdatePaymentInfoForOrderStatusError) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
+        message: "Cannot update payment info for order status",
+        errors: error.message,
+      });
+      return;
+    }
+
+    if (error instanceof CannotUpdateProductsForOrderStatusError) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
+        message: "Cannot update products for order status",
         errors: error.message,
       });
       return;

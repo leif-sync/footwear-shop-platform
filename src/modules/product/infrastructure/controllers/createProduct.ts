@@ -1,6 +1,6 @@
 import multer, { memoryStorage, MulterError } from "multer";
 import { HTTP_STATUS } from "../../../shared/infrastructure/httpStatus.js";
-import { ServiceContainer } from "../../../shared/infrastructure/serviceContainer.js";
+import { ServiceContainer } from "../../../shared/infrastructure/setupDependencies.js";
 import { InvalidCategoryError } from "../../domain/errors/invalidCategoryError.js";
 import { InvalidDetailError } from "../../domain/errors/invalidDetailError.js";
 import { InvalidSizeError } from "../../domain/errors/invalidSizeError.js";
@@ -11,20 +11,20 @@ import { productSchema } from "../schemas/product.js";
 import { ZodError } from "zod";
 import { visibilityOptions } from "../../domain/visibility.js";
 import { DiscountOptions } from "../../domain/discountType.js";
-import { variantConstraint } from "../../domain/variantConstraints.js";
 import { productConstraint } from "../../domain/productConstraints.js";
+import { VariantFull } from "../../domain/variantFull.js";
 
 const maxFiles =
-  productConstraint.variants.maxVariants * variantConstraint.image.maxImages;
+  productConstraint.variants.maxVariants * VariantFull.imageConstraint.maxImages;
 
 const minFilesRequired =
-  productConstraint.variants.minVariants * variantConstraint.image.minImages;
+  productConstraint.variants.minVariants * VariantFull.imageConstraint.minImages;
 
 const createProductLimits: Required<multer.Options["limits"]> = {
   fieldNameSize: 100,
   fieldSize: 1 * 1024 * 1024,
   fields: 1, // contendrá un string json de los productos
-  fileSize: variantConstraint.image.maxFileSizeBytes,
+  fileSize: VariantFull.imageConstraint.maxFileSizeBytes,
   files: maxFiles,
   parts: 1 + maxFiles, // 1 json de productos + cantidad de imágenes de todos los productos
   headerPairs: 100,
@@ -167,8 +167,8 @@ async function handleProductUpload(req: Request, res: Response) {
     const variantFiles = filteredFiles[key];
     const variantFileCount = variantFiles.length;
 
-    const minimumRequiredImages = variantConstraint.image.minImages;
-    const maxImageAllowed = variantConstraint.image.maxImages;
+    const minimumRequiredImages = VariantFull.imageConstraint.minImages;
+    const maxImageAllowed = VariantFull.imageConstraint.maxImages;
 
     const hasMinRequiredImages = variantFileCount >= minimumRequiredImages;
     const areImagesUnderMax = variantFileCount <= maxImageAllowed;

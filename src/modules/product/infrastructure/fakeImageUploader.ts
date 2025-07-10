@@ -1,6 +1,6 @@
-import { ImageUploader } from "../domain/imageUploader.js";
+import { ImageStorageEngine } from "../domain/imageStorageEngine.js";
 
-export class FakeImageUploader implements ImageUploader {
+export class FakeImageUploader implements ImageStorageEngine {
   private urlGenerator() {
     return `http://fake-image-url.com/${Math.random()
       .toString(36)

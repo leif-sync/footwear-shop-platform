@@ -1,6 +1,6 @@
 import { app } from "./app.js";
 import { PORT } from "./environmentVariables.js";
-import { logger } from "./modules/shared/infrastructure/logger.js";
+import { logger } from "./modules/shared/infrastructure/setupDependencies.js";
 
 app.listen(PORT, () => {
   logger.info({

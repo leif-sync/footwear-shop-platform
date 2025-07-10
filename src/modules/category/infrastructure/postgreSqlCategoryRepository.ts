@@ -6,7 +6,7 @@ import { Category } from "../domain/category.js";
 import { CategoryName } from "../domain/categoryName.js";
 import { CategoryRepository } from "../domain/categoryRepository.js";
 
-export class PostgresCategoryRepostory implements CategoryRepository {
+export class PostgreSqlCategoryRepository implements CategoryRepository {
   async create(params: { category: Category }): Promise<void> {
     const { categoryId, categoryName } = params.category.toPrimitives();
 

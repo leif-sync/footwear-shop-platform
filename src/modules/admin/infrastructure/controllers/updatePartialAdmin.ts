@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { updatePartialAdminSchema } from "../schemas/admin.js";
-import { ServiceContainer } from "../../../shared/infrastructure/serviceContainer.js";
+import { ServiceContainer } from "../../../shared/infrastructure/setupDependencies.js";
 import { HTTP_STATUS } from "../../../shared/infrastructure/httpStatus.js";
 import { z, ZodError } from "zod";
 import { AdminNotFoundError } from "../../domain/errors/adminNotFoundError.js";

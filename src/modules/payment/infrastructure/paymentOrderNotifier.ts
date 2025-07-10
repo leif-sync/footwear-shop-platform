@@ -9,7 +9,7 @@ import { Email } from "../../shared/domain/email.js";
 import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
 import { Phone } from "../../shared/domain/phone.js";
 import { UUID } from "../../shared/domain/UUID.js";
-import { logger } from "../../shared/infrastructure/logger.js";
+import { logger } from "../../shared/infrastructure/setupDependencies.js";
 
 // TODO: move to a configuration file
 const commerceName = COMMERCE_NAME;

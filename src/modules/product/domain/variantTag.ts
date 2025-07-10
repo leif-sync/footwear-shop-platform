@@ -1,6 +1,7 @@
-import { variantConstraint } from "./variantConstraints.js";
 
 export class VariantTag {
+  static readonly minTagLength: 3;
+  static readonly maxTagLength: 50;
   private readonly tag: string;
 
   constructor(tag: string) {
@@ -12,13 +13,13 @@ export class VariantTag {
     const tag = this.tag;
     const tagLength = tag.length;
 
-    const minimumTagLength = variantConstraint.tag.minTagLength;
+    const minimumTagLength = VariantTag.minTagLength;
     if (tagLength < minimumTagLength) {
       throw new Error(
         `Tag cannot have less than ${minimumTagLength} characters`
       );
     }
-    const maximumTagLength = variantConstraint.tag.maxTagLength;
+    const maximumTagLength = VariantTag.maxTagLength;
     if (tagLength > maximumTagLength) {
       throw new Error(
         `Tag cannot have more than ${maximumTagLength} characters`

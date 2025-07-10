@@ -2,7 +2,7 @@ import { RequestHandler, NextFunction, Request, Response } from "express";
 import { JWT_SECRET, isDevelopment } from "../../../../environmentVariables.js";
 import { validPermissionOptions } from "../../../admin/domain/validPermissions.js";
 import { HTTP_STATUS } from "../../../shared/infrastructure/httpStatus.js";
-import { logger } from "../../../shared/infrastructure/logger.js";
+import { logger } from "../../../shared/infrastructure/setupDependencies.js";
 import {
   adminAccessTokenName,
   adminAccessTokenPayload,

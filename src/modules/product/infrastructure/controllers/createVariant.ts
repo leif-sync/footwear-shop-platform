@@ -1,5 +1,5 @@
 import { HTTP_STATUS } from "../../../shared/infrastructure/httpStatus.js";
-import { ServiceContainer } from "../../../shared/infrastructure/serviceContainer.js";
+import { ServiceContainer } from "../../../shared/infrastructure/setupDependencies.js";
 import { InvalidDetailError } from "../../domain/errors/invalidDetailError.js";
 import { InvalidSizeError } from "../../domain/errors/invalidSizeError.js";
 import { InvalidTagError } from "../../domain/errors/invalidTagError.js";
@@ -10,16 +10,16 @@ import multer, { MulterError, memoryStorage } from "multer";
 import { multerFileFilter } from "../multerConfig.js";
 import { messagesFromMulterError } from "../multerConfig.js";
 import { createUniqueVariantSchema } from "../schemas/variant.js";
-import { variantConstraint } from "../../domain/variantConstraints.js";
+import { VariantFull } from "../../domain/variantFull.js";
 
 const createVariantMulterLimits: Required<multer.Options["limits"]> = {
-  files: variantConstraint.image.maxImages,
-  fileSize: variantConstraint.image.maxFileSizeBytes,
+  files: VariantFull.imageConstraint.maxImages,
+  fileSize: VariantFull.imageConstraint.maxFileSizeBytes,
   fieldSize: 500 * 1024, // bytes
   fieldNameSize: 100, // bytes
   headerPairs: 100,
   fields: 1, // Solo se espera un campo con el JSON de la variante
-  parts: 1 + variantConstraint.image.maxImages, // 1 json de variantes + cantidad de imágenes
+  parts: 1 + VariantFull.imageConstraint.maxImages, // 1 json de variantes + cantidad de imágenes
 };
 
 export const memoryMulterUploadForVariant = multer({
@@ -35,7 +35,7 @@ export const createVariantFieldNames = {
 
 const processVariantImageUploads = memoryMulterUploadForVariant.array(
   createVariantFieldNames.variantImages,
-  variantConstraint.image.maxImages
+  VariantFull.imageConstraint.maxImages
 );
 
 const uuidSchema = z.string().uuid();
@@ -116,9 +116,9 @@ async function handleVariantUpload(
     });
   }
 
-  if (req.files.length < variantConstraint.image.minImages) {
+  if (req.files.length < VariantFull.imageConstraint.minImages) {
     return res.status(HTTP_STATUS.BAD_REQUEST).json({
-      message: `Need at least ${variantConstraint.image.minImages} images`,
+      message: `Need at least ${VariantFull.imageConstraint.minImages} images`,
     });
   }
 

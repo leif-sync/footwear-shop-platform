@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { listPaymentsQuerySchema } from "../schemas/listPaymentsQuery.js";
 import { HTTP_STATUS } from "../../../shared/infrastructure/httpStatus.js";
-import { ServiceContainer } from "../../../shared/infrastructure/serviceContainer.js";
+import { ServiceContainer } from "../../../shared/infrastructure/setupDependencies.js";
 import { ZodError } from "zod";
 import { PrimitivePaymentTransaction } from "../../domain/paymentTransaction.js";
 import { PositiveInteger } from "../../../shared/domain/positiveInteger.js";

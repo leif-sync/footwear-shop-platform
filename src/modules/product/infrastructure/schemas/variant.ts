@@ -1,9 +1,11 @@
 import { z } from "zod";
 import { variantDetailSchema } from "./variantDetail.js";
 import { variantSizeSchema } from "./variantSize.js";
-import { variantConstraint } from "../../domain/variantConstraints.js";
 import { hexPattern } from "../../../shared/domain/hexColor.js";
 import { visibilitySchema } from "./visibility.js";
+import { VariantTag } from "../../domain/variantTag.js";
+import { VariantFull } from "../../domain/variantFull.js";
+import { AppImage } from "../../../shared/domain/AppImage.js";
 
 const imageFieldConstraint = {
   minImageFieldLength: 1,
@@ -44,9 +46,11 @@ const variantTagsSchema = z
   .array(
     z
       .string()
-      .min(variantConstraint.tag.minTagLength)
-      .max(variantConstraint.tag.maxTagLength)
+      .min(VariantTag.minTagLength)
+      .max(VariantTag.maxTagLength)
   )
+  .min(VariantFull.tagConstraint.minTags)
+  .max(VariantFull.tagConstraint.maxTags)
   .superRefine((tags, ctx) => {
     const tagsSet = new Set<string>();
     tags.forEach((tag) => {
@@ -74,11 +78,11 @@ export const variantSchema = z.object({
     .array(
       z
         .string()
-        .min(variantConstraint.imageAlt.minImageAltLength)
-        .max(variantConstraint.imageAlt.maxImageAltLength)
+        .min(AppImage.minImageAltLength)
+        .max(AppImage.maxImageAltLength)
     )
-    .min(variantConstraint.image.minImages)
-    .max(variantConstraint.image.maxImages),
+    .min(VariantFull.imageConstraint.minImages)
+    .max(VariantFull.imageConstraint.maxImages),
   visibility: visibilitySchema,
 });
 
@@ -107,6 +111,6 @@ export type createUniqueVariantSchemaType = z.infer<
 export const addImageToVariantSchema = z.object({
   imageAlt: z
     .string()
-    .min(variantConstraint.imageAlt.minImageAltLength)
-    .max(variantConstraint.imageAlt.maxImageAltLength),
+    .min(AppImage.minImageAltLength)
+    .max(AppImage.maxImageAltLength),
 });

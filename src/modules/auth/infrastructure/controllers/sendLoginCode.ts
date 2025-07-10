@@ -6,7 +6,7 @@ import {
   loginCodeRepository,
   emailSender,
   ServiceContainer,
-} from "../../../shared/infrastructure/serviceContainer.js";
+} from "../../../shared/infrastructure/setupDependencies.js";
 import { LoginCode } from "../../domain/loginCode.js";
 import { Request, Response } from "express";
 import { AdminNotFoundError } from "../../../admin/domain/errors/adminNotFoundError.js";

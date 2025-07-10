@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { requestOptionsSchema } from "../schemas/requestOptions.js";
-import { ServiceContainer } from "../../../shared/infrastructure/serviceContainer.js";
+import { ServiceContainer } from "../../../shared/infrastructure/setupDependencies.js";
 import { ZodError } from "zod";
 import { HTTP_STATUS } from "../../../shared/infrastructure/httpStatus.js";
 import {

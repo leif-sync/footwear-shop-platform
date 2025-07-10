@@ -1,4 +1,3 @@
-import { variantConstraint } from "./variantConstraints.js";
 
 export interface PrimitiveVariantDetail {
   title: string;
@@ -6,6 +5,11 @@ export interface PrimitiveVariantDetail {
 }
 
 export class VariantDetail {
+  static readonly minTitleLength: 3;
+  static readonly maxTitleLength: 50;
+  static readonly minContentLength: 3;
+  static readonly maxContentLength: 150;
+
   private readonly title: string;
   private readonly content: string;
 
@@ -18,22 +22,19 @@ export class VariantDetail {
 
   private ensureIsValid() {
     const { title, content } = this;
-    const { maxTitleLength, minTitleLength } = variantConstraint.detail.title;
-    const { maxContentLength, minContentLength } =
-      variantConstraint.detail.content;
 
-    if (title.length < minTitleLength || title.length > maxTitleLength) {
+    if (title.length < VariantDetail.minTitleLength || title.length > VariantDetail.maxTitleLength) {
       throw new Error(
-        `Title length must be between ${minTitleLength} and ${maxTitleLength}`
+        `Title length must be between ${VariantDetail.minTitleLength} and ${VariantDetail.maxTitleLength}`
       );
     }
 
     if (
-      content.length < minContentLength ||
-      content.length > maxContentLength
+      content.length < VariantDetail.minContentLength ||
+      content.length > VariantDetail.maxContentLength
     ) {
       throw new Error(
-        `Content length must be between ${minContentLength} and ${maxContentLength}`
+        `Content length must be between ${VariantDetail.minContentLength} and ${VariantDetail.maxContentLength}`
       );
     }
   }

@@ -50,7 +50,7 @@ export class UpdatePartialVariant {
     sizes?: number[];
     tags?: string[];
   }) {
-    const validationPromises = [];
+    const validationPromises: Promise<void>[] = [];
 
     if (params.tags) {
       validationPromises.push(

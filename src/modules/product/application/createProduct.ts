@@ -3,7 +3,7 @@ import { UUID } from "../../shared/domain/UUID.js";
 import { VariantDetail } from "../domain/variantDetail.js";
 import { DiscountOptions, DiscountType } from "../domain/discountType.js";
 import { ProductPrice } from "../domain/productPrice.js";
-import { ImageUploader } from "../domain/imageUploader.js";
+import { ImageStorageEngine } from "../domain/imageStorageEngine.js";
 import { ProductRepository } from "../domain/productRepository.js";
 import { VariantFull } from "../domain/variantFull.js";
 import { AppUrl } from "../../shared/domain/appUrl.js";
@@ -50,12 +50,12 @@ type CreateProductParams = {
 };
 
 export class CreateProduct {
-  private readonly imageUploader: ImageUploader;
+  private readonly imageUploader: ImageStorageEngine;
   private readonly productRepository: ProductRepository;
   private readonly productValidationService: ProductValidationService;
 
   constructor(params: {
-    imageUploader: ImageUploader;
+    imageUploader: ImageStorageEngine;
     productRepository: ProductRepository;
     productValidationService: ProductValidationService;
   }) {

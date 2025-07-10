@@ -2,7 +2,7 @@ import { Email } from "../../shared/domain/email.js";
 import { EmailSender } from "../domain/emailSender.js";
 import { styleText } from "node:util";
 
-export class FakeEmailSender implements EmailSender {
+export class DebugEmailSender implements EmailSender {
   async sendTransactionalEmail(params: {
     to: Email;
     subject: string;

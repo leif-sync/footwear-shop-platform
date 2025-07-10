@@ -36,7 +36,15 @@ import { OrderVariantWrite } from "../domain/orderVariantWrite.js";
 import { OrderWrite } from "../domain/orderWrite.js";
 import { ShippingAddress } from "../domain/shippingAddress.js";
 
-export class PostgresOrderRepository implements OrderRepository {
+export class PostgreSqlOrderRepository implements OrderRepository {
+  private readonly transactionContext?: PrismaTransaction;
+  private readonly isWithTransactionContext: boolean;
+
+  constructor(params: { transactionContext?: PrismaTransaction } = {}) {
+    this.transactionContext = params.transactionContext;
+    this.isWithTransactionContext = Boolean(this.transactionContext);
+  }
+
   async create(params: { order: OrderWrite }): Promise<void> {
     const {
       orderId,
@@ -56,7 +64,7 @@ export class PostgresOrderRepository implements OrderRepository {
     const { commune, region, streetName, streetNumber, additionalInfo } =
       shippingAddress;
 
-    await prismaConnection.$transaction(async (tx) => {
+    const runInTransaction = async (tx: PrismaTransaction) => {
       await tx.order.create({
         data: {
           orderId,
@@ -91,13 +99,22 @@ export class PostgresOrderRepository implements OrderRepository {
           },
         ],
       });
-    });
+    };
+
+    if (this.isWithTransactionContext && this.transactionContext) {
+      await runInTransaction(this.transactionContext);
+      return;
+    }
+
+    await prismaConnection.$transaction(runInTransaction);
   }
 
   async checkIfOrderExists(params: OrderSearchOptions): Promise<boolean> {
     const orderId = params.orderId.getValue();
 
-    const count = await prismaConnection.order.count({
+    const connection = this.transactionContext ?? prismaConnection;
+
+    const count = await connection.order.count({
       where: {
         orderId,
       },
@@ -134,7 +151,9 @@ export class PostgresOrderRepository implements OrderRepository {
         : [customerEmail.getValue()]
       : undefined;
 
-    const count = await prismaConnection.order.count({
+    const connection = this.transactionContext ?? prismaConnection;
+
+    const count = await connection.order.count({
       where: {
         ...(creators && { creatorType: { in: creators } }),
         ...(orderStatuses && { orderStatus: { in: orderStatuses } }),
@@ -149,7 +168,9 @@ export class PostgresOrderRepository implements OrderRepository {
   async checkIfProductIsBought(params: { productId: UUID }): Promise<boolean> {
     const productId = params.productId.getValue();
 
-    const count = await prismaConnection.orderProduct.count({
+    const connection = this.transactionContext ?? prismaConnection;
+
+    const count = await connection.orderProduct.count({
       where: {
         productId,
       },
@@ -165,7 +186,9 @@ export class PostgresOrderRepository implements OrderRepository {
     const productId = params.productId.getValue();
     const variantId = params.variantId.getValue();
 
-    const count = await prismaConnection.orderVariant.count({
+    const connection = this.transactionContext ?? prismaConnection;
+
+    const count = await connection.orderVariant.count({
       where: {
         orderProduct: {
           productId,
@@ -182,7 +205,9 @@ export class PostgresOrderRepository implements OrderRepository {
   async find(params: OrderSearchOptions): Promise<OrderFull | null> {
     const orderId = params.orderId.getValue();
 
-    const storedOrder = await prismaConnection.order.findUnique({
+    const connection = this.transactionContext ?? prismaConnection;
+
+    const storedOrder = await connection.order.findUnique({
       where: {
         orderId,
       },
@@ -331,7 +356,7 @@ export class PostgresOrderRepository implements OrderRepository {
       ? params.orderId.map((id) => id.getValue())
       : [params.orderId.getValue()];
 
-    await prismaConnection.$transaction(async (tx) => {
+    const runInTransaction = async (tx: PrismaTransaction): Promise<void> => {
       await tx.orderVariant.deleteMany({
         where: {
           orderProduct: {
@@ -357,7 +382,14 @@ export class PostgresOrderRepository implements OrderRepository {
           },
         },
       });
-    });
+    };
+
+    if (this.isWithTransactionContext && this.transactionContext) {
+      await runInTransaction(this.transactionContext);
+      return;
+    }
+
+    await prismaConnection.$transaction(runInTransaction);
   }
 
   async listAllOrders(params: OrderFilterCriteria): Promise<OrderWrite[]> {
@@ -386,7 +418,9 @@ export class PostgresOrderRepository implements OrderRepository {
         : [customerEmail.getValue()]
       : undefined;
 
-    const storedOrders = await prismaConnection.order.findMany({
+    const connection = this.transactionContext ?? prismaConnection;
+
+    const storedOrders = await connection.order.findMany({
       where: {
         ...(creators && { creatorType: { in: creators } }),
         ...(orderStatuses && { orderStatus: { in: orderStatuses } }),
@@ -395,10 +429,6 @@ export class PostgresOrderRepository implements OrderRepository {
       },
       include: {
         orderProducts: {
-          select: {
-            unitPrice: true,
-            productId: true,
-          },
           include: {
             orderVariants: {
               include: {
@@ -551,7 +581,9 @@ export class PostgresOrderRepository implements OrderRepository {
         : [customerEmail.getValue()]
       : undefined;
 
-    const storedOrders = await prismaConnection.order.findMany({
+    const connection = this.transactionContext ?? prismaConnection;
+
+    const storedOrders = await connection.order.findMany({
       where: {
         ...(creators && { creatorType: { in: creators } }),
         ...(orderStatuses && { orderStatus: { in: orderStatuses } }),
@@ -560,9 +592,6 @@ export class PostgresOrderRepository implements OrderRepository {
       },
       include: {
         orderProducts: {
-          select: {
-            unitPrice: true,
-          },
           include: {
             orderVariants: {
               select: {
@@ -618,7 +647,7 @@ export class PostgresOrderRepository implements OrderRepository {
     const { paymentAt, paymentDeadline, paymentStatus } = paymentInfo;
     const { creator: creatorType, creatorId } = creatorDetails;
 
-    await prismaConnection.$transaction(async (tx) => {
+    const runInTransaction = async (tx: PrismaTransaction): Promise<void> => {
       await tx.order.update({
         data: {
           orderStatus,
@@ -643,7 +672,14 @@ export class PostgresOrderRepository implements OrderRepository {
           orderId,
         },
       });
-    });
+    };
+
+    if (this.isWithTransactionContext && this.transactionContext) {
+      await runInTransaction(this.transactionContext);
+      return;
+    }
+
+    await prismaConnection.$transaction(runInTransaction);
   }
 
   private async createBatchOrderProducts(params: {
@@ -657,8 +693,8 @@ export class PostgresOrderRepository implements OrderRepository {
 
     const primitiveOrders = params.orders.map((item) => ({
       orderId: item.orderId.getValue(),
-      orderProducts: item.orderProducts.map((product) =>
-        product.toPrimitives()
+      orderProducts: item.orderProducts.map((orderProduct) =>
+        orderProduct.toPrimitives()
       ),
     }));
 
@@ -682,8 +718,10 @@ export class PostgresOrderRepository implements OrderRepository {
         orderProducts.forEach((orderProduct) => {
           const { productId, unitPrice, productVariants } = orderProduct;
 
+          const orderProductId = UUID.generateRandomUUID();
+
           orderProductsToCreate.push({
-            orderProductId: UUID.generateRandomUUID().getValue(),
+            orderProductId: orderProductId.getValue(),
             unitPrice: unitPrice,
             productId: productId,
             orderId: orderId,
@@ -694,7 +732,7 @@ export class PostgresOrderRepository implements OrderRepository {
           });
 
           orderProductVariants.push({
-            orderProductId: new UUID(orderId),
+            orderProductId,
             orderProductVariants: orderVariants,
           });
         });
@@ -712,6 +750,11 @@ export class PostgresOrderRepository implements OrderRepository {
 
     if (transaction) {
       await runInTransaction(transaction);
+      return;
+    }
+
+    if (this.isWithTransactionContext && this.transactionContext) {
+      await runInTransaction(this.transactionContext);
       return;
     }
 
@@ -807,7 +850,12 @@ export class PostgresOrderRepository implements OrderRepository {
       return;
     }
 
-    await executeOrderVariantCreation(prismaConnection);
+    if (this.isWithTransactionContext && this.transactionContext) {
+      await executeOrderVariantCreation(this.transactionContext);
+      return;
+    }
+
+    await prismaConnection.$transaction(executeOrderVariantCreation);
   }
 
   private async retrieveVariantSizes(params: {
@@ -822,11 +870,15 @@ export class PostgresOrderRepository implements OrderRepository {
       variantSizeId: UUID;
     }[]
   > {
-    const variantSizeIds = await prismaConnection.variantSize.findMany({
+    const connection = this.transactionContext ?? prismaConnection;
+
+    const variantSizeIds = await connection.variantSize.findMany({
       where: {
         OR: params.variantSizes.map((size) => ({
+          size: {
+            sizeValue: size.sizeValue.getValue(),
+          },
           variantId: size.variantId.getValue(),
-          sizeValue: size.sizeValue.getValue(),
         })),
       },
       include: {

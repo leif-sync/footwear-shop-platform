@@ -1,6 +1,6 @@
 import express from "express";
 import { productRouter } from "./modules/product/infrastructure/expressProductRouter.js";
-import { imageUploader } from "./modules/shared/infrastructure/serviceContainer.js";
+import { imageStorageEngine } from "./modules/shared/infrastructure/setupDependencies.js";
 import {
   absoluteImageStoragePath,
   DiskImageUploader,
@@ -16,14 +16,19 @@ import { Request, Response, NextFunction } from "express";
 import { HTTP_STATUS } from "./modules/shared/infrastructure/httpStatus.js";
 import { orderRouter } from "./modules/order/infrastructure/expressOrderRouter.js";
 import { paymentRouter } from "./modules/payment/infrastructure/expressPaymentRouter.js";
-await import("./seed.js");
-import(
-  "./modules/order/infrastructure/deleteOrderAndReleaseProductStockAutomatically.js"
-);
+import { createInitialSuperAdmin, seedDatabase } from "./seed.js";
 import cookieParser from "cookie-parser";
 import { authRouter } from "./modules/auth/infrastructure/expressAuthRouter.js";
 import { adminRouter } from "./modules/admin/infrastructure/adminRouter.js";
 import { paymentsEndpoint } from "./modules/payment/infrastructure/controllers/createWebpayPlusPaymentGatewayLink.js";
+import { isAppTest } from "./environmentVariables.js";
+
+await import(
+  "./modules/order/infrastructure/deleteOrderAndReleaseProductStockAutomatically.js"
+);
+
+if (isAppTest) await createInitialSuperAdmin();
+if (!isAppTest) await seedDatabase();
 
 export const app = express();
 
@@ -38,7 +43,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 app.use(cookieParser());
 
-if (imageUploader instanceof DiskImageUploader) {
+if (imageStorageEngine instanceof DiskImageUploader) {
   app.use(publicImagesAPIEndpoint, express.static(absoluteImageStoragePath));
 }
 

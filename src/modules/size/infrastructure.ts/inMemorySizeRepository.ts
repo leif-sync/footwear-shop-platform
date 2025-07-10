@@ -7,7 +7,7 @@ import { SizeRepository } from "../domain/sizeRepository.js";
 type findParams = { sizeId?: UUID; sizeValue?: PositiveInteger };
 type deleteParams = { sizeId?: UUID; sizeValue?: PositiveInteger };
 
-export class inMemorySizeRepository implements SizeRepository {
+export class InMemorySizeRepository implements SizeRepository {
   private sizes: Size[] = [];
 
   async create(params: { size: Size }): Promise<void> {

@@ -17,8 +17,10 @@ export class CreateSize {
     const size = new Size({ sizeId: id, sizeValue });
 
     const sizeFound = await this.sizeRepository.find({ sizeValue });
-    if (sizeFound)
+
+    if (sizeFound) {
       throw new SizeAlreadyExistsError({ sizeValue: params.sizeValue });
+    }
 
     await this.sizeRepository.create({ size });
     return {

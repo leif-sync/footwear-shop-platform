@@ -5,7 +5,7 @@ import { createTestOrder, loginTest } from "../../helper";
 import { HTTP_STATUS } from "../../../src/modules/shared/infrastructure/httpStatus";
 import { OrderPaymentStatusOptions } from "../../../src/modules/order/domain/orderPaymentStatus";
 import { OrderStatusOptions } from "../../../src/modules/order/domain/orderStatus";
-import { ServiceContainer } from "../../../src/modules/shared/infrastructure/serviceContainer";
+import { ServiceContainer } from "../../../src/modules/shared/infrastructure/setupDependencies";
 import { UUID } from "../../../src/modules/shared/domain/UUID";
 
 test("update partial order", async () => {

@@ -1,5 +1,5 @@
 import { HTTP_STATUS } from "../../../shared/infrastructure/httpStatus.js";
-import { ServiceContainer } from "../../../shared/infrastructure/serviceContainer.js";
+import { ServiceContainer } from "../../../shared/infrastructure/setupDependencies.js";
 import { InvalidCategoryError } from "../../domain/errors/invalidCategoryError.js";
 import { ProductNotFoundError } from "../../domain/errors/productNotFoundError.js";
 import { Request, Response } from "express";

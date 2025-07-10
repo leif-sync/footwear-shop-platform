@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { z, ZodError } from "zod";
-import { ServiceContainer } from "../../../shared/infrastructure/serviceContainer.js";
+import { ServiceContainer } from "../../../shared/infrastructure/setupDependencies.js";
 import { ProductNotFoundError } from "../../domain/errors/productNotFoundError.js";
 import { HTTP_STATUS } from "../../../shared/infrastructure/httpStatus.js";
 import { VariantPurchaseConflictError } from "../../domain/errors/variantPurchaseConflictError.js";

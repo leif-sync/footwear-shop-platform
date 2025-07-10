@@ -1,8 +1,13 @@
-import { adminConstraints } from "./adminConstraints.js";
 import {
   isValidPermission,
   validPermissionOptions,
 } from "./validPermissions.js";
+
+export class AdminPermissionError extends Error {
+  constructor(params: { invalidPermission: string }) {
+    super(`Invalid permission: ${params.invalidPermission}`);
+  }
+}
 
 /**
  * Represents a permission assigned to an admin.
@@ -12,20 +17,8 @@ export class AdminPermission {
 
   constructor(permissionName: validPermissionOptions) {
     this.permissionName = permissionName;
-    const isPermissionNameTooShort =
-      permissionName.length < adminConstraints.permission.minLength;
-
-    const isPermissionNameTooLong =
-      permissionName.length > adminConstraints.permission.maxLength;
-
-    if (isPermissionNameTooShort || isPermissionNameTooLong) {
-      throw new Error(
-        `Permission name must be between ${adminConstraints.permission.minLength} and ${adminConstraints.permission.maxLength} characters long.`
-      );
-    }
-
     if (!isValidPermission({ permission: permissionName })) {
-      throw new Error(`Invalid permission name: ${permissionName}`);
+      throw new AdminPermissionError({ invalidPermission: permissionName });
     }
   }
 
@@ -35,6 +28,13 @@ export class AdminPermission {
 
   static create(permissionName: validPermissionOptions) {
     return new AdminPermission(permissionName);
+  }
+
+  static from(permissionName: string) {
+    if (!isValidPermission({ permission: permissionName })) {
+      throw new AdminPermissionError({ invalidPermission: permissionName });
+    }
+    return new AdminPermission(permissionName as validPermissionOptions);
   }
 
   static clone(permission: AdminPermission): AdminPermission {

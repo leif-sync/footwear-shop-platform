@@ -34,6 +34,14 @@ export type storedVariantImage = {
 };
 
 export class PostgreSqlProductRepository implements ProductRepository {
+  private readonly transactionContext?: PrismaTransaction;
+  private readonly isWithTransactionContext: boolean;
+
+  constructor(params: { transactionContext?: PrismaTransaction } = {}) {
+    this.transactionContext = params.transactionContext;
+    this.isWithTransactionContext = Boolean(this.transactionContext);
+  }
+
   async create(params: { product: ProductFull }): Promise<void> {
     const {
       categories,
@@ -45,8 +53,10 @@ export class PostgreSqlProductRepository implements ProductRepository {
       variants,
     } = params.product.toPrimitives();
 
+    const connection = this.transactionContext ?? prismaConnection;
+
     const mapCategoryNameToId = new Map<string, string>();
-    const existingCategories = await prismaConnection.category.findMany({
+    const existingCategories = await connection.category.findMany({
       where: {
         name: {
           in: categories,
@@ -71,7 +81,7 @@ export class PostgreSqlProductRepository implements ProductRepository {
       };
     });
 
-    prismaConnection.$transaction(async (transaction) => {
+    const runInTransaction = async (transaction: PrismaTransaction) => {
       const connection = transaction;
 
       await connection.product.create({
@@ -97,7 +107,14 @@ export class PostgreSqlProductRepository implements ProductRepository {
         transaction,
         variants,
       });
-    });
+    };
+
+    if (this.isWithTransactionContext && this.transactionContext) {
+      await runInTransaction(this.transactionContext);
+      return;
+    }
+
+    await prismaConnection.$transaction(runInTransaction);
   }
 
   private async createBatchVariants(params: {
@@ -106,7 +123,8 @@ export class PostgreSqlProductRepository implements ProductRepository {
     variants: PrimitiveVariantFull[];
   }) {
     const { transaction, productId, variants } = params;
-    const connection = transaction ?? prismaConnection;
+    const connection =
+      transaction ?? this.transactionContext ?? prismaConnection;
 
     const variantsTable: {
       variantId: string;
@@ -288,7 +306,9 @@ export class PostgreSqlProductRepository implements ProductRepository {
   async find(params: ProductSearchOptions): Promise<ProductFull | null> {
     const { productId } = params;
 
-    const storedProduct = await prismaConnection.product.findUnique({
+    const connection = this.transactionContext ?? prismaConnection;
+
+    const storedProduct = await connection.product.findUnique({
       where: {
         productId: productId.getValue(),
       },
@@ -415,7 +435,9 @@ export class PostgreSqlProductRepository implements ProductRepository {
         : [productVisibility.getValue()]
       : undefined;
 
-    const storedProducts = await prismaConnection.product.findMany({
+    const connection = this.transactionContext ?? prismaConnection;
+
+    const storedProducts = await connection.product.findMany({
       take,
       skip,
       where: {
@@ -487,7 +509,9 @@ export class PostgreSqlProductRepository implements ProductRepository {
   async checkCategoryUsage(params: { categoryName: string }): Promise<boolean> {
     const { categoryName } = params;
 
-    const count = await prismaConnection.productCategory.count({
+    const connection = this.transactionContext ?? prismaConnection;
+
+    const count = await connection.productCategory.count({
       where: {
         category: {
           name: categoryName,
@@ -501,7 +525,8 @@ export class PostgreSqlProductRepository implements ProductRepository {
   async checkDetailUsage(params: { detailTitle: string }): Promise<boolean> {
     const { detailTitle } = params;
 
-    const count = await prismaConnection.variantDetailContent.count({
+    const connection = this.transactionContext ?? prismaConnection;
+    const count = await connection.variantDetailContent.count({
       where: {
         detail: {
           title: detailTitle,
@@ -517,7 +542,9 @@ export class PostgreSqlProductRepository implements ProductRepository {
   }): Promise<boolean> {
     const { sizeValue } = params;
 
-    const count = await prismaConnection.variantSize.count({
+    const connection = this.transactionContext ?? prismaConnection;
+
+    const count = await connection.variantSize.count({
       where: {
         size: {
           sizeValue: sizeValue.getValue(),
@@ -531,7 +558,9 @@ export class PostgreSqlProductRepository implements ProductRepository {
   async checkTagUsage(params: { tagName: string }): Promise<boolean> {
     const { tagName } = params;
 
-    const count = await prismaConnection.variantTag.count({
+    const connection = this.transactionContext ?? prismaConnection;
+
+    const count = await connection.variantTag.count({
       where: {
         tag: {
           name: tagName,
@@ -552,7 +581,9 @@ export class PostgreSqlProductRepository implements ProductRepository {
         : [productVisibility.getValue()]
       : undefined;
 
-    const count = await prismaConnection.product.count({
+    const connection = this.transactionContext ?? prismaConnection;
+
+    const count = await connection.product.count({
       where: {
         productCategories: {
           some: {
@@ -573,7 +604,9 @@ export class PostgreSqlProductRepository implements ProductRepository {
   }
 
   async deleteProduct(params: { productId: UUID }): Promise<void> {
-    await prismaConnection.$transaction(async (transaction) => {
+    const runInTransaction = async (
+      transaction: PrismaTransaction
+    ): Promise<void> => {
       await transaction.variantSize.deleteMany({
         where: {
           variant: {
@@ -615,7 +648,13 @@ export class PostgreSqlProductRepository implements ProductRepository {
           productId: params.productId.getValue(),
         },
       });
-    });
+    };
+    if (this.isWithTransactionContext && this.transactionContext) {
+      await runInTransaction(this.transactionContext);
+      return;
+    }
+
+    await prismaConnection.$transaction(runInTransaction);
   }
 
   async deleteVariant(params: {
@@ -624,7 +663,9 @@ export class PostgreSqlProductRepository implements ProductRepository {
   }): Promise<void> {
     const { productId, variantId } = params;
 
-    await prismaConnection.$transaction(async (transaction) => {
+    const runInTransaction = async (
+      transaction: PrismaTransaction
+    ): Promise<void> => {
       await transaction.variantSize.deleteMany({
         where: {
           variantId: variantId.getValue(),
@@ -658,7 +699,14 @@ export class PostgreSqlProductRepository implements ProductRepository {
           productId: productId.getValue(),
         },
       });
-    });
+    };
+
+    if (this.isWithTransactionContext && this.transactionContext) {
+      await runInTransaction(this.transactionContext);
+      return;
+    }
+
+    await prismaConnection.$transaction(runInTransaction);
   }
 
   async modifyStock(
@@ -668,6 +716,8 @@ export class PostgreSqlProductRepository implements ProductRepository {
       size: { sizeValue: PositiveInteger; stockAdjustment: Integer };
     }[]
   ): Promise<void> {
+    if (products.length === 0) return;
+
     const values = Prisma.join(
       products.map(
         (p) =>
@@ -684,24 +734,26 @@ export class PostgreSqlProductRepository implements ProductRepository {
       products.map((p) => Prisma.sql`${p.size.sizeValue.getValue()}`)
     );
 
-    await prismaConnection.$executeRaw`
+    const connection = this.transactionContext ?? prismaConnection;
+
+    await connection.$executeRaw`
       WITH "sizeIds" AS (
-        SELECT sizeId, sizeValue
+        SELECT "sizeId", "sizeValue"
         FROM "Size"
-        WHERE sizeValue = ANY (ARRAY[${sizeValues}])
+        WHERE "sizeValue" = ANY (ARRAY[${sizeValues}])
       )
       UPDATE "VariantSize" as vs
-      SET stock = vs.stock + v.sizeAdjustment
+      SET "stock" = vs."stock" + v."sizeAdjustment"
       FROM (
         VALUES ${values}
-      ) as v(productId, variantId, sizeValue, sizeAdjustment)
+      ) as v("productId", "variantId", "sizeValue", "sizeAdjustment")
       WHERE
-        vs.variantId = v.variantId
+        vs."variantId" = v."variantId"
         AND
-        vs.sizeId = (
-          SELECT sizeId
+        vs."sizeId" = (
+          SELECT "sizeId"
           FROM "sizeIds"
-          WHERE sizeValue = v.sizeValue
+          WHERE "sizeValue" = v."sizeValue"
         );
     `;
   }
@@ -735,6 +787,53 @@ export class PostgreSqlProductRepository implements ProductRepository {
       visibility,
       createdAt,
     } = primitiveVariantFull;
+
+    const runInTransaction = async (transaction: PrismaTransaction) => {
+      const validImages: storedVariantImage[] = images;
+
+      await transaction.variant.update({
+        where: {
+          variantId,
+          productId: productId.getValue(),
+        },
+        data: {
+          hexColor,
+          images: validImages,
+          visibility,
+          createdAt,
+          updatedAt,
+        },
+      });
+
+      await this.updateVariantSizes({
+        transaction,
+        variantId,
+        sizes: sizes.map((size) => ({
+          sizeValue: size.sizeValue,
+          newStock: size.stock,
+        })),
+      });
+
+      await this.updateVariantDetails({
+        transaction,
+        variantId,
+        details: details.map((detail) => ({
+          detailTitle: detail.title,
+          newContent: detail.content,
+        })),
+      });
+
+      await this.updateVariantTags({
+        transaction,
+        variantId,
+        tags,
+      });
+    };
+
+    if (this.isWithTransactionContext && this.transactionContext) {
+      await runInTransaction(this.transactionContext);
+      return;
+    }
 
     await prismaConnection.$transaction(async (transaction) => {
       const validImages: storedVariantImage[] = images;
@@ -785,7 +884,8 @@ export class PostgreSqlProductRepository implements ProductRepository {
     tags: string[];
   }) {
     const { transaction, variantId, tags } = params;
-    const connection = transaction ?? prismaConnection;
+    const connection =
+      transaction ?? this.transactionContext ?? prismaConnection;
 
     const existingTags = await connection.tag.findMany({
       where: { name: { in: tags } },
@@ -806,30 +906,34 @@ export class PostgreSqlProductRepository implements ProductRepository {
       },
     });
 
-    variantTagsInDb.forEach((dbTag) => {
-      const tagName = mapTagIdToName.get(dbTag.tagId);
+    variantTagsInDb.forEach((dbVariantTag) => {
+      const tagName = mapTagIdToName.get(dbVariantTag.tagId);
 
       if (!tagName) {
-        throw new Error(
-          `Tag with ID ${dbTag.tagId} not found, this should never happen check the data consistency`
-        );
-      }
-
-      if (!tags.includes(tagName)) {
-        variantTagsToDelete.push(dbTag.tagId);
+        variantTagsToDelete.push(dbVariantTag.tagId);
       }
     });
 
     tags.forEach((tag) => {
       const tagId = mapTagNameToId.get(tag);
 
-      if (tagId) {
-        // Already exists, handled in the previous loop
+      if (!tagId) {
+        throw new Error(
+          `Tag with name ${tag} not found, this should never happen check the data consistency`
+        );
+      }
+
+      const tagExistsInDb = variantTagsInDb.some(
+        (vTag) => vTag.tagId === tagId
+      );
+
+      if (tagExistsInDb) {
+        // Already exists, do not create again
         return;
       }
 
       variantTagsToCreate.push({
-        tagId: UUID.generateRandomUUID().getValue(),
+        tagId,
         variantId,
       });
     });
@@ -856,10 +960,11 @@ export class PostgreSqlProductRepository implements ProductRepository {
     }[];
   }) {
     const { transaction, variantId, details } = params;
-    const connection = transaction ?? prismaConnection;
+    const connection =
+      transaction ?? this.transactionContext ?? prismaConnection;
 
     const variantDetailsToDelete: string[] = []; // IDs of variantDetails to delete
-    const variantDetailsToCreate: {
+    const variantDetailsContentToCreate: {
       detailId: string;
       content: string;
       variantId: string;
@@ -886,47 +991,53 @@ export class PostgreSqlProductRepository implements ProductRepository {
       mapDetailIdToTitle.set(detail.variantDetailId, detail.title);
     });
 
-    const dbVariantDetails = await connection.variantDetailContent.findMany({
-      where: {
-        variantId,
-      },
-    });
+    const dbVariantDetailsContent =
+      await connection.variantDetailContent.findMany({
+        where: {
+          variantId,
+        },
+      });
 
-    dbVariantDetails.forEach((dbDetail) => {
-      const detailTitle = mapDetailIdToTitle.get(dbDetail.detailId);
+    dbVariantDetailsContent.forEach((dbDetailContent) => {
+      const detailTitle = mapDetailIdToTitle.get(dbDetailContent.detailId);
 
       if (!detailTitle) {
-        throw new Error(
-          `Detail with ID ${dbDetail.detailId} not found, this should never happen check the data consistency`
-        );
+        variantDetailsToDelete.push(dbDetailContent.detailId);
       }
-
-      const newDetailData = details.find(
-        (detail) => detail.detailTitle === detailTitle
-      );
-
-      if (newDetailData && dbDetail.content !== newDetailData.newContent) {
-        variantDetailsToUpdate.push({
-          detailId: dbDetail.detailId,
-          variantId,
-          newContent: newDetailData.newContent,
-        });
-        return;
-      }
-
-      variantDetailsToDelete.push(dbDetail.detailId);
     });
 
     details.forEach((detail) => {
       const detailId = mapDetailTitleToId.get(detail.detailTitle);
 
-      if (detailId) {
-        // Already exists, handled in the previous loop
+      if (!detailId) {
+        throw new Error(
+          `Detail with title ${detail.detailTitle} not found, this should never happen check the data consistency`
+        );
+      }
+
+      const existingVariantDetailContent = dbVariantDetailsContent.find(
+        (vDetail) => vDetail.detailId === detailId
+      );
+
+      const isTheSameContent =
+        existingVariantDetailContent?.content === detail.newContent;
+
+      if (existingVariantDetailContent && isTheSameContent) {
+        // No need to update, already exists with the same content
         return;
       }
 
-      variantDetailsToCreate.push({
-        detailId: UUID.generateRandomUUID().getValue(),
+      if (existingVariantDetailContent && !isTheSameContent) {
+        variantDetailsToUpdate.push({
+          detailId,
+          variantId,
+          newContent: detail.newContent,
+        });
+        return;
+      }
+
+      variantDetailsContentToCreate.push({
+        detailId,
         content: detail.newContent,
         variantId,
       });
@@ -943,9 +1054,9 @@ export class PostgreSqlProductRepository implements ProductRepository {
       });
     }
 
-    if (variantDetailsToCreate.length > 0) {
+    if (variantDetailsContentToCreate.length > 0) {
       await connection.variantDetailContent.createMany({
-        data: variantDetailsToCreate,
+        data: variantDetailsContentToCreate,
       });
     }
 
@@ -967,7 +1078,8 @@ export class PostgreSqlProductRepository implements ProductRepository {
   }) {
     const { transaction, data } = params;
     if (data.length === 0) return;
-    const connection = transaction ?? prismaConnection;
+    const connection =
+      transaction ?? this.transactionContext ?? prismaConnection;
 
     const values = Prisma.join(
       data.map(
@@ -977,13 +1089,13 @@ export class PostgreSqlProductRepository implements ProductRepository {
     );
 
     await connection.$executeRaw`
-      UPDATE "VariantDetail"
+      UPDATE "VariantDetailContent"
       SET content = v.newContent
       FROM (
         VALUES ${values}
       ) as v(detailId, variantId, newContent)
-      WHERE "VariantDetail".detailId = v.detailId
-      AND "VariantDetail".variantId = v.variantId;
+      WHERE "VariantDetailContent"."detailId" = v.detailId::uuid
+      AND "VariantDetailContent"."variantId" = v.variantId::uuid;
     `;
   }
 
@@ -995,10 +1107,13 @@ export class PostgreSqlProductRepository implements ProductRepository {
       newStock: number;
     }[];
   }) {
-    const connection = params.transaction ?? prismaConnection;
+    const connection =
+      params.transaction ?? this.transactionContext ?? prismaConnection;
     const sizesToSearch = params.sizes.map((size) => size.sizeValue);
+
     const mapSizeIdToSizeValue = new Map<string, number>();
     const mapSizeValueToId = new Map<number, string>();
+
     const sizesInDb = await connection.size.findMany({
       where: { sizeValue: { in: sizesToSearch } },
     });
@@ -1028,32 +1143,16 @@ export class PostgreSqlProductRepository implements ProductRepository {
       const sizeValue = mapSizeIdToSizeValue.get(storedSize.sizeId);
 
       if (!sizeValue) {
-        throw new Error(
-          `Size with ID ${storedSize.sizeId} not found, this should never happen check the data consistency`
-        );
+        variantSizesToDelete.push(storedSize.variantSizeId);
       }
-
-      const newSizeData = params.sizes.find(
-        (size) => size.sizeValue === sizeValue
-      );
-
-      if (newSizeData && storedSize.stock !== newSizeData.newStock) {
-        variantSizesToUpdate.push({
-          variantSizeId: storedSize.variantSizeId,
-          newStock: newSizeData.newStock,
-        });
-        return;
-      }
-
-      variantSizesToDelete.push(storedSize.variantSizeId);
     });
 
-    params.sizes.forEach((size) => {
-      const sizeId = mapSizeValueToId.get(size.sizeValue);
+    params.sizes.forEach((newSize) => {
+      const sizeId = mapSizeValueToId.get(newSize.sizeValue);
 
       if (!sizeId) {
         throw new Error(
-          `Size with value ${size.sizeValue} not found, this should never happen check the data consistency`
+          `Size with value ${newSize.sizeValue} not found, this should never happen check the data consistency`
         );
       }
 
@@ -1061,11 +1160,24 @@ export class PostgreSqlProductRepository implements ProductRepository {
         (vSize) => vSize.sizeId === sizeId
       );
 
-      if (existingVariantSize) return; // Already handled in the previous loop
+      const isTheSameStock = existingVariantSize?.stock === newSize.newStock;
+
+      if (existingVariantSize && isTheSameStock) {
+        // No need to update, already exists with the same stock
+        return;
+      }
+
+      if (existingVariantSize && !isTheSameStock) {
+        variantSizesToUpdate.push({
+          variantSizeId: existingVariantSize.variantSizeId,
+          newStock: newSize.newStock,
+        });
+        return;
+      }
 
       variantSizesToCreate.push({
         variantSizeId: UUID.generateRandomUUID().getValue(),
-        stock: size.newStock,
+        stock: newSize.newStock,
         sizeId,
         variantId: params.variantId,
       });
@@ -1081,16 +1193,16 @@ export class PostgreSqlProductRepository implements ProductRepository {
       });
     }
 
-    if (variantSizesToCreate.length > 0) {
-      await connection.variantSize.createMany({
-        data: variantSizesToCreate,
+    if (variantSizesToUpdate.length > 0) {
+      await this.updateBatchVariantSizesTable({
+        transaction: params.transaction ?? prismaConnection,
+        data: variantSizesToUpdate,
       });
     }
 
-    if (variantSizesToUpdate.length > 0) {
-      await this.updateBatchVariantSizesTable({
-        transaction: params.transaction,
-        data: variantSizesToUpdate,
+    if (variantSizesToCreate.length > 0) {
+      await connection.variantSize.createMany({
+        data: variantSizesToCreate,
       });
     }
   }
@@ -1105,7 +1217,8 @@ export class PostgreSqlProductRepository implements ProductRepository {
     const { transaction, data } = params;
     if (data.length === 0) return;
 
-    const connection = transaction ?? prismaConnection;
+    const connection =
+      transaction ?? this.transactionContext ?? prismaConnection;
 
     const values = Prisma.join(
       data.map((item) => Prisma.sql`(${item.variantSizeId}, ${item.newStock})`)
@@ -1118,7 +1231,7 @@ export class PostgreSqlProductRepository implements ProductRepository {
       FROM (
         VALUES ${values}
       ) AS v(variantSizeId, newStock)
-      WHERE "VariantSize".variantSizeId = v.variantSizeId;
+      WHERE "VariantSize"."variantSizeId" = v.variantSizeId::uuid;
     `;
   }
 
@@ -1141,14 +1254,19 @@ export class PostgreSqlProductRepository implements ProductRepository {
 
     const pricePrimitives = productPrice.toPrimitives();
 
-    await prismaConnection.$transaction(async (transaction) => {
+    const runInTransaction = async (
+      transaction: PrismaTransaction
+    ): Promise<void> => {
       const existingCategories = await transaction.category.findMany({
         where: { name: { in: productCategories } },
       });
+
       const mapCategoryNameToId = new Map<string, string>();
       const mapCategoryIdToName = new Map<string, string>();
+
       existingCategories.forEach((category) => {
         mapCategoryNameToId.set(category.name, category.categoryId);
+        mapCategoryIdToName.set(category.categoryId, category.name);
       });
 
       const productCategoryToDelete: {
@@ -1170,12 +1288,6 @@ export class PostgreSqlProductRepository implements ProductRepository {
         );
 
         if (!categoryName) {
-          throw new Error(
-            `Category with ID ${dbProductCategory.categoryId} not found, this should never happen check the data consistency`
-          );
-        }
-
-        if (!productCategories.includes(categoryName)) {
           productCategoryToDelete.push({
             categoryId: dbProductCategory.categoryId,
             productId: productId.getValue(),
@@ -1186,13 +1298,22 @@ export class PostgreSqlProductRepository implements ProductRepository {
       productCategories.forEach((categoryName) => {
         const categoryId = mapCategoryNameToId.get(categoryName);
 
-        if (categoryId) {
-          // Already exists, handled in the previous loop
+        if (!categoryId) {
+          throw new Error(
+            `Category with name ${categoryName} not found, this should never happen check the data consistency`
+          );
+        }
+
+        const categoryAlreadyExists = dbProductCategories.some(
+          (pc) => pc.categoryId === categoryId
+        );
+
+        if (categoryAlreadyExists) {
           return;
         }
 
         productCategoryToCreate.push({
-          categoryId: UUID.generateRandomUUID().getValue(),
+          categoryId,
           productId: productId.getValue(),
         });
       });
@@ -1230,7 +1351,14 @@ export class PostgreSqlProductRepository implements ProductRepository {
           productCategories: {},
         },
       });
-    });
+    };
+
+    if (this.isWithTransactionContext && this.transactionContext) {
+      await runInTransaction(this.transactionContext);
+      return;
+    }
+
+    await prismaConnection.$transaction(runInTransaction);
   }
 
   async retrievePartialProductDetails(params: {
@@ -1238,7 +1366,9 @@ export class PostgreSqlProductRepository implements ProductRepository {
   }): Promise<partialProductDetailsDto[]> {
     const { productIds } = params;
 
-    const dbProducts = await prismaConnection.product.findMany({
+    const connection = this.transactionContext ?? prismaConnection;
+
+    const dbProducts = await connection.product.findMany({
       where: {
         productId: {
           in: productIds.map((id) => id.getValue()),

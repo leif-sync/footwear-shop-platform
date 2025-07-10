@@ -1,6 +1,6 @@
 import { ZodError } from "zod";
 import { HTTP_STATUS } from "../../../shared/infrastructure/httpStatus.js";
-import { ServiceContainer } from "../../../shared/infrastructure/serviceContainer.js";
+import { ServiceContainer } from "../../../shared/infrastructure/setupDependencies.js";
 import { InvalidProductError } from "../../domain/errors/invalidProductError.js";
 import { InvalidVariantError } from "../../domain/errors/invalidVariantError.js";
 import { NotEnoughStockError } from "../../domain/errors/notEnoughStockError.js";
@@ -235,7 +235,7 @@ async function createOrderForAdmin(params: {
       paymentInfo,
       orderProducts,
     });
- 
+
     res.status(HTTP_STATUS.CREATED).json({
       message: "Order created",
       order: {

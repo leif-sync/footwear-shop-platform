@@ -1,4 +1,11 @@
-import { adminConstraints } from "./adminConstraints.js";
+export class AdminFirstNameError extends Error {
+  constructor(params: { firstName: string }) {
+    super(
+      `First name "${params.firstName}" must be between ${AdminFirstName.minLength} and ${AdminFirstName.maxLength}
+       characters long, but it is ${params.firstName.length} characters long.`
+    );
+  }
+}
 
 /**
  * Represents the first name of an admin.
@@ -6,6 +13,8 @@ import { adminConstraints } from "./adminConstraints.js";
  * It ensures that the first name meets the minimum and maximum length requirements.
  */
 export class AdminFirstName {
+  static readonly minLength = 2;
+  static readonly maxLength = 50;
   private readonly firstName: string;
 
   constructor(firstName: string) {
@@ -14,15 +23,13 @@ export class AdminFirstName {
   }
 
   private ensureIsValid(firstName: string): void {
-    if (firstName.length < adminConstraints.firstName.minLength) {
-      throw new Error(
-        `First name must be at least ${adminConstraints.firstName.minLength} characters long`
-      );
-    }
-    if (firstName.length > adminConstraints.firstName.maxLength) {
-      throw new Error(
-        `First name must be at most ${adminConstraints.firstName.maxLength} characters long`
-      );
+    const firstNameLength = firstName.length;
+
+    const isFirstNameTooShort = firstNameLength < AdminFirstName.minLength;
+    const isFirstNameTooLong = firstNameLength > AdminFirstName.maxLength;
+
+    if (isFirstNameTooShort || isFirstNameTooLong) {
+      throw new AdminFirstNameError({ firstName });
     }
   }
 

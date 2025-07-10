@@ -1,4 +1,4 @@
-export abstract class ImageUploader {
+export abstract class ImageStorageEngine {
   abstract uploadSingleImage(imageBuffer: Buffer): Promise<string>;
   abstract uploadMultipleImages(imageBuffers: Buffer[]): Promise<string[]>;
 

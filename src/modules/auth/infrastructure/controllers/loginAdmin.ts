@@ -5,7 +5,7 @@ import {
   ServiceContainer,
   loginCodeRepository,
   refreshTokenRepository,
-} from "../../../shared/infrastructure/serviceContainer.js";
+} from "../../../shared/infrastructure/setupDependencies.js";
 import { HTTP_STATUS } from "../../../shared/infrastructure/httpStatus.js";
 import { AdminNotFoundError } from "../../../admin/domain/errors/adminNotFoundError.js";
 import {

@@ -1,6 +1,6 @@
 import { HTTP_STATUS } from "./modules/shared/infrastructure/httpStatus.js";
 import { Request, Response, NextFunction } from "express";
-import { logger } from "./modules/shared/infrastructure/logger.js";
+import { logger } from "./modules/shared/infrastructure/setupDependencies.js";
 
 export async function expressErrorHandler(
   err: unknown,

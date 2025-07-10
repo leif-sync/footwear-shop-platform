@@ -19,18 +19,31 @@ export class AppImageError extends Error {
       return;
     }
 
-    super(`Invalid image alt: ${params.invalidImageAlt}`);
+    super(
+      `Invalid image alt: ${params.invalidImageAlt}, it must be between ${
+        AppImage.minImageAltLength
+      } and ${AppImage.maxImageAltLength} characters long.`
+    );
   }
 }
 
 export class AppImage {
+  static readonly minImageAltLength: 1;
+  static readonly maxImageAltLength: 50;
+
   private readonly imageUrl: AppUrl;
   private readonly imageAlt: string;
 
   constructor(params: { imageUrl: AppUrl; imageAlt: string }) {
     const { imageUrl, imageAlt } = params;
 
-    if (!imageAlt.length) throw new Error("Image alt cannot be empty");
+    if (imageAlt.length < AppImage.minImageAltLength) {
+      throw new AppImageError({ invalidImageAlt: imageAlt });
+    }
+
+    if (imageAlt.length > AppImage.maxImageAltLength) {
+      throw new AppImageError({ invalidImageAlt: imageAlt });
+    }
 
     this.imageUrl = AppUrl.clone(imageUrl);
     this.imageAlt = imageAlt;

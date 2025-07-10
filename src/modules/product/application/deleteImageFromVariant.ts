@@ -11,10 +11,9 @@ import { VariantSize } from "../domain/variantSize.js";
 import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
 import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
 import { Visibility } from "../domain/visibility.js";
-import { ImageUploader } from "../domain/imageUploader.js";
+import { ImageStorageEngine } from "../domain/imageStorageEngine.js";
 import { VariantImageNotFoundError } from "../domain/errors/variantImageNotFoundError.js";
 import { VariantImageConstraintError } from "../domain/errors/variantImageConstraintError.js";
-import { variantConstraint } from "../domain/variantConstraints.js";
 import { VariantTag } from "../domain/variantTag.js";
 
 type DeleteImageFromVariantParams = {
@@ -25,11 +24,11 @@ type DeleteImageFromVariantParams = {
 
 export class DeleteImageFromVariant {
   private readonly productRepository: ProductRepository;
-  private readonly imageUploader: ImageUploader;
+  private readonly imageUploader: ImageStorageEngine;
 
   constructor(params: {
     productRepository: ProductRepository;
-    imageUploader: ImageUploader;
+    imageUploader: ImageStorageEngine;
   }) {
     this.productRepository = params.productRepository;
     this.imageUploader = params.imageUploader;
@@ -67,7 +66,7 @@ export class DeleteImageFromVariant {
       return imageUrlId !== imageIdFound;
     });
 
-    if (updatedImagesPrimitives.length < variantConstraint.image.minImages) {
+    if (updatedImagesPrimitives.length < VariantFull.imageConstraint.minImages) {
       throw new VariantImageConstraintError({
         variantId,
       });

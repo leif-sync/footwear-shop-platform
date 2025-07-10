@@ -8,12 +8,10 @@ import {
 } from "../webpaySdkHelper.js";
 import { InvalidOrderError } from "../../domain/errors/invalidOrderError.js";
 import { PaymentDeadlineExceededError } from "../../domain/errors/paymentDeadlineExceededError.js";
-import { ServiceContainer } from "../../../shared/infrastructure/serviceContainer.js";
+import { ServiceContainer } from "../../../shared/infrastructure/setupDependencies.js";
 import { PaymentTransaction } from "../../domain/paymentTransaction.js";
 import { Currency } from "../../domain/currency.js";
-import {
-  PaymentProcessor,
-} from "../../domain/paymentProcessor.js";
+import { PaymentProcessor } from "../../domain/paymentProcessor.js";
 import { UUID } from "../../../shared/domain/UUID.js";
 import { TransactionType } from "../../domain/transactionType.js";
 import { PaymentTransactionStatus } from "../../domain/paymentTransactionStatus.js";
@@ -62,6 +60,7 @@ function handlePaymentSuccessErrors(params: {
         isPaymentRefunded: true,
       },
     });
+    return;
   }
 
   if (error instanceof PaymentAlreadyMadeError) {
@@ -83,7 +82,10 @@ function handlePaymentSuccessErrors(params: {
         isPaymentRefunded: true,
       },
     });
+    return;
   }
+
+  throw error;
 }
 
 async function processCashBackWebpayPlus(params: {

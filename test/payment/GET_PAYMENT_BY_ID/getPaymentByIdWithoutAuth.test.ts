@@ -8,7 +8,7 @@ import { CurrencyOptions } from "../../../src/modules/payment/domain/currency";
 import { PaymentProcessorOptions } from "../../../src/modules/payment/domain/paymentProcessor";
 import { PaymentTransactionStatusOptions } from "../../../src/modules/payment/domain/paymentTransactionStatus";
 import { TransactionTypeOptions } from "../../../src/modules/payment/domain/transactionType";
-import { ServiceContainer } from "../../../src/modules/shared/infrastructure/serviceContainer";
+import { ServiceContainer } from "../../../src/modules/shared/infrastructure/setupDependencies";
 import { HTTP_STATUS } from "../../../src/modules/shared/infrastructure/httpStatus";
 
 test("get payment by id without auth", async () => {
@@ -27,7 +27,7 @@ test("get payment by id without auth", async () => {
     currency: CurrencyOptions.CLP,
     orderId,
     paymentProcessor: PaymentProcessorOptions.WEBPAY,
-    rawResponse: "test-raw-response",
+    rawResponse: `{"message":"Test response"}`,
     transactionStatus: PaymentTransactionStatusOptions.APPROVED,
     transactionType: TransactionTypeOptions.PAYMENT,
     updatedAt: new Date(),

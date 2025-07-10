@@ -1,4 +1,4 @@
-import { discountOptions } from "../../src/modules/product/domain/discountType";
+import { DiscountOptions } from "../../src/modules/product/domain/discountType";
 
 export const priceTestCases: {
   updateTestName: string;
@@ -15,7 +15,7 @@ export const priceTestCases: {
     createTestName: "create product with valid price",
     baseValue: 100,
     discountValue: 10,
-    discountType: discountOptions.PERCENT,
+    discountType: DiscountOptions.PERCENT,
     discountStartAt: new Date().toISOString(),
     discountEndAt: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
     shouldSucceed: true,
@@ -25,7 +25,7 @@ export const priceTestCases: {
     createTestName: "create product with price baseValue < discountValue FIXED",
     baseValue: 100,
     discountValue: 200,
-    discountType: discountOptions.FIXED,
+    discountType: DiscountOptions.FIXED,
     shouldSucceed: false,
     discountEndAt: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
     discountStartAt: new Date().toISOString(),
@@ -33,7 +33,7 @@ export const priceTestCases: {
   {
     updateTestName: "update product with price discountValue > 100 PERCENT",
     createTestName: "create product with price discountValue > 100 PERCENT",
-    discountType: discountOptions.PERCENT,
+    discountType: DiscountOptions.PERCENT,
     discountValue: 200,
     shouldSucceed: false,
     baseValue: 100,
@@ -48,7 +48,7 @@ export const priceTestCases: {
     shouldSucceed: false,
     baseValue: 100,
     discountValue: 10,
-    discountType: discountOptions.PERCENT,
+    discountType: DiscountOptions.PERCENT,
   },
   {
     updateTestName: "update product with invalid discount type",
@@ -64,7 +64,7 @@ export const priceTestCases: {
   {
     updateTestName: "update product with discount without dates",
     createTestName: "create product with discount without dates",
-    discountType: discountOptions.FIXED,
+    discountType: DiscountOptions.FIXED,
     discountStartAt: null,
     discountEndAt: null,
     shouldSucceed: false,
@@ -74,7 +74,7 @@ export const priceTestCases: {
   {
     updateTestName: "update product with discount without start date",
     createTestName: "create product with discount without start date",
-    discountType: discountOptions.FIXED,
+    discountType: DiscountOptions.FIXED,
     discountStartAt: null,
     discountEndAt: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
     shouldSucceed: false,
@@ -84,7 +84,7 @@ export const priceTestCases: {
   {
     updateTestName: "update product with discount without end date",
     createTestName: "create product with discount without end date",
-    discountType: discountOptions.FIXED,
+    discountType: DiscountOptions.FIXED,
     discountStartAt: new Date().toISOString(),
     discountEndAt: null,
     shouldSucceed: false,
@@ -94,7 +94,7 @@ export const priceTestCases: {
   {
     updateTestName: "update product with valid discount NONE",
     createTestName: "create product with valid discount NONE",
-    discountType: discountOptions.NONE,
+    discountType: DiscountOptions.NONE,
     discountValue: 0,
     discountStartAt: null,
     discountEndAt: null,
@@ -104,7 +104,7 @@ export const priceTestCases: {
   {
     updateTestName: "update product with discount NONE and dates",
     createTestName: "create product with discount NONE and dates",
-    discountType: discountOptions.NONE,
+    discountType: DiscountOptions.NONE,
     discountValue: 0,
     discountStartAt: new Date().toISOString(),
     discountEndAt: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
@@ -114,7 +114,7 @@ export const priceTestCases: {
   {
     updateTestName: "update product with discount NONE and discountValue > 0",
     createTestName: "create product with discount NONE and discountValue > 0",
-    discountType: discountOptions.NONE,
+    discountType: DiscountOptions.NONE,
     discountValue: 10,
     discountStartAt: null,
     discountEndAt: null,

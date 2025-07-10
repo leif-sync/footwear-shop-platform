@@ -20,7 +20,7 @@ export class AppUrl {
   private readonly queryParams: Record<string, queryParameterType | undefined> =
     {};
 
-  constructor(baseUrl: string, ...paths: string[]) {
+  constructor(baseUrl: string | AppUrl, ...paths: string[]) {
     // const pathComponents: string[] = [];
 
     // const normalizedAndAddPathComponent = (path: string) => {
@@ -49,9 +49,11 @@ export class AppUrl {
 
     const normalizedPath = pathComponents.join("/");
 
-    const urlToValidate = baseUrl.endsWith("/")
-      ? `${baseUrl}${normalizedPath}`
-      : [baseUrl, normalizedPath].filter(Boolean).join("/");
+    const stringBaseUrl =
+      baseUrl instanceof AppUrl ? baseUrl.getValue() : baseUrl;
+    const urlToValidate = stringBaseUrl.endsWith("/")
+      ? `${stringBaseUrl}${normalizedPath}`
+      : [stringBaseUrl, normalizedPath].filter(Boolean).join("/");
 
     this.ensureIsValid(urlToValidate);
     this.url = urlToValidate;

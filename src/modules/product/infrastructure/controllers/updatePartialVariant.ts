@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { HTTP_STATUS } from "../../../shared/infrastructure/httpStatus.js";
-import { ServiceContainer } from "../../../shared/infrastructure/serviceContainer.js";
+import { ServiceContainer } from "../../../shared/infrastructure/setupDependencies.js";
 import { InvalidDetailError } from "../../domain/errors/invalidDetailError.js";
 import { InvalidSizeError } from "../../domain/errors/invalidSizeError.js";
 import { InvalidTagError } from "../../domain/errors/invalidTagError.js";
@@ -25,7 +25,13 @@ export async function updatePartialVariant(
       productId,
       variant: {
         variantId,
-        ...partialVariant,
+        details: partialVariant.details?.map((detail) => ({
+          title: detail.title,
+          content: detail.content,
+        })),
+        hexColor: partialVariant.hexColor,
+        tags: partialVariant.tags,
+        visibility: partialVariant.visibility,
         sizes: partialVariant.sizes?.map((size) => ({
           sizeValue: size.sizeValue,
           stock: size.stock,

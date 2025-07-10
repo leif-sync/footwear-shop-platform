@@ -9,7 +9,7 @@ import { CurrencyOptions } from "../../../src/modules/payment/domain/currency";
 import { PaymentProcessorOptions } from "../../../src/modules/payment/domain/paymentProcessor";
 import { PaymentTransactionStatusOptions } from "../../../src/modules/payment/domain/paymentTransactionStatus";
 import { TransactionTypeOptions } from "../../../src/modules/payment/domain/transactionType";
-import { ServiceContainer } from "../../../src/modules/shared/infrastructure/serviceContainer";
+import { ServiceContainer } from "../../../src/modules/shared/infrastructure/setupDependencies";
 
 test("get payment by id", async () => {
   const { orderId } = await createTestOrder({
@@ -27,7 +27,7 @@ test("get payment by id", async () => {
     currency: CurrencyOptions.CLP,
     orderId,
     paymentProcessor: PaymentProcessorOptions.WEBPAY,
-    rawResponse: "test-raw-response",
+    rawResponse: `{"message":"Test response"}`,
     transactionStatus: PaymentTransactionStatusOptions.APPROVED,
     transactionType: TransactionTypeOptions.PAYMENT,
     updatedAt: new Date(),
@@ -57,5 +57,4 @@ test("get payment by id", async () => {
     createdAt: transactionToCreate.createdAt.toISOString(),
     updatedAt: transactionToCreate.updatedAt.toISOString(),
   });
-
 });

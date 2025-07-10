@@ -1,7 +1,7 @@
 import { z, ZodError } from "zod";
 import { Request, Response } from "express";
 import { HTTP_STATUS } from "../../shared/infrastructure/httpStatus.js";
-import { ServiceContainer } from "../../shared/infrastructure/serviceContainer.js";
+import { ServiceContainer } from "../../shared/infrastructure/setupDependencies.js";
 import { DetailAlreadyExistsError } from "../domain/detailAlreadyExistsError.js";
 import { DetailInUseError } from "../domain/detailInUseError.js";
 import { DetailNotFoundError } from "../domain/detailNotFoundError.js";

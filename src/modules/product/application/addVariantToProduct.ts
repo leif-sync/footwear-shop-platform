@@ -9,7 +9,7 @@ import { VariantSize } from "../domain/variantSize.js";
 import { Visibility, visibilityOptions } from "../domain/visibility.js";
 import { AppImage } from "../../shared/domain/AppImage.js";
 import { AppUrl } from "../../shared/domain/appUrl.js";
-import { ImageUploader } from "../domain/imageUploader.js";
+import { ImageStorageEngine } from "../domain/imageStorageEngine.js";
 import { ProductValidationService } from "../domain/productValidationService.js";
 import { ProductNotFoundError } from "../domain/errors/productNotFoundError.js";
 import { VariantTag } from "../domain/variantTag.js";
@@ -37,12 +37,12 @@ type AddVariantToProductParams = {
 
 export class AddVariantToProduct {
   private readonly productRepository: ProductRepository;
-  private readonly imageUploader: ImageUploader;
+  private readonly imageUploader: ImageStorageEngine;
   private readonly productValidationService: ProductValidationService;
 
   constructor(params: {
     productRepository: ProductRepository;
-    imageUploader: ImageUploader;
+    imageUploader: ImageStorageEngine;
     productValidationService: ProductValidationService;
   }) {
     this.productRepository = params.productRepository;

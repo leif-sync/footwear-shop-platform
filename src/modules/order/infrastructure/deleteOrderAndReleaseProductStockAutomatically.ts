@@ -1,4 +1,4 @@
-import { ServiceContainer } from "../../shared/infrastructure/serviceContainer.js";
+import { ServiceContainer } from "../../shared/infrastructure/setupDependencies.js";
 import { CronJob } from "cron";
 import { PRODUCT_STOCK_RELEASE_CRON_EXPRESSION } from "../../../environmentVariables.js";
 

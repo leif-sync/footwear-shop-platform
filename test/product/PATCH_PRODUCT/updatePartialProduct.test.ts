@@ -2,7 +2,7 @@ import { describe, test, expect } from "vitest";
 import { api } from "../../api";
 import { productsUrlPath } from "../shared";
 import { visibilityOptions } from "../../../src/modules/product/domain/visibility";
-import { discountOptions } from "../../../src/modules/product/domain/discountType";
+import { DiscountOptions } from "../../../src/modules/product/domain/discountType";
 import {
   adminProductFullSchema,
   publicProductFullSchema,
@@ -46,7 +46,7 @@ describe("PATCH /products/:productId", async () => {
       productCategories: [newCategory],
       price: {
         baseValue: 100,
-        discountType: discountOptions.FIXED,
+        discountType: DiscountOptions.FIXED,
         discountValue: 80,
         discountStartAt: new Date(),
         discountEndAt: new Date(Date.now() + 1000 * 60 * 60 * 24),

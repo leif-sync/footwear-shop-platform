@@ -7,7 +7,7 @@
 import { CategoryAlreadyExistsError } from "../src/modules/category/domain/errors/categoryAlreadyExistsError";
 import {
   DiscountType,
-  discountOptions,
+  DiscountOptions,
 } from "../src/modules/product/domain/discountType";
 import { ProductFull } from "../src/modules/product/domain/productFull";
 import { ProductPrice } from "../src/modules/product/domain/productPrice";
@@ -27,7 +27,7 @@ import { UUID } from "../src/modules/shared/domain/UUID";
 import {
   productRepository,
   ServiceContainer,
-} from "../src/modules/shared/infrastructure/serviceContainer";
+} from "../src/modules/shared/infrastructure/setupDependencies";
 import { SizeAlreadyExistsError } from "../src/modules/size/domain/errors/sizeAlreadyExistsError";
 import { TagAlreadyExistsError } from "../src/modules/tag/domain/errors/tagAlreadyExistsError";
 import { AppImage } from "../src/modules/shared/domain/AppImage";
@@ -117,7 +117,7 @@ export async function createTestProduct(params?: {
 }) {
   const price = new ProductPrice({
     baseValue: new PositiveInteger(120),
-    discountType: new DiscountType(discountOptions.PERCENT),
+    discountType: new DiscountType(DiscountOptions.PERCENT),
     discountValue: new NonNegativeInteger(15),
     discountStartAt: new Date(),
     discountEndAt: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 30),

@@ -6,7 +6,7 @@ import { createTestOrder } from "../../helper";
 import { OrderStatusOptions } from "../../../src/modules/order/domain/orderStatus";
 import { OrderPaymentStatusOptions } from "../../../src/modules/order/domain/orderPaymentStatus";
 import * as webpay from "../../../src/modules/payment/infrastructure/webpaySdkHelper";
-import { ServiceContainer } from "../../../src/modules/shared/infrastructure/serviceContainer";
+import { ServiceContainer } from "../../../src/modules/shared/infrastructure/setupDependencies";
 import { UUID } from "../../../src/modules/shared/domain/UUID";
 
 beforeEach(() => {
@@ -26,7 +26,7 @@ test("processing Webpay Plus payment gateway return URL", async () => {
 
   const orderId = new UUID(order.orderId);
 
-  vi.spyOn(webpay.WebpaySdkHelper, "commitTransaction").mockResolvedValue({
+  const ct = vi.spyOn(webpay.WebpaySdkHelper, "commitTransaction").mockResolvedValue({
     vci: webpay.webPayPlusVciOptions.SUCCESSFUL_AUTHENTICATION,
     amount: 10000,
     status: webpay.webpayPlusStatusOptions.AUTHORIZED,
@@ -50,6 +50,7 @@ test("processing Webpay Plus payment gateway return URL", async () => {
       token_ws: Array(64).fill("a").join(""), // El relleno del token debe ser distinto a de los demás tests
     });
 
+  expect(ct).toHaveBeenCalled();
   expect(response.status).toBe(HTTP_STATUS.OK);
   expect(response.body).toEqual({
     invoice: {
@@ -73,6 +74,8 @@ test("processing Webpay Plus payment gateway return URL", async () => {
     OrderPaymentStatusOptions.PAID
   );
   expect(orderUpdated.paymentInfo.paymentAt).toBeDefined();
+
+  
 });
 
 test("processing Webpay Plus payment gateway return URL error form pay", async () => {
@@ -126,7 +129,7 @@ test("processing Webpay Plus payment gateway return URL with payment not approve
 
   const orderId = new UUID(order.orderId);
 
-  vi.spyOn(webpay.WebpaySdkHelper, "commitTransaction").mockResolvedValue({
+  const ct = vi.spyOn(webpay.WebpaySdkHelper, "commitTransaction").mockResolvedValue({
     vci: webpay.webPayPlusVciOptions.SUCCESSFUL_AUTHENTICATION,
     amount: 10000,
     status: webpay.webpayPlusStatusOptions.FAILED,
@@ -150,6 +153,7 @@ test("processing Webpay Plus payment gateway return URL with payment not approve
       token_ws: Array(64).fill("d").join(""), // El relleno del token debe ser distinto a de los demás tests
     });
 
+  expect(ct).toHaveBeenCalled();
   expect(response.status).toBe(HTTP_STATUS.CONFLICT);
   expect(response.body.error.code).toBe("PAYMENT_NOT_APPROVED");
 
@@ -165,7 +169,7 @@ test("processing Webpay Plus payment gateway return URL with payment not approve
 });
 
 test("processing Webpay Plus payment gateway return URL with order not found", async () => {
-  vi.spyOn(webpay.WebpaySdkHelper, "commitTransaction").mockResolvedValue({
+  const ct = vi.spyOn(webpay.WebpaySdkHelper, "commitTransaction").mockResolvedValue({
     vci: webpay.webPayPlusVciOptions.SUCCESSFUL_AUTHENTICATION,
     amount: 10000,
     status: webpay.webpayPlusStatusOptions.AUTHORIZED,
@@ -183,12 +187,20 @@ test("processing Webpay Plus payment gateway return URL with order not found", a
     balance: 0,
   });
 
+  const rt = vi.spyOn(webpay.WebpaySdkHelper, "refundTransaction").mockResolvedValue({
+    type: webpay.webpayPlusRefundTypeOptions.REVERSED,
+  });
+
   const response = await api
     .get(`${paymentsPathUrl}/gateways/webpay-plus/confirm`)
     .query({
       token_ws: Array(64).fill("e").join(""), // El relleno del token debe ser distinto a de los demás tests
     });
 
+  console.log(response.body);
+
+  expect(ct).toBeCalledTimes(1);
+  expect(rt).toBeCalledTimes(1);
   expect(response.status).toBe(HTTP_STATUS.CONFLICT);
   expect(response.body.error.code).toBe("INVALID_ORDER");
   expect(response.body.error.isPaymentRefunded).toBe(true);
@@ -204,11 +216,11 @@ test("processing Webpay Plus payment gateway return URL with order already paid"
     },
   });
 
-  vi.spyOn(webpay.WebpaySdkHelper, "refundTransaction").mockResolvedValue({
+  const rt= vi.spyOn(webpay.WebpaySdkHelper, "refundTransaction").mockResolvedValue({
     type: webpay.webpayPlusRefundTypeOptions.REVERSED,
   });
 
-  vi.spyOn(webpay.WebpaySdkHelper, "commitTransaction").mockResolvedValue({
+  const ct = vi.spyOn(webpay.WebpaySdkHelper, "commitTransaction").mockResolvedValue({
     vci: webpay.webPayPlusVciOptions.SUCCESSFUL_AUTHENTICATION,
     amount: 10000,
     status: webpay.webpayPlusStatusOptions.AUTHORIZED,
@@ -232,6 +244,8 @@ test("processing Webpay Plus payment gateway return URL with order already paid"
       token_ws: Array(64).fill("f").join(""), // El relleno del token debe ser distinto a de los demás tests
     });
 
+  expect(rt).toHaveBeenCalled();
+  expect(ct).toHaveBeenCalled();
   expect(response.status).toBe(HTTP_STATUS.CONFLICT);
   expect(response.body.error.code).toBe("PAYMENT_ALREADY_MADE");
   expect(response.body.error.isPaymentRefunded).toBe(true);
@@ -247,11 +261,11 @@ test("processing Webpay Plus payment gateway return URL with order payment deadl
     },
   });
 
-  vi.spyOn(webpay.WebpaySdkHelper, "refundTransaction").mockResolvedValue({
+  const rt = vi.spyOn(webpay.WebpaySdkHelper, "refundTransaction").mockResolvedValue({
     type: webpay.webpayPlusRefundTypeOptions.REVERSED,
   });
 
-  vi.spyOn(webpay.WebpaySdkHelper, "commitTransaction").mockResolvedValue({
+  const ct = vi.spyOn(webpay.WebpaySdkHelper, "commitTransaction").mockResolvedValue({
     vci: webpay.webPayPlusVciOptions.SUCCESSFUL_AUTHENTICATION,
     amount: 10000,
     status: webpay.webpayPlusStatusOptions.AUTHORIZED,
@@ -275,6 +289,8 @@ test("processing Webpay Plus payment gateway return URL with order payment deadl
       token_ws: Array(64).fill("g").join(""), // El relleno del token debe ser distinto a de los demás tests
     });
 
+  expect(rt).toHaveBeenCalled();
+  expect(ct).toHaveBeenCalled();
   expect(response.status).toBe(HTTP_STATUS.CONFLICT);
   expect(response.body.error.code).toBe("PAYMENT_DEADLINE_EXCEEDED");
   expect(response.body.error.isPaymentRefunded).toBe(true);
@@ -290,11 +306,11 @@ test("processing Webpay Plus payment gateway return URL with transaction already
     },
   });
 
-  vi.spyOn(webpay.WebpaySdkHelper, "refundTransaction").mockResolvedValue({
+  const rt = vi.spyOn(webpay.WebpaySdkHelper, "refundTransaction").mockResolvedValue({
     type: webpay.webpayPlusRefundTypeOptions.REVERSED,
   });
 
-  vi.spyOn(webpay.WebpaySdkHelper, "commitTransaction").mockResolvedValue({
+  const ct = vi.spyOn(webpay.WebpaySdkHelper, "commitTransaction").mockResolvedValue({
     vci: webpay.webPayPlusVciOptions.SUCCESSFUL_AUTHENTICATION,
     amount: 10000,
     status: webpay.webpayPlusStatusOptions.REVERSED,
@@ -318,5 +334,7 @@ test("processing Webpay Plus payment gateway return URL with transaction already
       token_ws: Array(64).fill("h").join(""), // El relleno del token debe ser distinto a de los demás tests
     });
 
+  expect(rt).not.toHaveBeenCalled();
+  expect(ct).toHaveBeenCalled();
   expect(response.ok).toBe(false);
 });

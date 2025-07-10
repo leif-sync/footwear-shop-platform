@@ -4,7 +4,6 @@ import { HexColor } from "../../shared/domain/hexColor.js";
 import { Visibility, visibilityOptions } from "./visibility.js";
 import { PrimitiveVariantSize, VariantSize } from "./variantSize.js";
 import { AppImage, PrimitiveAppImage } from "../../shared/domain/AppImage.js";
-import { variantConstraint } from "./variantConstraints.js";
 import { VariantTag } from "./variantTag.js";
 
 export type PrimitiveVariantFull = {
@@ -22,6 +21,24 @@ export type PrimitiveVariantFull = {
 type sizeValue = number;
 
 export class VariantFull {
+  static readonly imageConstraint = {
+    maxImages: 8,
+    minImages: 2,
+    maxFileSizeBytes: 2 * 1024 * 1024,
+  };
+  static readonly tagConstraint = {
+    minTags: 1,
+    maxTags: 15,
+  };
+  static readonly detailConstraint = {
+    minDetails: 1,
+    maxDetails: 20,
+  };
+  static readonly sizeConstraint = {
+    minSizes: 1,
+    maxSizes: 10,
+  };
+
   private readonly variantId: UUID;
   private readonly hexColor: HexColor;
   private readonly images: AppImage[];
@@ -64,51 +81,50 @@ export class VariantFull {
   }
 
   private ensureIsValid() {
-    if (this.images.length < variantConstraint.image.minImages) {
+    if (this.images.length < VariantFull.imageConstraint.minImages) {
       throw new Error(
-        `Images cannot be less than ${variantConstraint.image.minImages}`
+        `Images cannot be less than ${VariantFull.imageConstraint.minImages}`
       );
     }
-    if (this.images.length > variantConstraint.image.maxImages) {
+    if (this.images.length > VariantFull.imageConstraint.maxImages) {
       throw new Error(
-        `Images cannot be greater than ${variantConstraint.image.maxImages}`
+        `Images cannot be greater than ${VariantFull.imageConstraint.maxImages}`
       );
     }
     const sizes = Array.from(this.sizes.values());
-    if (sizes.length < variantConstraint.size.minSizes) {
+    if (sizes.length < VariantFull.sizeConstraint.minSizes) {
       throw new Error(
-        `Sizes cannot be less than ${variantConstraint.size.minSizes}`
+        `Sizes cannot be less than ${VariantFull.sizeConstraint.minSizes}`
       );
     }
-    if (sizes.length > variantConstraint.size.maxSizes) {
+    if (sizes.length > VariantFull.sizeConstraint.maxSizes) {
       throw new Error(
-        `Sizes cannot be greater than ${variantConstraint.size.maxSizes}`
+        `Sizes cannot be greater than ${VariantFull.sizeConstraint.maxSizes}`
       );
     }
-    if (this.tags.length < variantConstraint.tag.minTags) {
+    if (this.tags.length < VariantFull.tagConstraint.minTags) {
       throw new Error(
-        `Tags cannot be less than ${variantConstraint.tag.minTags}`
+        `Tags cannot be less than ${VariantFull.tagConstraint.minTags}`
       );
     }
-    if (this.tags.length > variantConstraint.tag.maxTags) {
+    if (this.tags.length > VariantFull.tagConstraint.maxTags) {
       throw new Error(
-        `Tags cannot be greater than ${variantConstraint.tag.maxTags}`
+        `Tags cannot be greater than ${VariantFull.tagConstraint.maxTags}`
       );
     }
-    if (this.details.length < variantConstraint.detail.minDetails) {
+    if (this.details.length < VariantFull.detailConstraint.minDetails) {
       throw new Error(
-        `Details cannot be less than ${variantConstraint.detail.minDetails}`
+        `Details cannot be less than ${VariantFull.detailConstraint.minDetails}`
       );
     }
-    if (this.details.length > variantConstraint.detail.maxDetails) {
+    if (this.details.length > VariantFull.detailConstraint.maxDetails) {
       throw new Error(
-        `Details cannot be greater than ${variantConstraint.detail.maxDetails}`
+        `Details cannot be greater than ${VariantFull.detailConstraint.maxDetails}`
       );
     }
   }
 
   static clone(productVariant: VariantFull) {
-    // el constructor se encarga de las copias profundas
     return new VariantFull({
       variantId: productVariant.variantId,
       hexColor: productVariant.hexColor,

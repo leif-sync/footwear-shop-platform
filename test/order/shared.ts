@@ -1,12 +1,12 @@
 import { expect } from "vitest";
-import { ServiceContainer } from "../../src/modules/shared/infrastructure/serviceContainer";
+import { ServiceContainer } from "../../src/modules/shared/infrastructure/setupDependencies";
 import { basePath } from "../api";
 import { UUID } from "../../src/modules/shared/domain/UUID";
 
 export const ordersPathUrl = `${basePath}/orders`;
 
 export function returnIfNotUndefined(a: any, b: any) {
-  return a ?? a === null ? a : b;
+  return (a ?? a === null) ? a : b;
 }
 
 export async function compareTestOrder(params: {

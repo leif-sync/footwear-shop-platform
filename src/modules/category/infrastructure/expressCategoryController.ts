@@ -1,5 +1,5 @@
 import { z, ZodError } from "zod";
-import { ServiceContainer } from "../../shared/infrastructure/serviceContainer.js";
+import { ServiceContainer } from "../../shared/infrastructure/setupDependencies.js";
 import { CategoryNotFoundError } from "../domain/errors/categoryNotFoundError.js";
 import { ActiveCategoryError } from "../domain/errors/activeCategoryError.js";
 import { Request, Response } from "express";
@@ -28,7 +28,7 @@ export class CategoryController {
       const limit = new PositiveInteger(result.limit);
       const offset = new NonNegativeInteger(result.offset);
 
-      const categories = await ServiceContainer.category.litCategories.run({
+      const categories = await ServiceContainer.category.listCategories.run({
         limit,
         offset,
       });

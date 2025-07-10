@@ -1,17 +1,18 @@
 import { z } from "zod";
-import { adminConstraints } from "../../domain/adminConstraints.js";
 import { Phone } from "../../../shared/domain/phone.js";
+import { AdminFirstName } from "../../domain/adminFirstName.js";
+import { AdminLastName } from "../../domain/adminLastName.js";
 
 export const updatePartialAdminSchema = z
   .object({
     firstName: z
       .string()
-      .min(adminConstraints.firstName.minLength)
-      .max(adminConstraints.firstName.maxLength),
+      .min(AdminFirstName.minLength)
+      .max(AdminFirstName.maxLength),
     lastName: z
       .string()
-      .min(adminConstraints.lastName.minLength)
-      .max(adminConstraints.lastName.maxLength),
+      .min(AdminLastName.minLength)
+      .max(AdminLastName.maxLength),
     phoneNumber: z.string().superRefine((value, ctx) => {
       try {
         new Phone(value);

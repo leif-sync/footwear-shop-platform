@@ -1,6 +1,6 @@
 model AdminRefreshToken {
   tokenId String @id @db.Uuid
-  adminId String @unique @db.Uuid
+  adminId String @db.Uuid
 }
 
 model LoginCode {

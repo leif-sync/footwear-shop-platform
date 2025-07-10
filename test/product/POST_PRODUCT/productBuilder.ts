@@ -1,4 +1,4 @@
-import { discountOptions } from "../../../src/modules/product/domain/discountType";
+import { DiscountOptions } from "../../../src/modules/product/domain/discountType";
 import { visibilityOptions } from "../../../src/modules/product/domain/visibility";
 import type { MakeOptional } from "../../../src/modules/shared/domain/helperTypes";
 
@@ -12,7 +12,7 @@ type priceToSend = {
 
 const defaultPrice: priceToSend = {
   baseValue: 120,
-  discountType: discountOptions.PERCENT as string,
+  discountType: DiscountOptions.PERCENT as string,
   discountValue: 15,
   discountStartAt: "2025-02-18T00:00:00.000Z",
   discountEndAt: "2025-03-18T00:00:00.000Z",

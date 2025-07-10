@@ -2,7 +2,7 @@ import { AppUrl } from "../../shared/domain/appUrl.js";
 import { UUID } from "../../shared/domain/UUID.js";
 import { ProductNotFoundError } from "../domain/errors/productNotFoundError.js";
 import { VariantNotFoundError } from "../domain/errors/variantNotFoundError.js";
-import { ImageUploader } from "../domain/imageUploader.js";
+import { ImageStorageEngine } from "../domain/imageStorageEngine.js";
 import { ProductRepository } from "../domain/productRepository.js";
 import { VariantFull } from "../domain/variantFull.js";
 import { AppImage } from "../../shared/domain/AppImage.js";
@@ -23,11 +23,11 @@ type AddImageToVariantParams = {
 
 export class AddImageToVariant {
   private readonly productRepository: ProductRepository;
-  private readonly imageUploader: ImageUploader;
+  private readonly imageUploader: ImageStorageEngine;
 
   constructor(params: {
     productRepository: ProductRepository;
-    imageUploader: ImageUploader;
+    imageUploader: ImageStorageEngine;
   }) {
     this.productRepository = params.productRepository;
     this.imageUploader = params.imageUploader;

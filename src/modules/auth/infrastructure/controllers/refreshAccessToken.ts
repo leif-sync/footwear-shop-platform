@@ -8,7 +8,7 @@ import { HTTP_STATUS } from "../../../shared/infrastructure/httpStatus.js";
 import {
   refreshTokenRepository,
   ServiceContainer,
-} from "../../../shared/infrastructure/serviceContainer.js";
+} from "../../../shared/infrastructure/setupDependencies.js";
 import jwt from "jsonwebtoken";
 import {
   ACCESS_TOKEN_JWT_EXPIRES_SECONDS,

@@ -81,20 +81,38 @@ export class PaymentGatewaySuccessHandler {
       });
 
     if (!paymentOrder) {
-      await params.processCashBack({ orderId, gatewaySessionId, amount });
-      await this.paymentTransactionRepository.create({ paymentTransaction });
+      const refundTransaction = await params.processCashBack({
+        orderId,
+        gatewaySessionId,
+        amount,
+      });
+      await this.paymentTransactionRepository.create({
+        paymentTransaction: refundTransaction,
+      });
       throw new InvalidOrderError({ orderId });
     }
 
     if (paymentOrder.isOrderPaid()) {
-      await params.processCashBack({ orderId, gatewaySessionId, amount });
-      await this.paymentTransactionRepository.create({ paymentTransaction });
+      const refundTransaction = await params.processCashBack({
+        orderId,
+        gatewaySessionId,
+        amount,
+      });
+      await this.paymentTransactionRepository.create({
+        paymentTransaction: refundTransaction,
+      });
       throw new PaymentAlreadyMadeError({ orderId });
     }
 
     if (paymentOrder.isPaymentExpired()) {
-      await params.processCashBack({ orderId, gatewaySessionId, amount });
-      await this.paymentTransactionRepository.create({ paymentTransaction });
+      const refundTransaction = await params.processCashBack({
+        orderId,
+        gatewaySessionId,
+        amount,
+      });
+      await this.paymentTransactionRepository.create({
+        paymentTransaction: refundTransaction,
+      });
       throw new PaymentDeadlineExceededError({ paymentOrder });
     }
 
