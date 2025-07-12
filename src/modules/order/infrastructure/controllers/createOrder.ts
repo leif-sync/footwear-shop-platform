@@ -12,7 +12,7 @@ import {
 } from "../schemas/orderSchemas.js";
 import { InvalidCreatorError } from "../../domain/errors/invalidCreatorError.js";
 import { Customer } from "../../domain/customer.js";
-import { Email } from "../../../shared/domain/email.js";
+import { EmailAddress } from "../../../shared/domain/emailAddress.js";
 import { Phone } from "../../../shared/domain/phone.js";
 import { ShippingAddress } from "../../domain/shippingAddress.js";
 import { OrderCreatorDetails } from "../../domain/orderCreatorDetails.js";
@@ -105,7 +105,7 @@ export async function createOrder(req: Request, res: Response) {
       .parse(req.body);
 
     const customer = new Customer({
-      email: new Email(orderFromRequest.customer.email),
+      email: new EmailAddress(orderFromRequest.customer.email),
       firstName: new CustomerFirstName(orderFromRequest.customer.firstName),
       lastName: new CustomerLastName(orderFromRequest.customer.lastName),
       phone: new Phone(orderFromRequest.customer.phone),
@@ -171,7 +171,7 @@ async function createOrderForAdmin(params: {
     const orderFromRequest = createOrderForAdminSchema.parse(req.body);
 
     const customer = new Customer({
-      email: new Email(orderFromRequest.customer.email),
+      email: new EmailAddress(orderFromRequest.customer.email),
       firstName: new CustomerFirstName(orderFromRequest.customer.firstName),
       lastName: new CustomerLastName(orderFromRequest.customer.lastName),
       phone: new Phone(orderFromRequest.customer.phone),

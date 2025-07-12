@@ -1,5 +1,5 @@
 import { EmailSender } from "../../notification/domain/emailSender.js";
-import { Email } from "../../shared/domain/email.js";
+import { EmailAddress } from "../../shared/domain/emailAddress.js";
 import { Admin } from "./admin.js";
 import { COMMERCE_NAME } from "../../../environmentVariables.js";
 
@@ -89,7 +89,7 @@ export class AdminNotifier {
           <p>The ${COMMERCE_NAME} Team</p>
         </footer>
     `;
-    const adminEmail = new Email(admin.getEmail());
+    const adminEmail = new EmailAddress(admin.getEmail());
 
     await this.emailSender.sendTransactionalEmail({
       to: adminEmail,

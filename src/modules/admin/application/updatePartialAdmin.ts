@@ -1,4 +1,4 @@
-import { Email } from "../../shared/domain/email.js";
+import { EmailAddress } from "../../shared/domain/emailAddress.js";
 import { Phone } from "../../shared/domain/phone.js";
 import { UUID } from "../../shared/domain/UUID.js";
 import { Admin } from "../domain/admin.js";
@@ -65,7 +65,7 @@ export class UpdatePartialAdmin {
       adminId,
       firstName: new AdminFirstName(firstName),
       lastName: new AdminLastName(lastName),
-      email: new Email(email),
+      email: new EmailAddress(email),
       phoneNumber: new Phone(phoneNumber),
       permissions: permissions.map(AdminPermission.create),
       updatedAt,

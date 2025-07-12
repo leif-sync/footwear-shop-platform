@@ -1,4 +1,4 @@
-import { Email } from "../../shared/domain/email.js";
+import { EmailAddress } from "../../shared/domain/emailAddress.js";
 import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
 import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
 import { UUID } from "../../shared/domain/UUID.js";
@@ -24,7 +24,7 @@ export interface OrderFilterCriteria {
   /**
    * Optional filter for customer email. Can be a single email or an array of emails.
    */
-  customerEmail?: Email | Email[];
+  customerEmail?: EmailAddress | EmailAddress[];
   /**
    * Optional filter for order creator. Can be a single creator or an array of creators.
    */

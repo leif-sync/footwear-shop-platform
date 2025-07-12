@@ -1,4 +1,4 @@
-import { Email } from "../../shared/domain/email.js";
+import { EmailAddress } from "../../shared/domain/emailAddress.js";
 import { Phone } from "../../shared/domain/phone.js";
 import { CustomerFirstName } from "./customerFirstName.js";
 import { CustomerLastName } from "./customerLastName.js";
@@ -13,13 +13,13 @@ export interface PrimitiveCustomer {
 export class Customer {
   private readonly firstName: CustomerFirstName;
   private readonly lastName: CustomerLastName;
-  private readonly email: Email;
+  private readonly email: EmailAddress;
   private readonly phone: Phone;
 
   constructor(params: {
     firstName: CustomerFirstName;
     lastName: CustomerLastName;
-    email: Email;
+    email: EmailAddress;
     phone: Phone;
   }) {
     this.firstName = params.firstName;
@@ -49,7 +49,7 @@ export class Customer {
     return this.lastName;
   }
 
-  getEmail(): Email {
+  getEmail(): EmailAddress {
     return this.email;
   }
 
@@ -74,7 +74,7 @@ export class Customer {
     return new Customer({
       firstName: new CustomerFirstName(primitive.firstName),
       lastName: new CustomerLastName(primitive.lastName),
-      email: new Email(primitive.email),
+      email: new EmailAddress(primitive.email),
       phone: new Phone(primitive.phone),
     });
   }

@@ -1,6 +1,6 @@
 import { LoginCodeRepository } from "../domain/loginCodeRepository.js";
 import { LoginCode } from "../domain/loginCode.js";
-import { Email } from "../../shared/domain/email.js";
+import { EmailAddress } from "../../shared/domain/emailAddress.js";
 
 export class InMemoryLoginCodeRepository implements LoginCodeRepository {
   private loginCodes: LoginCode[] = [];
@@ -9,15 +9,17 @@ export class InMemoryLoginCodeRepository implements LoginCodeRepository {
     this.loginCodes.push(params.loginCode);
   }
 
-  async find(params: { notificationEmail: Email }): Promise<LoginCode | null>;
+  async find(params: {
+    notificationEmail: EmailAddress;
+  }): Promise<LoginCode | null>;
   async find(params: {
     code: string;
-    notificationEmail: Email;
+    notificationEmail: EmailAddress;
   }): Promise<LoginCode | null>;
 
   async find(params: {
     code?: string;
-    notificationEmail: Email;
+    notificationEmail: EmailAddress;
   }): Promise<LoginCode | null> {
     const { code, notificationEmail } = params;
 
@@ -40,7 +42,7 @@ export class InMemoryLoginCodeRepository implements LoginCodeRepository {
 
   async delete(params: {
     code: string;
-    notificationEmail: Email;
+    notificationEmail: EmailAddress;
   }): Promise<void> {
     const { code, notificationEmail } = params;
     this.loginCodes = this.loginCodes.filter(

@@ -1,4 +1,4 @@
-import { Email } from "../../shared/domain/email.js";
+import { EmailAddress } from "../../shared/domain/emailAddress.js";
 import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
 import { UUID } from "../../shared/domain/UUID.js";
 import { Customer, PrimitiveCustomer } from "./customer.js";
@@ -143,7 +143,7 @@ export class OrderFull {
     };
   }
 
-  getCustomerEmail(): Email {
+  getCustomerEmail(): EmailAddress {
     return this.customer.getEmail();
   }
 

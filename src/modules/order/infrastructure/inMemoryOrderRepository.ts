@@ -1,7 +1,7 @@
 import { ProductRepository } from "../../product/domain/productRepository.js";
 import { AppUrl } from "../../shared/domain/appUrl.js";
 import { Specification } from "../../shared/domain/specification.js";
-import { Email } from "../../shared/domain/email.js";
+import { EmailAddress } from "../../shared/domain/emailAddress.js";
 import { HexColor } from "../../shared/domain/hexColor.js";
 import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
 import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
@@ -53,7 +53,7 @@ function creatorCriteria(creator: OrderCreator) {
   return new Specification(filter);
 }
 
-function customerEmailCriteria(customerEmail: Email) {
+function customerEmailCriteria(customerEmail: EmailAddress) {
   const filter = (order: OrderWrite) =>
     order.toPrimitives().customer.email === customerEmail.getValue();
 
@@ -156,7 +156,7 @@ export class InMemoryOrderRepository implements OrderRepository {
         new OrderOverview({
           orderId: order.getId(),
           orderStatus: order.getOrderStatus(),
-          customerEmail: new Email(order.toPrimitives().customer.email),
+          customerEmail: new EmailAddress(order.toPrimitives().customer.email),
           totalAmount: order.evaluateFinalAmount(),
           createdAt: order.getCreatedAt(),
           updatedAt: order.getUpdatedAt(),
@@ -302,7 +302,7 @@ export class InMemoryOrderRepository implements OrderRepository {
     const products = await Promise.all(productsPromises);
 
     const customer = new Customer({
-      email: new Email(orderPrimitives.customer.email),
+      email: new EmailAddress(orderPrimitives.customer.email),
       firstName: new CustomerFirstName(orderPrimitives.customer.firstName),
       lastName: new CustomerLastName(orderPrimitives.customer.lastName),
       phone: new Phone(orderPrimitives.customer.phone),

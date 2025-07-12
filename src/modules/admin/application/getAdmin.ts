@@ -1,4 +1,4 @@
-import { Email } from "../../shared/domain/email.js";
+import { EmailAddress } from "../../shared/domain/emailAddress.js";
 import { UUID } from "../../shared/domain/UUID.js";
 import { Admin } from "../domain/admin.js";
 import { AdminRepository } from "../domain/adminRepository.js";
@@ -23,7 +23,7 @@ export class GetAdmin {
   }
 
   private async findAdminByEmail(email: string): Promise<Admin> {
-    const adminEmail = new Email(email);
+    const adminEmail = new EmailAddress(email);
     const admin = await this.adminRepository.find({ adminEmail });
     if (!admin) throw new AdminNotFoundError({ adminEmail });
     return admin;

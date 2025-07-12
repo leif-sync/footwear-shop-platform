@@ -1,4 +1,4 @@
-import { Email } from "../../shared/domain/email.js";
+import { EmailAddress } from "../../shared/domain/emailAddress.js";
 import { EmailSender } from "../domain/emailSender.js";
 import { Resend } from "resend";
 
@@ -8,7 +8,7 @@ const emailFrom = "Acme <onboarding@resend.dev>";
 
 export class ResendEmailSender implements EmailSender {
   async sendTransactionalEmail(params: {
-    to: Email;
+    to: EmailAddress;
     subject: string;
     content: string;
   }): Promise<void> {

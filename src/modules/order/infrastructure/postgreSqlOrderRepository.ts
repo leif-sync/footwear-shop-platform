@@ -1,7 +1,7 @@
 import { storedVariantImage } from "../../product/infrastructure/postgreSqlProductRepository.js";
 import { AppImage } from "../../shared/domain/AppImage.js";
 import { AppUrl } from "../../shared/domain/appUrl.js";
-import { Email } from "../../shared/domain/email.js";
+import { EmailAddress } from "../../shared/domain/emailAddress.js";
 import { HexColor } from "../../shared/domain/hexColor.js";
 import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
 import { Phone } from "../../shared/domain/phone.js";
@@ -244,7 +244,7 @@ export class PostgreSqlOrderRepository implements OrderRepository {
     });
 
     const customer = new Customer({
-      email: new Email(storedOrder.customerEmail),
+      email: new EmailAddress(storedOrder.customerEmail),
       firstName: new CustomerFirstName(storedOrder.customerFirstName),
       lastName: new CustomerLastName(storedOrder.customerLastName),
       phone: new Phone(storedOrder.customerPhone),
@@ -447,7 +447,7 @@ export class PostgreSqlOrderRepository implements OrderRepository {
 
     const orderWrites = storedOrders.map((storedOrder) => {
       const customer = new Customer({
-        email: new Email(storedOrder.customerEmail),
+        email: new EmailAddress(storedOrder.customerEmail),
         firstName: new CustomerFirstName(storedOrder.customerFirstName),
         lastName: new CustomerLastName(storedOrder.customerLastName),
         phone: new Phone(storedOrder.customerPhone),
@@ -616,7 +616,7 @@ export class PostgreSqlOrderRepository implements OrderRepository {
       }, 0);
 
       return new OrderOverview({
-        customerEmail: new Email(storedOrder.customerEmail),
+        customerEmail: new EmailAddress(storedOrder.customerEmail),
         paymentStatus: OrderPaymentStatus.from(storedOrder.paymentStatus),
         orderId: new UUID(storedOrder.orderId),
         orderStatus: OrderStatus.from(storedOrder.orderStatus),

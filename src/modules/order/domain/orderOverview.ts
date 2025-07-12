@@ -1,4 +1,4 @@
-import { Email } from "../../shared/domain/email.js";
+import { EmailAddress } from "../../shared/domain/emailAddress.js";
 import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
 import { UUID } from "../../shared/domain/UUID.js";
 import {
@@ -20,7 +20,7 @@ export interface PrimitiveOrderOverview {
 export class OrderOverview {
   private readonly orderId: UUID;
   private readonly orderStatus: OrderStatus;
-  private readonly customerEmail: Email;
+  private readonly customerEmail: EmailAddress;
   private readonly totalAmount: NonNegativeInteger;
   private readonly createdAt: Date;
   private readonly updatedAt: Date;
@@ -29,7 +29,7 @@ export class OrderOverview {
   constructor(params: {
     orderId: UUID;
     orderStatus: OrderStatus;
-    customerEmail: Email;
+    customerEmail: EmailAddress;
     totalAmount: NonNegativeInteger;
     createdAt: Date;
     updatedAt: Date;
@@ -48,7 +48,7 @@ export class OrderOverview {
     return new OrderOverview({
       orderId: UUID.clone(orderOverview.orderId),
       orderStatus: OrderStatus.clone(orderOverview.orderStatus),
-      customerEmail: Email.clone(orderOverview.customerEmail),
+      customerEmail: EmailAddress.clone(orderOverview.customerEmail),
       totalAmount: NonNegativeInteger.clone(orderOverview.totalAmount),
       createdAt: orderOverview.createdAt,
       updatedAt: orderOverview.updatedAt,

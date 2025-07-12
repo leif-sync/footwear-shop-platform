@@ -10,7 +10,7 @@ import {
 import { PositiveInteger } from "../../../shared/domain/positiveInteger.js";
 import { NonNegativeInteger } from "../../../shared/domain/nonNegativeInteger.js";
 import { OrderStatus } from "../../domain/orderStatus.js";
-import { Email } from "../../../shared/domain/email.js";
+import { EmailAddress } from "../../../shared/domain/emailAddress.js";
 import { PrimitiveOrderOverview } from "../../domain/orderOverview.js";
 
 type SuccessApiResponse = {
@@ -67,7 +67,7 @@ export async function listOrderOverviews(
     );
 
     const customerEmail = result.customerEmail
-      ? result.customerEmail.map((email) => new Email(email))
+      ? result.customerEmail.map((email) => new EmailAddress(email))
       : undefined;
 
     const orders = await ServiceContainer.order.listOrderOverviews.run({

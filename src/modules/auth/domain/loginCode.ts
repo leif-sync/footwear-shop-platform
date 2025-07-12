@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { Email } from "../../shared/domain/email.js";
+import { EmailAddress } from "../../shared/domain/emailAddress.js";
 import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
 import { UUID } from "../../shared/domain/UUID.js";
 
@@ -28,7 +28,7 @@ export class LoginCode {
   private readonly code: string;
   private readonly createdAt: Date;
   private readonly expiresInSeconds: NonNegativeInteger;
-  private readonly notificationEmail: Email;
+  private readonly notificationEmail: EmailAddress;
   private isUsed: boolean;
 
   constructor(params: {
@@ -36,14 +36,14 @@ export class LoginCode {
     code: string;
     createdAt: Date;
     expiresInSeconds: NonNegativeInteger;
-    notificationEmail: Email;
+    notificationEmail: EmailAddress;
     isUsed: boolean;
   }) {
     this.loginCodeId = UUID.clone(params.loginCodeId);
     this.code = params.code;
     this.createdAt = new Date(params.createdAt);
     this.expiresInSeconds = NonNegativeInteger.clone(params.expiresInSeconds);
-    this.notificationEmail = Email.clone(params.notificationEmail);
+    this.notificationEmail = EmailAddress.clone(params.notificationEmail);
     this.isUsed = params.isUsed;
 
     if (this.code.length !== loginCodeConstraints.length) {
@@ -59,7 +59,7 @@ export class LoginCode {
 
   static create(params: {
     loginCodeId: UUID;
-    notificationEmail: Email;
+    notificationEmail: EmailAddress;
     expiresInSeconds: NonNegativeInteger;
   }): LoginCode {
     const code = this.generate();

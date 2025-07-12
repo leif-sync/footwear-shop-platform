@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Email } from "../../../shared/domain/email.js";
+import { EmailAddress } from "../../../shared/domain/emailAddress.js";
 import { NonNegativeInteger } from "../../../shared/domain/nonNegativeInteger.js";
 import { HTTP_STATUS } from "../../../shared/infrastructure/httpStatus.js";
 import {
@@ -30,7 +30,7 @@ export async function sendLoginCode(req: Request, res: Response) {
     return;
   }
 
-  const email = new Email(parsedBody.data.email);
+  const email = new EmailAddress(parsedBody.data.email);
 
   try {
     await ServiceContainer.admin.getAdmin.run({

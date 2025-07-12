@@ -1,10 +1,10 @@
-import { Email } from "../../shared/domain/email.js";
+import { EmailAddress } from "../../shared/domain/emailAddress.js";
 import { EmailSender } from "../domain/emailSender.js";
 import { styleText } from "node:util";
 
 export class DebugEmailSender implements EmailSender {
   async sendTransactionalEmail(params: {
-    to: Email;
+    to: EmailAddress;
     subject: string;
     content: string;
   }): Promise<void> {

@@ -16,7 +16,7 @@ import {
 } from "../../../../environmentVariables.js";
 import { validPermissionOptions } from "../../../admin/domain/validPermissions.js";
 import { loginCodeConstraints } from "../../domain/loginCode.js";
-import { Email } from "../../../shared/domain/email.js";
+import { EmailAddress } from "../../../shared/domain/emailAddress.js";
 import { UUID } from "../../../shared/domain/UUID.js";
 import { AdminRefreshToken } from "../../domain/adminRefreshToken.js";
 
@@ -37,7 +37,7 @@ export async function logInAdmin(req: Request, res: Response) {
   try {
     const { email: adminEmail, code } = logInAdminSchema.parse(req.body);
 
-    const notificationEmail = new Email(adminEmail);
+    const notificationEmail = new EmailAddress(adminEmail);
     const admin = await ServiceContainer.admin.getAdmin.run({ adminEmail });
 
     const loginCodeFound = await loginCodeRepository.find({

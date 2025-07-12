@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { AppUrl } from "./modules/shared/domain/appUrl.js";
-import { Email } from "./modules/shared/domain/email.js";
+import { EmailAddress } from "./modules/shared/domain/emailAddress.js";
 import { Phone } from "./modules/shared/domain/phone.js";
 import { NonNegativeInteger } from "./modules/shared/domain/nonNegativeInteger.js";
 import { AdminFirstName } from "./modules/admin/domain/adminFirstName.js";
@@ -226,7 +226,7 @@ export const COMMERCE_NAME = handleValueWithError({
 const supportEmailName = "SUPPORT_EMAIL";
 export const SUPPORT_EMAIL = handleValueWithError({
   valueToReturn: () =>
-    new Email(process.env[supportEmailName] as any).getValue(),
+    new EmailAddress(process.env[supportEmailName] as any).getValue(),
   errorMessage: `${supportEmailName} must be a valid email`,
 });
 
@@ -288,7 +288,9 @@ export const JWT_SECRET = handleValueWithError({
 export const initialSuperAdminUser = {
   email: handleValueWithError({
     valueToReturn: () =>
-      new Email(process.env.INITIAL_SUPER_ADMIN_USER_EMAIL as any).getValue(),
+      new EmailAddress(
+        process.env.INITIAL_SUPER_ADMIN_USER_EMAIL as any
+      ).getValue(),
     errorMessage: "INITIAL_SUPER_ADMIN_USER_EMAIL must be a valid email",
   }),
   firstName: handleValueWithError({

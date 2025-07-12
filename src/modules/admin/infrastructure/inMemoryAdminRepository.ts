@@ -1,4 +1,4 @@
-import { Email } from "../../shared/domain/email.js";
+import { EmailAddress } from "../../shared/domain/emailAddress.js";
 import { UUID } from "../../shared/domain/UUID.js";
 import { Admin } from "../domain/admin.js";
 import { AdminRepository } from "../domain/adminRepository.js";
@@ -12,14 +12,14 @@ export class InMemoryAdminRepository implements AdminRepository {
   }
 
   async find(params: { adminId: UUID }): Promise<Admin | null>;
-  async find(params: { adminEmail: Email }): Promise<Admin | null>;
+  async find(params: { adminEmail: EmailAddress }): Promise<Admin | null>;
   async find(
     params:
       | {
           adminId: UUID;
         }
       | {
-          adminEmail: Email;
+          adminEmail: EmailAddress;
         }
   ): Promise<Admin | null> {
     const isAdminId = "adminId" in params;
@@ -29,7 +29,7 @@ export class InMemoryAdminRepository implements AdminRepository {
       );
       return admin ?? null;
     }
-    
+
     const admin = this.admins.find((a) =>
       params.adminEmail.equals(a.getEmail())
     );

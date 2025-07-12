@@ -1,7 +1,7 @@
 import { AdminRepository } from "../domain/adminRepository.js";
 import { Admin } from "../domain/admin.js";
 import { UUID } from "../../shared/domain/UUID.js";
-import { Email } from "../../shared/domain/email.js";
+import { EmailAddress } from "../../shared/domain/emailAddress.js";
 import { AdminFirstName } from "../domain/adminFirstName.js";
 import { AdminLastName } from "../domain/adminLastName.js";
 import { Phone } from "../../shared/domain/phone.js";
@@ -29,9 +29,9 @@ export class CreateAdmin {
    * @param params.email - The email address of the admin.
    * @param params.phoneNumber - The phone number of the admin.
    * @param params.permissions - The permissions assigned to the admin.
-   * 
+   *
    * @returns {Promise<void>} A promise that resolves when the admin is successfully created.
-   * 
+   *
    * @throws {AdminAlreadyExistsError} If an admin with the same email already exists.
    */
   async run(params: {
@@ -41,7 +41,7 @@ export class CreateAdmin {
     phoneNumber: string;
     permissions: validPermissionOptions[];
   }) {
-    const adminEmail = new Email(params.email);
+    const adminEmail = new EmailAddress(params.email);
 
     const admin = new Admin({
       adminId: UUID.generateRandomUUID(),

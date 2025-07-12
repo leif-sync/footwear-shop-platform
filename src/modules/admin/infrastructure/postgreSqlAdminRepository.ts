@@ -4,7 +4,7 @@ import {
   prismaConnection,
   PrismaTransaction,
 } from "../../shared/infrastructure/prismaClient.js";
-import { Email } from "../../shared/domain/email.js";
+import { EmailAddress } from "../../shared/domain/emailAddress.js";
 import { UUID } from "../../shared/domain/UUID.js";
 import { AdminFirstName } from "../domain/adminFirstName.js";
 import { AdminLastName } from "../domain/adminLastName.js";
@@ -43,15 +43,15 @@ export class PostgreSqlAdminRepository implements AdminRepository {
         lastName,
         phoneNumber,
         updatedAt,
-        permissions: permissions
+        permissions: permissions,
       },
     });
   }
 
   async find(params: { adminId: UUID }): Promise<Admin | null>;
-  async find(params: { adminEmail: Email }): Promise<Admin | null>;
+  async find(params: { adminEmail: EmailAddress }): Promise<Admin | null>;
   async find(
-    params: { adminId: UUID } | { adminEmail: Email }
+    params: { adminId: UUID } | { adminEmail: EmailAddress }
   ): Promise<Admin | null> {
     const isAdminId = "adminId" in params;
 
@@ -67,7 +67,7 @@ export class PostgreSqlAdminRepository implements AdminRepository {
       return new Admin({
         adminId: new UUID(admin.adminId),
         createdAt: admin.createdAt,
-        email: new Email(admin.email),
+        email: new EmailAddress(admin.email),
         firstName: new AdminFirstName(admin.firstName),
         lastName: new AdminLastName(admin.lastName),
         permissions: admin.permissions.map((permission) =>
@@ -87,7 +87,7 @@ export class PostgreSqlAdminRepository implements AdminRepository {
     return new Admin({
       adminId: new UUID(admin.adminId),
       createdAt: admin.createdAt,
-      email: new Email(admin.email),
+      email: new EmailAddress(admin.email),
       firstName: new AdminFirstName(admin.firstName),
       lastName: new AdminLastName(admin.lastName),
       permissions: admin.permissions.map((permission) =>
@@ -121,7 +121,7 @@ export class PostgreSqlAdminRepository implements AdminRepository {
         lastName,
         phoneNumber,
         updatedAt,
-        permissions
+        permissions,
       },
     });
   }

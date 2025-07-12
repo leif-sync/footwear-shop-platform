@@ -5,7 +5,7 @@ import {
 } from "../../../environmentVariables.js";
 import { EmailSender } from "../../notification/domain/emailSender.js";
 import { OrderRepository } from "../../order/domain/orderRepository.js";
-import { Email } from "../../shared/domain/email.js";
+import { EmailAddress } from "../../shared/domain/emailAddress.js";
 import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
 import { Phone } from "../../shared/domain/phone.js";
 import { UUID } from "../../shared/domain/UUID.js";
@@ -14,7 +14,7 @@ import { logger } from "../../shared/infrastructure/setupDependencies.js";
 // TODO: move to a configuration file
 const commerceName = COMMERCE_NAME;
 const timeToShipment = "2 días hábiles.";
-const supportEmail = new Email(SUPPORT_EMAIL);
+const supportEmail = new EmailAddress(SUPPORT_EMAIL);
 const whatsAppSupportContact = new Phone(WHATSAPP_SUPPORT_CONTACT);
 const subject = "¡Tu pedido esta listo para enviarse! 🎉";
 
@@ -80,7 +80,7 @@ function notifyOrderHasBeenPayTemplate(params: {
   orderId: UUID;
   totalAmount: NonNegativeInteger;
   timeToShipment: string;
-  supportEmail: Email;
+  supportEmail: EmailAddress;
   whatsAppSupportContact: Phone;
 }) {
   const orderId = params.orderId.getValue();

@@ -1,4 +1,4 @@
-import { Email } from "../../shared/domain/email.js";
+import { EmailAddress } from "../../shared/domain/emailAddress.js";
 import { NonNegativeInteger } from "../../shared/domain/nonNegativeInteger.js";
 import { UUID } from "../../shared/domain/UUID.js";
 import { prismaConnection } from "../../shared/infrastructure/prismaClient.js";
@@ -29,15 +29,17 @@ export class PostgresLoginCodeRepository implements LoginCodeRepository {
     });
   }
 
-  async find(params: { notificationEmail: Email }): Promise<LoginCode | null>;
+  async find(params: {
+    notificationEmail: EmailAddress;
+  }): Promise<LoginCode | null>;
   async find(params: {
     code: string;
-    notificationEmail: Email;
+    notificationEmail: EmailAddress;
   }): Promise<LoginCode | null>;
   async find(
     params:
-      | { notificationEmail: Email }
-      | { code: string; notificationEmail: Email }
+      | { notificationEmail: EmailAddress }
+      | { code: string; notificationEmail: EmailAddress }
   ): Promise<LoginCode | null> {
     const isCodePresent = "code" in params;
 
@@ -61,7 +63,7 @@ export class PostgresLoginCodeRepository implements LoginCodeRepository {
         ),
         isUsed: storedLoginCode.isUsed,
         loginCodeId: new UUID(storedLoginCode.loginCodeId),
-        notificationEmail: new Email(storedLoginCode.notificationEmail),
+        notificationEmail: new EmailAddress(storedLoginCode.notificationEmail),
       });
     }
 
@@ -82,13 +84,13 @@ export class PostgresLoginCodeRepository implements LoginCodeRepository {
       ),
       isUsed: storedLoginCode.isUsed,
       loginCodeId: new UUID(storedLoginCode.loginCodeId),
-      notificationEmail: new Email(storedLoginCode.notificationEmail),
+      notificationEmail: new EmailAddress(storedLoginCode.notificationEmail),
     });
   }
 
   async delete(params: {
     code: string;
-    notificationEmail: Email;
+    notificationEmail: EmailAddress;
   }): Promise<void> {
     const { code } = params;
     const notificationEmail = params.notificationEmail.getValue();

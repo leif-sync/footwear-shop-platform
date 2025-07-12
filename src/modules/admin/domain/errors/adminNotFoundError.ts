@@ -1,4 +1,4 @@
-import { Email } from "../../../shared/domain/email.js";
+import { EmailAddress } from "../../../shared/domain/emailAddress.js";
 import { UUID } from "../../../shared/domain/UUID.js";
 
 /**
@@ -7,11 +7,11 @@ import { UUID } from "../../../shared/domain/UUID.js";
  */
 export class AdminNotFoundError extends Error {
   constructor(params: { adminId: string | UUID });
-  constructor(params: { adminEmail: string | Email });
+  constructor(params: { adminEmail: string | EmailAddress });
 
   constructor(params: {
     adminId?: string | UUID;
-    adminEmail?: string | Email;
+    adminEmail?: string | EmailAddress;
   }) {
     const { adminId, adminEmail } = params;
     if (adminId) {
@@ -21,7 +21,7 @@ export class AdminNotFoundError extends Error {
     }
     if (adminEmail) {
       const email =
-        adminEmail instanceof Email ? adminEmail.getValue() : adminEmail;
+        adminEmail instanceof EmailAddress ? adminEmail.getValue() : adminEmail;
       super(`Admin with email ${email} not found`);
       return;
     }

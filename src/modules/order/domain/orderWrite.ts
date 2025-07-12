@@ -1,4 +1,4 @@
-import { Email } from "../../shared/domain/email.js";
+import { EmailAddress } from "../../shared/domain/emailAddress.js";
 import { PositiveInteger } from "../../shared/domain/positiveInteger.js";
 import { UUID } from "../../shared/domain/UUID.js";
 import { Customer, PrimitiveCustomer } from "./customer.js";
@@ -333,7 +333,7 @@ export class OrderWrite {
     const orderPrimitives = order.toPrimitives();
     const orderStatus = new OrderStatus(orderPrimitives.status);
     const customer = new Customer({
-      email: new Email(orderPrimitives.customer.email),
+      email: new EmailAddress(orderPrimitives.customer.email),
       firstName: new CustomerFirstName(orderPrimitives.customer.firstName),
       lastName: new CustomerLastName(orderPrimitives.customer.lastName),
       phone: new Phone(orderPrimitives.customer.phone),

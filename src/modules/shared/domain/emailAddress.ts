@@ -10,7 +10,7 @@ export class EmailError extends Error {
   }
 }
 
-export class Email {
+export class EmailAddress {
   private readonly value: string;
 
   constructor(value: string) {
@@ -23,16 +23,16 @@ export class Email {
     if (!isEmailValid) throw new EmailError({ invalidEmail: value });
   }
 
-  static clone(email: Email): Email {
-    return new Email(email.getValue());
+  static clone(email: EmailAddress): EmailAddress {
+    return new EmailAddress(email.getValue());
   }
 
   getValue() {
     return this.value;
   }
 
-  equals(email: Email | string): boolean {
-    if (email instanceof Email) return this.value === email.getValue();
+  equals(email: EmailAddress | string): boolean {
+    if (email instanceof EmailAddress) return this.value === email.getValue();
     return this.value === email;
   }
 }

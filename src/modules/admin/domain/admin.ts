@@ -1,4 +1,4 @@
-import { Email } from "../../shared/domain/email.js";
+import { EmailAddress } from "../../shared/domain/emailAddress.js";
 import { Phone } from "../../shared/domain/phone.js";
 import { UUID } from "../../shared/domain/UUID.js";
 import { AdminFirstName } from "./adminFirstName.js";
@@ -13,7 +13,7 @@ export class Admin {
   private readonly adminId: UUID;
   private readonly firstName: AdminFirstName;
   private readonly lastName: AdminLastName;
-  private readonly email: Email;
+  private readonly email: EmailAddress;
   private readonly phoneNumber: Phone;
   private readonly permissions: AdminPermission[];
   private readonly updatedAt: Date;
@@ -35,7 +35,7 @@ export class Admin {
     adminId: UUID;
     firstName: AdminFirstName;
     lastName: AdminLastName;
-    email: Email;
+    email: EmailAddress;
     phoneNumber: Phone;
     permissions: AdminPermission[];
     updatedAt: Date;
@@ -44,7 +44,7 @@ export class Admin {
     this.adminId = UUID.clone(params.adminId);
     this.firstName = AdminFirstName.clone(params.firstName);
     this.lastName = AdminLastName.clone(params.lastName);
-    this.email = Email.clone(params.email);
+    this.email = EmailAddress.clone(params.email);
     this.phoneNumber = Phone.clone(params.phoneNumber);
     this.permissions = params.permissions.map(AdminPermission.clone);
     this.updatedAt = new Date(params.updatedAt);

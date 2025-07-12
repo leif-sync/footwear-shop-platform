@@ -7,7 +7,7 @@ import { updatePartialOrderSchema } from "../schemas/orderSchemas.js";
 import { z, ZodError } from "zod";
 import { UUID } from "../../../shared/domain/UUID.js";
 import { Customer } from "../../domain/customer.js";
-import { Email } from "../../../shared/domain/email.js";
+import { EmailAddress } from "../../../shared/domain/emailAddress.js";
 import { CustomerFirstName } from "../../domain/customerFirstName.js";
 import { CustomerLastName } from "../../domain/customerLastName.js";
 import { Phone } from "../../../shared/domain/phone.js";
@@ -39,7 +39,7 @@ export async function updatePartialOrder(
       : undefined;
     const customer = newOrderData.customer
       ? new Customer({
-          email: new Email(newOrderData.customer.email),
+          email: new EmailAddress(newOrderData.customer.email),
           firstName: new CustomerFirstName(newOrderData.customer.firstName),
           lastName: new CustomerLastName(newOrderData.customer.lastName),
           phone: new Phone(newOrderData.customer.phone),
