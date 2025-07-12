@@ -3,6 +3,7 @@ import { InMemoryLoginCodeRepository } from "../../auth/infrastructure/inMemoryL
 import { InMemoryRefreshTokenRepository } from "../../auth/infrastructure/inMemoryRefreshTokenRepository.js";
 import { InMemoryCategoryRepository } from "../../category/infrastructure/inMemoryCategoryRepository.js";
 import { InMemoryDetailRepository } from "../../detail/infrastructure/inMemoryDetailRepository.js";
+import { InMemoryEmailRepository } from "../../notification/infrastructure.ts/inMemoryEmailRepository.js";
 import { FakeOrderTransactionManager } from "../../order/infrastructure/fakeOrderTransactionManager.js";
 import { InMemoryOrderRepository } from "../../order/infrastructure/inMemoryOrderRepository.js";
 import { OrderAssociatedDataProvider } from "../../order/infrastructure/orderAssociatedDataProvider.js";
@@ -39,5 +40,6 @@ export function setupInMemoryRepositories(): RepositoryContainer {
     loginCodeRepository: new InMemoryLoginCodeRepository(),
     refreshTokenRepository: new InMemoryRefreshTokenRepository(),
     orderTransactionManager,
+    emailRepository: new InMemoryEmailRepository(),
   };
 }

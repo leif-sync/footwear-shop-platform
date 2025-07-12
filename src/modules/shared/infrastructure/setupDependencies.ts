@@ -1,5 +1,7 @@
 import {
+  EMAIL_PROVIDER_FROM,
   EMAIL_SENDER,
+  EMAIL_SENDER_API_KEY,
   IMAGE_STORAGE_ENGINE,
   LOGGER_PROVIDER,
   REPOSITORY_ENGINE,
@@ -12,8 +14,15 @@ import { LoggerProvider } from "./loggerProvider.js";
 import { RepositoryProvider } from "./repositoryProvider.js";
 
 const repositoryContainer = RepositoryProvider[REPOSITORY_ENGINE];
-export const emailSender = EmailSenderProviders[EMAIL_SENDER];
+
+export const emailSender = EmailSenderProviders.getEmailSender({
+  provider: EMAIL_SENDER,
+  from: EMAIL_PROVIDER_FROM,
+  apiKey: EMAIL_SENDER_API_KEY,
+});
+
 export const logger = LoggerProvider[LOGGER_PROVIDER];
+
 export const imageStorageEngine =
   await ImageStorageProviderFactory.initializeImageStorage({
     imageStorageEngine: IMAGE_STORAGE_ENGINE,
@@ -32,6 +41,7 @@ export const {
   sizeRepository,
   tagRepository,
   orderTransactionManager,
+  emailRepository,
 } = repositoryContainer;
 
 export const ServiceContainer = setupServiceContainer({
@@ -46,6 +56,7 @@ export const ServiceContainer = setupServiceContainer({
     adminRepository,
     loginCodeRepository,
     refreshTokenRepository,
+    emailRepository,
   },
   utilityServices: {
     imageUploader: imageStorageEngine,

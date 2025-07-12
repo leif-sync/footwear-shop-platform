@@ -94,7 +94,7 @@ export class AdminNotifier {
     await this.emailSender.sendTransactionalEmail({
       to: adminEmail,
       subject: emailSubject,
-      content: emailBody,
+      htmlContent: emailBody,
     });
   }
 }

@@ -1,0 +1,37 @@
+enum EmailProvider {
+  RESEND
+  DEBUG
+}
+
+enum EmailType {
+  PURCHASE_CONFIRMATION
+}
+
+enum EmailStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+enum RelatedEntityType {
+  ORDER
+}
+
+model EmailMessage {
+  emailId          String @id @db.Uuid
+  fromEmailAddress String
+  toEmailAddress   String
+  subject          String
+  contentHtml      String
+  provider         EmailProvider
+  type             EmailType
+  createdAt        DateTime @db.Timestamptz()
+  updatedAt        DateTime @db.Timestamptz()
+  status           EmailStatus
+  retryCount      Int
+  maxRetries      Int
+  relatedEntityId String? @db.Uuid
+  providerMessageId String?
+  relatedEntityType RelatedEntityType?
+  providerResponseJson Json?
+}

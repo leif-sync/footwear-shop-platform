@@ -3,6 +3,7 @@ import { AdminRefreshTokenRepository } from "../../../auth/domain/adminRefreshTo
 import { LoginCodeRepository } from "../../../auth/domain/loginCodeRepository.js";
 import { CategoryRepository } from "../../../category/domain/categoryRepository.js";
 import { DetailRepository } from "../../../detail/domain/detailRepository.js";
+import { EmailRepository } from "../../../notification/domain/emailRepository.js";
 import { EmailSender } from "../../../notification/domain/emailSender.js";
 import { OrderRepository } from "../../../order/domain/orderRepository.js";
 import { OrderTransactionManager } from "../../../order/domain/orderTransactionManager.js";
@@ -43,6 +44,7 @@ export function setupServiceContainer(params: {
     adminRepository: AdminRepository;
     loginCodeRepository: LoginCodeRepository;
     refreshTokenRepository: AdminRefreshTokenRepository;
+    emailRepository: EmailRepository;
   };
   transactionManagers: {
     orderTransactionManager: OrderTransactionManager;
@@ -61,6 +63,7 @@ export function setupServiceContainer(params: {
     orderRepository,
     paymentTransactionRepository,
     adminRepository,
+    emailRepository,
     loginCodeRepository,
     refreshTokenRepository,
   } = params.repositories;
@@ -108,6 +111,7 @@ export function setupServiceContainer(params: {
     orderRepository,
     emailSender,
     paymentTransactionRepository,
+    emailRepository,
   });
 
   return {

@@ -3,6 +3,13 @@ import {
   SUPPORT_EMAIL,
   WHATSAPP_SUPPORT_CONTACT,
 } from "../../../environmentVariables.js";
+import {
+  EmailMessage,
+  EmailRelatedEntityType,
+  EmailStatus,
+  EmailType,
+} from "../../notification/domain/emailMessage.js";
+import { EmailRepository } from "../../notification/domain/emailRepository.js";
 import { EmailSender } from "../../notification/domain/emailSender.js";
 import { OrderRepository } from "../../order/domain/orderRepository.js";
 import { EmailAddress } from "../../shared/domain/emailAddress.js";
@@ -11,21 +18,20 @@ import { Phone } from "../../shared/domain/phone.js";
 import { UUID } from "../../shared/domain/UUID.js";
 import { logger } from "../../shared/infrastructure/setupDependencies.js";
 
-// TODO: move to a configuration file
-const commerceName = COMMERCE_NAME;
 const timeToShipment = "2 días hábiles.";
-const supportEmail = new EmailAddress(SUPPORT_EMAIL);
-const whatsAppSupportContact = new Phone(WHATSAPP_SUPPORT_CONTACT);
 const subject = "¡Tu pedido esta listo para enviarse! 🎉";
 
 export class PaymentOrderNotifier {
   private readonly emailSender: EmailSender;
   private readonly orderRepository: OrderRepository;
+  private readonly emailRepository: EmailRepository;
 
   constructor(params: {
     emailSender: EmailSender;
     orderRepository: OrderRepository;
+    emailRepository: EmailRepository;
   }) {
+    this.emailRepository = params.emailRepository;
     this.emailSender = params.emailSender;
     this.orderRepository = params.orderRepository;
   }
@@ -53,15 +59,38 @@ export class PaymentOrderNotifier {
       orderId: orderFull.getOrderId(),
       totalAmount: orderFull.evaluateFinalAmount(),
       timeToShipment,
-      supportEmail,
-      whatsAppSupportContact,
+      supportEmail: SUPPORT_EMAIL,
+      whatsAppSupportContact: WHATSAPP_SUPPORT_CONTACT,
     });
 
     try {
-      await this.emailSender.sendTransactionalEmail({
+      const response = await this.emailSender.sendTransactionalEmail({
         to: customerEmail,
-        content: emailTemplate,
+        htmlContent: emailTemplate,
         subject,
+      });
+
+      const emailMessage = new EmailMessage({
+        from: this.emailSender.getFrom(),
+        createdAt: new Date(),
+        htmlContent: emailTemplate,
+        emailId: UUID.generateRandomUUID(),
+        maxRetries: new NonNegativeInteger(4),
+        retryCount: new NonNegativeInteger(0),
+        subject,
+        to: customerEmail,
+        updatedAt: new Date(),
+        status: EmailStatus.create.SENT,
+        type: EmailType.create.PURCHASE_CONFIRMATION,
+        provider: this.emailSender.getProvider(),
+        providerMessageId: response.providerMessageId,
+        providerResponseJson: JSON.stringify(response),
+        relatedEntityId: orderId,
+        relatedEntityType: EmailRelatedEntityType.create.ORDER,
+      });
+
+      await this.emailRepository.create({
+        emailMessage,
       });
       return true;
     } catch (error) {
@@ -128,7 +157,7 @@ function notifyOrderHasBeenPayTemplate(params: {
         ¿Tienes alguna duda? Contáctanos en <a href="mailto:${supportEmail}">${supportEmail}</a>
         o envíanos un mensaje a través de WhatsApp al <a href="tel:${whatsAppSupportContact}">${whatsAppSupportContact}</a>
       </p>
-      <p>2025 - ${commerceName}</p>
+      <p>2025 - ${COMMERCE_NAME}</p>
     </footer>
   </body>
   </html>

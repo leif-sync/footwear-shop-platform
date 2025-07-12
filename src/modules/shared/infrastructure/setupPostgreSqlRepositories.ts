@@ -3,6 +3,7 @@ import { PostgresAdminRefreshTokenRepository } from "../../auth/infrastructure/p
 import { PostgresLoginCodeRepository } from "../../auth/infrastructure/postgreSqlLoginCodeRepository.js";
 import { PostgreSqlCategoryRepository } from "../../category/infrastructure/postgreSqlCategoryRepository.js";
 import { PostgreSqlDetailRepository } from "../../detail/infrastructure/postgreSqlDetailRepository.js";
+import { PostgreSqlEmailRepository } from "../../notification/infrastructure.ts/PostgreSqlEmailRepository.js";
 import { PostgreSqlOrderRepository } from "../../order/infrastructure/postgreSqlOrderRepository.js";
 import { PostgreSqlOrderTransactionManager } from "../../order/infrastructure/postgreSqlOrderTransactionManager.js";
 import { PostgreSqlPaymentTransactionRepository } from "../../payment/infrastructure/postgreSqlPaymentTransactionRepository.js";
@@ -24,5 +25,6 @@ export function setupPostgreSqlRepositories(): RepositoryContainer {
     refreshTokenRepository: new PostgresAdminRefreshTokenRepository(),
     adminRepository: new PostgreSqlAdminRepository(),
     orderTransactionManager: new PostgreSqlOrderTransactionManager(),
+    emailRepository: new PostgreSqlEmailRepository(),
   };
 }

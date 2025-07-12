@@ -1,9 +1,11 @@
 import { EmailAddress } from "../../shared/domain/emailAddress.js";
+import { EmailProvider } from "./emailMessage.js";
 
 /**
  * EmailSender is an abstract class that defines the contract for sending emails.
  */
 export abstract class EmailSender {
+  from!: EmailAddress;
   /**
    * Sends a transactional email.
    * @param params - The parameters for sending the email.
@@ -15,6 +17,11 @@ export abstract class EmailSender {
   abstract sendTransactionalEmail(params: {
     to: EmailAddress;
     subject: string;
-    content: string;
-  }): Promise<void>;
+    htmlContent: string;
+  }): Promise<{
+    providerMessageId?: string;
+  }>;
+
+  abstract getFrom(): EmailAddress;
+  abstract getProvider(): EmailProvider;
 }

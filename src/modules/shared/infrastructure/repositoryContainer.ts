@@ -3,6 +3,7 @@ import { AdminRefreshTokenRepository } from "../../auth/domain/adminRefreshToken
 import { LoginCodeRepository } from "../../auth/domain/loginCodeRepository.js";
 import { CategoryRepository } from "../../category/domain/categoryRepository.js";
 import { DetailRepository } from "../../detail/domain/detailRepository.js";
+import { EmailRepository } from "../../notification/domain/emailRepository.js";
 import { OrderRepository } from "../../order/domain/orderRepository.js";
 import { OrderTransactionManager } from "../../order/domain/orderTransactionManager.js";
 import { PaymentTransactionRepository } from "../../payment/domain/paymentTransactionRepository.js";
@@ -22,4 +23,5 @@ export interface RepositoryContainer {
   loginCodeRepository: LoginCodeRepository;
   refreshTokenRepository: AdminRefreshTokenRepository;
   orderTransactionManager: OrderTransactionManager;
+  emailRepository: EmailRepository;
 }

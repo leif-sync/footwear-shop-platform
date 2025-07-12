@@ -6,10 +6,10 @@ import { NonNegativeInteger } from "./modules/shared/domain/nonNegativeInteger.j
 import { AdminFirstName } from "./modules/admin/domain/adminFirstName.js";
 import { AdminLastName } from "./modules/admin/domain/adminLastName.js";
 import { validateCronExpression } from "cron";
-import { EmailSenderOptions } from "./modules/shared/infrastructure/emailSenderProviders.js";
 import { ImageStorageOptions } from "./modules/shared/infrastructure/imageStorageProviderFactory.js";
 import { RepositoryEngineOptions } from "./modules/shared/infrastructure/repositoryProvider.js";
 import { LoggerProviderOptions } from "./modules/shared/infrastructure/loggerProvider.js";
+import { EmailProviderOptions } from "./modules/notification/domain/emailMessage.js";
 /**
  * Handles a value that may throw an error, returning the value if successful,
  * or throwing a TypeError with a specified error message if an error occurs.
@@ -156,7 +156,22 @@ export const SERVER_BASE_URL = handleValueWithError({
 // * EMAIL_SENDER
 export const EMAIL_SENDER = readFromEnvVariablesWithEnum({
   envVariableName: "EMAIL_SENDER",
-  nativeEnum: EmailSenderOptions,
+  nativeEnum: EmailProviderOptions,
+});
+
+// * EMAIL_PROVIDER_FROM
+const emailProviderFromName = "EMAIL_PROVIDER_FROM";
+export const EMAIL_PROVIDER_FROM = handleValueWithError({
+  valueToReturn: () =>
+    new EmailAddress(process.env[emailProviderFromName] as any),
+  errorMessage: `${emailProviderFromName} must be a valid email address`,
+});
+
+// * EMAIL_SENDER_API_KEY
+const emailSenderApiKeyName = "EMAIL_SENDER_API_KEY";
+export const EMAIL_SENDER_API_KEY = handleValueWithError({
+  valueToReturn: () => process.env[emailSenderApiKeyName],
+  errorMessage: `${emailSenderApiKeyName} must be a valid string`,
 });
 
 // * REPOSITORY_ENGINE
@@ -225,8 +240,7 @@ export const COMMERCE_NAME = handleValueWithError({
 // * SUPPORT_EMAIL
 const supportEmailName = "SUPPORT_EMAIL";
 export const SUPPORT_EMAIL = handleValueWithError({
-  valueToReturn: () =>
-    new EmailAddress(process.env[supportEmailName] as any).getValue(),
+  valueToReturn: () => new EmailAddress(process.env[supportEmailName] as any),
   errorMessage: `${supportEmailName} must be a valid email`,
 });
 
@@ -234,7 +248,7 @@ export const SUPPORT_EMAIL = handleValueWithError({
 const WHATSAPP_SUPPORT_CONTACT_NAME = "WHATSAPP_SUPPORT_CONTACT";
 export const WHATSAPP_SUPPORT_CONTACT = handleValueWithError({
   valueToReturn: () =>
-    new Phone(process.env[WHATSAPP_SUPPORT_CONTACT_NAME] as any).getValue(),
+    new Phone(process.env[WHATSAPP_SUPPORT_CONTACT_NAME] as any),
   errorMessage: `${WHATSAPP_SUPPORT_CONTACT_NAME} must be a valid phone number`,
 });
 

@@ -69,7 +69,7 @@ export async function sendLoginCode(req: Request, res: Response) {
   await emailSender.sendTransactionalEmail({
     to: email,
     subject: "Login Code",
-    content: `Your login code is: ${loginCode.getCode()}`,
+    htmlContent: `Your login code is: ${loginCode.getCode()}`,
   });
 
   if (!isProduction) {

@@ -1,3 +1,4 @@
+import { EmailRepository } from "../../../notification/domain/emailRepository.js";
 import { EmailSender } from "../../../notification/domain/emailSender.js";
 import { OrderRepository } from "../../../order/domain/orderRepository.js";
 import { CountTransactions } from "../../../payment/application/countTransactions.js";
@@ -18,16 +19,20 @@ export interface PaymentService {
   createPaymentTransaction: CreatePaymentTransaction;
   prepareOrderForPayment: PrepareOrderForPayment;
 }
+
 export function setupPaymentService({
   paymentTransactionRepository,
   orderRepository,
   emailSender,
+  emailRepository,
 }: {
   paymentTransactionRepository: PaymentTransactionRepository;
   orderRepository: OrderRepository;
   emailSender: EmailSender;
+  emailRepository: EmailRepository;
 }) {
   const paymentOrderNotifier = new PaymentOrderNotifier({
+    emailRepository,
     emailSender,
     orderRepository,
   });
