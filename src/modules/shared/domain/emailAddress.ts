@@ -4,9 +4,9 @@
 import { z } from "zod";
 const emailSchema = z.string().email();
 
-export class EmailError extends Error {
-  constructor(params: { invalidEmail: string }) {
-    super(`Invalid email: ${params.invalidEmail}`);
+export class EmailAddressError extends Error {
+  constructor(params: { invalidEmailAddress: string }) {
+    super(`Invalid email address: ${params.invalidEmailAddress}`);
   }
 }
 
@@ -20,7 +20,7 @@ export class EmailAddress {
 
   private ensureIsValid(value: string): asserts value is string {
     const isEmailValid = emailSchema.safeParse(value).success;
-    if (!isEmailValid) throw new EmailError({ invalidEmail: value });
+    if (!isEmailValid) throw new EmailAddressError({ invalidEmailAddress: value });
   }
 
   static clone(email: EmailAddress): EmailAddress {
