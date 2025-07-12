@@ -51,7 +51,7 @@ import {
   OrderPaymentStatus,
   OrderPaymentStatusOptions,
 } from "../src/modules/order/domain/orderPaymentStatus";
-import { Email } from "../src/modules/shared/domain/email";
+import { EmailAddress } from "../src/modules/shared/domain/emailAddress";
 import { Phone } from "../src/modules/shared/domain/phone";
 import { Customer } from "../src/modules/order/domain/customer";
 import { ShippingAddress } from "../src/modules/order/domain/shippingAddress";
@@ -429,7 +429,7 @@ export async function createTestOrder(params?: {
   );
 
   const customer = new Customer({
-    email: new Email(params?.customer?.email ?? "example@example.com"),
+    email: new EmailAddress(params?.customer?.email ?? "example@example.com"),
     firstName: new CustomerFirstName(params?.customer?.firstName ?? "John"),
     lastName: new CustomerLastName(params?.customer?.lastName ?? "Doe"),
     phone: new Phone(params?.customer?.phone ?? "+56 123456789"),

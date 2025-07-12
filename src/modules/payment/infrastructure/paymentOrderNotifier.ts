@@ -21,6 +21,17 @@ import { logger } from "../../shared/infrastructure/setupDependencies.js";
 const timeToShipment = "2 días hábiles.";
 const subject = "¡Tu pedido esta listo para enviarse! 🎉";
 
+async function fetchWithResult<T>(
+  fn: () => Promise<T>
+): Promise<{ data: T; error?: unknown } | { data?: null; error: unknown }> {
+  try {
+    const data = await fn();
+    return { data };
+  } catch (error) {
+    return { error };
+  }
+}
+
 export class PaymentOrderNotifier {
   private readonly emailSender: EmailSender;
   private readonly orderRepository: OrderRepository;
@@ -64,11 +75,14 @@ export class PaymentOrderNotifier {
     });
 
     try {
-      const response = await this.emailSender.sendTransactionalEmail({
-        to: customerEmail,
-        htmlContent: emailTemplate,
-        subject,
-      });
+      const { data, error } = await fetchWithResult(
+        async () =>
+          await this.emailSender.sendTransactionalEmail({
+            to: customerEmail,
+            htmlContent: emailTemplate,
+            subject,
+          })
+      );
 
       const emailMessage = new EmailMessage({
         from: this.emailSender.getFrom(),
@@ -80,18 +94,18 @@ export class PaymentOrderNotifier {
         subject,
         to: customerEmail,
         updatedAt: new Date(),
-        status: EmailStatus.create.SENT,
+        status: data ? EmailStatus.create.SENT : EmailStatus.create.FAILED,
         type: EmailType.create.PURCHASE_CONFIRMATION,
         provider: this.emailSender.getProvider(),
-        providerMessageId: response.providerMessageId,
-        providerResponseJson: JSON.stringify(response),
+        providerMessageId: data?.providerMessageId,
+        providerResponseJson: data
+          ? JSON.stringify(data)
+          : JSON.stringify(error),
         relatedEntityId: orderId,
         relatedEntityType: EmailRelatedEntityType.create.ORDER,
       });
 
-      await this.emailRepository.create({
-        emailMessage,
-      });
+      await this.emailRepository.create({ emailMessage });
       return true;
     } catch (error) {
       logger.error({
