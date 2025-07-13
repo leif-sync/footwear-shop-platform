@@ -12,6 +12,7 @@ import { Request, Response } from "express";
 import { AdminNotFoundError } from "../../../admin/domain/errors/adminNotFoundError.js";
 import { isProduction } from "../../../../environmentVariables.js";
 import { UUID } from "../../../shared/domain/UUID.js";
+import { InvalidEmailAddressError } from "../../../notification/domain/emailSender.js";
 
 const loginCodeExpiresInSeconds = 60 * 5;
 
@@ -66,11 +67,24 @@ export async function sendLoginCode(req: Request, res: Response) {
 
   await loginCodeRepository.create({ loginCode });
 
-  await emailSender.sendTransactionalEmail({
-    to: email,
-    subject: "Login Code",
-    htmlContent: `Your login code is: ${loginCode.getCode()}`,
-  });
+  try {
+    await emailSender.sendTransactionalEmail({
+      to: email,
+      subject: "Login Code",
+      htmlContent: `Your login code is: ${loginCode.getCode()}`,
+    });
+  } catch (error) {
+    if (error instanceof InvalidEmailAddressError) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
+        message: "Invalid email address",
+        errors: [error.message],
+      });
+      return;
+    }
+
+    throw error;
+  }
+
 
   if (!isProduction) {
     res.status(HTTP_STATUS.OK).json({

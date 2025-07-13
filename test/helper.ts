@@ -429,7 +429,7 @@ export async function createTestOrder(params?: {
   );
 
   const customer = new Customer({
-    email: new EmailAddress(params?.customer?.email ?? "example@example.com"),
+    email: new EmailAddress(params?.customer?.email ?? initialSuperAdminUser.email),
     firstName: new CustomerFirstName(params?.customer?.firstName ?? "John"),
     lastName: new CustomerLastName(params?.customer?.lastName ?? "Doe"),
     phone: new Phone(params?.customer?.phone ?? "+56 123456789"),

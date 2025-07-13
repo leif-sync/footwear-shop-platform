@@ -1,6 +1,9 @@
 import { EmailAddress } from "../../shared/domain/emailAddress.js";
 import { EmailProvider } from "../domain/emailMessage.js";
-import { EmailSender } from "../domain/emailSender.js";
+import {
+  EmailSender,
+  InvalidEmailAddressError,
+} from "../domain/emailSender.js";
 import { Resend } from "resend";
 
 export class ResendEmailSender implements EmailSender {
@@ -29,7 +32,11 @@ export class ResendEmailSender implements EmailSender {
     });
 
     if (error) {
-      throw new Error(`Failed to send email: ${error.message}`);
+      if (error.name === "validation_error") {
+        throw new InvalidEmailAddressError({ emailAddress: to });
+      }
+
+      throw error;
     }
 
     if (!data || !data.id) {
