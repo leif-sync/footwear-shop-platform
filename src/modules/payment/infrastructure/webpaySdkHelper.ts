@@ -4,7 +4,7 @@
 
 import transBank from "transbank-sdk";
 
-const webpayTransaction = new transBank.WebpayPlus.Transaction(
+const testWebpayTransaction = new transBank.WebpayPlus.Transaction(
   new transBank.Options(
     transBank.IntegrationCommerceCodes.WEBPAY_PLUS,
     transBank.IntegrationApiKeys.WEBPAY,
@@ -126,18 +126,40 @@ type WebpayRefund =
       response_code: webpayPlusResponseCodeOptions;
     };
 
-export abstract class WebpaySdkHelper {
+export class WebpaySdkHelper {
+  private webpayTransaction: typeof testWebpayTransaction;
+
+  constructor(params: { apiKey: string }) {
+    this.webpayTransaction = new transBank.WebpayPlus.Transaction(
+      new transBank.Options(
+        transBank.IntegrationCommerceCodes.WEBPAY_PLUS,
+        params.apiKey,
+        transBank.Environment.Production
+      )
+    );
+  }
+
+  static createIntegrationInstance() {
+    const wp = new WebpaySdkHelper({
+      apiKey: transBank.IntegrationApiKeys.WEBPAY,
+    });
+
+    wp.webpayTransaction = testWebpayTransaction;
+
+    return wp;
+  }
+
   /**
    * Crea el link de pago para que el usuario pueda realizar el pago.
    * El link de pago es una URL que redirige al usuario a la página de pago de Transbank.
    */
-  static async createLinkPaymentGateway(paymentParams: {
+  async createLinkPaymentGateway(paymentParams: {
     sessionId: string;
     buyOrder: string;
     amount: number;
     returnUrl: string;
   }): Promise<{ url: string; token: string }> {
-    const response = (await webpayTransaction.create(
+    const response = (await this.webpayTransaction.create(
       paymentParams.buyOrder,
       paymentParams.sessionId,
       paymentParams.amount,
@@ -152,11 +174,10 @@ export abstract class WebpaySdkHelper {
    * que hemos recibido exitosamente los detalles de la transacción.
    * Es importante destacar que **si la confirmación no se realiza, la transacción será caducada.**
    */
-  static async commitTransaction(params: { token: string }) {
-    const transaction = (await webpayTransaction.commit(
+  async commitTransaction(params: { token: string }) {
+    const transaction = (await this.webpayTransaction.commit(
       params.token
     )) as commit;
-
 
     return transaction;
   }
@@ -166,8 +187,8 @@ export abstract class WebpaySdkHelper {
    * No hay límite de solicitudes de este tipo durante ese período.
    * Sin embargo, una vez pasados los 7 días, ya no podrás revisar su estado.
    */
-  static async statusTransaction(params: { token: string }) {
-    const transaction = (await webpayTransaction.status(
+  async statusTransaction(params: { token: string }) {
+    const transaction = (await this.webpayTransaction.status(
       params.token
     )) as status;
 
@@ -181,19 +202,19 @@ export abstract class WebpaySdkHelper {
    * en una Reversa o Anulación, dependiendo de ciertas condiciones (Reversa en las primeras 3 horas de
    * la autorización, anulación posterior a eso), o una Anulación parcial si el monto es menor al total.
    * Las anulaciones parciales para tarjetas débito y Prepago no están soportadas.
-   * 
+   *
    * ## Petición
    * Para llevar a cabo el reembolso, necesitas proporcionar el token de la transacción y el monto que
    * deseas reversar. Si anulas el monto total, podría ser una Reversa o Anulación, dependiendo de ciertas
    * condiciones (Reversa en las primeras 3 horas de la autorización, anulación posterior a eso), o una
    * Anulación Parcial si el monto es menor al total. Algunas consideraciones a tener en cuenta:
    * - No es posible realizar Anulaciones Parciales en pagos con cuotas.
-   * 
+   *
    * En este [link](https://transbankdevelopers.cl/producto/webpay#anulaciones-y-reversas)
    * podrás ver mayor información sobre las condiciones y casos para anular o reversar transacciones.
    */
-  static async refundTransaction(params: { token: string; amount: number }) {
-    const refund = (await webpayTransaction.refund(
+  async refundTransaction(params: { token: string; amount: number }) {
+    const refund = (await this.webpayTransaction.refund(
       params.token,
       params.amount
     )) as WebpayRefund;

@@ -6,12 +6,14 @@ import {
   LOGGER_PROVIDER,
   REPOSITORY_ENGINE,
   SERVER_BASE_URL,
+  WEBPAY_PLUS_API_KEY,
 } from "../../../environmentVariables.js";
 import { setupServiceContainer } from "./services/serviceContainer.js";
 import { EmailSenderProviders } from "./emailSenderProviders.js";
 import { ImageStorageProviderFactory } from "./imageStorageProviderFactory.js";
 import { LoggerProvider } from "./loggerProvider.js";
 import { RepositoryProvider } from "./repositoryProvider.js";
+import { WebpaySdkHelper } from "../../payment/infrastructure/webpaySdkHelper.js";
 
 const repositoryContainer = RepositoryProvider[REPOSITORY_ENGINE];
 
@@ -28,6 +30,10 @@ export const imageStorageEngine =
     imageStorageEngine: IMAGE_STORAGE_ENGINE,
     serverBaseUrl: SERVER_BASE_URL,
   });
+
+export const webpayPlus = WEBPAY_PLUS_API_KEY
+  ? new WebpaySdkHelper({ apiKey: WEBPAY_PLUS_API_KEY })
+  : WebpaySdkHelper.createIntegrationInstance();
 
 export const {
   adminRepository,

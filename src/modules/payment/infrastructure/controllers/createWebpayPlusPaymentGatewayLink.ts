@@ -2,10 +2,12 @@ import { Request, Response } from "express";
 import { createLinkPaymentGatewaySchema } from "../schemas/webpayPlus.js";
 import { ZodError } from "zod";
 import { HTTP_STATUS } from "../../../shared/infrastructure/httpStatus.js";
-import { WebpaySdkHelper } from "../webpaySdkHelper.js";
 import { randomBytes } from "node:crypto";
 import { SERVER_BASE_URL } from "../../../../environmentVariables.js";
-import { ServiceContainer } from "../../../shared/infrastructure/setupDependencies.js";
+import {
+  ServiceContainer,
+  webpayPlus,
+} from "../../../shared/infrastructure/setupDependencies.js";
 import { InvalidOrderError } from "../../domain/errors/invalidOrderError.js";
 import { PaymentAlreadyMadeError } from "../../domain/errors/paymentAlreadyMadeError.js";
 import { PaymentDeadlineExceededError } from "../../domain/errors/paymentDeadlineExceededError.js";
@@ -40,7 +42,7 @@ export async function createWebpayPlusPaymentGatewayLink(
         orderId,
       });
 
-    const webpayResult = await WebpaySdkHelper.createLinkPaymentGateway({
+    const webpayResult = await webpayPlus.createLinkPaymentGateway({
       sessionId: orderId.getValue(),
       amount: invoiceAmount.getValue(),
       buyOrder: generateRandomBuyOrder(),

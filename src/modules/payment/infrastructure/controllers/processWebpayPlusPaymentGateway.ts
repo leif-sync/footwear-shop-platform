@@ -4,11 +4,13 @@ import { HTTP_STATUS } from "../../../shared/infrastructure/httpStatus.js";
 import {
   webpayPlusResponseCodeOptions,
   webpayPlusStatusOptions,
-  WebpaySdkHelper,
 } from "../webpaySdkHelper.js";
 import { InvalidOrderError } from "../../domain/errors/invalidOrderError.js";
 import { PaymentDeadlineExceededError } from "../../domain/errors/paymentDeadlineExceededError.js";
-import { ServiceContainer } from "../../../shared/infrastructure/setupDependencies.js";
+import {
+  ServiceContainer,
+  webpayPlus,
+} from "../../../shared/infrastructure/setupDependencies.js";
 import { PaymentTransaction } from "../../domain/paymentTransaction.js";
 import { Currency } from "../../domain/currency.js";
 import { PaymentProcessor } from "../../domain/paymentProcessor.js";
@@ -96,7 +98,7 @@ async function processCashBackWebpayPlus(params: {
   const { orderId, gatewaySessionId, amount } = params;
 
   try {
-    const response = await WebpaySdkHelper.refundTransaction({
+    const response = await webpayPlus.refundTransaction({
       amount: amount.getValue(),
       token: gatewaySessionId,
     });
@@ -137,7 +139,7 @@ async function processCashBackWebpayPlus(params: {
 async function handleFlow1(params: { response: Response; token: string }) {
   const { response, token } = params;
 
-  const webpayTransactionResult = await WebpaySdkHelper.commitTransaction({
+  const webpayTransactionResult = await webpayPlus.commitTransaction({
     token,
   });
 

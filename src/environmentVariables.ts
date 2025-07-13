@@ -139,19 +139,32 @@ export const ENVIRONMENT_MODE = readFromEnvVariablesWithEnum({
   nativeEnum: ServerEnvironmentOptions,
 });
 
-// * IMAGE_STORAGE_ENGINE;
-
-export const IMAGE_STORAGE_ENGINE = readFromEnvVariablesWithEnum({
-  envVariableName: "IMAGE_STORAGE_ENGINE",
-  nativeEnum: ImageStorageOptions,
-});
-
 // * SERVER_BASE_URL
 const serverBaseUrlName = "SERVER_BASE_URL";
 export const SERVER_BASE_URL = handleValueWithError({
   valueToReturn: () => new AppUrl(process.env[serverBaseUrlName] as any),
   errorMessage: `${serverBaseUrlName} must be a valid URL`,
 });
+
+// * REPOSITORY_ENGINE
+
+export const REPOSITORY_ENGINE = readFromEnvVariablesWithEnum({
+  envVariableName: "REPOSITORY_ENGINE",
+  nativeEnum: RepositoryEngineOptions,
+});
+
+// * LOGGER_PROVIDER
+
+export const LOGGER_PROVIDER = readFromEnvVariablesWithEnum({
+  envVariableName: "LOGGER_PROVIDER",
+  nativeEnum: LoggerProviderOptions,
+});
+
+/*
+######################
+### EMAIL CONFIG ###
+######################
+*/
 
 // * EMAIL_SENDER
 export const EMAIL_SENDER = readFromEnvVariablesWithEnum({
@@ -174,18 +187,16 @@ export const EMAIL_SENDER_API_KEY = handleValueWithError({
   errorMessage: `${emailSenderApiKeyName} must be a valid string`,
 });
 
-// * REPOSITORY_ENGINE
+/*
+######################
+### IMAGE CONFIG ###
+######################
+*/
 
-export const REPOSITORY_ENGINE = readFromEnvVariablesWithEnum({
-  envVariableName: "REPOSITORY_ENGINE",
-  nativeEnum: RepositoryEngineOptions,
-});
-
-// * LOGGER_PROVIDER
-
-export const LOGGER_PROVIDER = readFromEnvVariablesWithEnum({
-  envVariableName: "LOGGER_PROVIDER",
-  nativeEnum: LoggerProviderOptions,
+// * IMAGE_STORAGE_ENGINE;
+export const IMAGE_STORAGE_ENGINE = readFromEnvVariablesWithEnum({
+  envVariableName: "IMAGE_STORAGE_ENGINE",
+  nativeEnum: ImageStorageOptions,
 });
 
 /*
@@ -202,6 +213,13 @@ export const PAYMENT_TIMEOUT_SECONDS = handleValueWithError({
       calculateMathInput(process.env[paymentTimeoutSecondsName] as any)
     ).getValue(),
   errorMessage: `${paymentTimeoutSecondsName} must be a non-negative integer or a valid math expression`,
+});
+
+// * WEBPAY_PLUS_API_KEY
+const webpayPlusApiKeyName = "WEBPAY_PLUS_API_KEY";
+export const WEBPAY_PLUS_API_KEY = handleValueWithError({
+  valueToReturn: () => process.env[webpayPlusApiKeyName],
+  errorMessage: `${webpayPlusApiKeyName} must be a valid string`,
 });
 
 /*
